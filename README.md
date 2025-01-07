@@ -13,6 +13,7 @@ feature, you are welcome to contribute to the project. You can also choose to cl
 that is hosted within your company.
 
 Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
+[![JHipster Online on Red Hat Developer Sandbox](https://img.youtube.com/vi/b7xbcTAGNIQ/0.jpg)](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
 
 ## Quick start guide
 
