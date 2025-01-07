@@ -12,6 +12,8 @@ You can use [https://start.jhipster.tech/](https://start.jhipster.tech/) for fre
 feature, you are welcome to contribute to the project. You can also choose to clone or fork the project, and have your own version
 that is hosted within your company.
 
+Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
+
 ## Quick start guide
 
 JHipster Online is a JHipster application, so you can follow the [JHipster documentation](https://www.jhipster.tech/) to

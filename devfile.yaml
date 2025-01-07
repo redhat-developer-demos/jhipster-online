@@ -4,7 +4,7 @@ metadata:
   version: 2.33.0
   description: Stack with the JHipster Online on DevSpaces Red Hat OpenShift
   displayName: JHipster Online
-  icon: https://raw.githubusercontent.com/maximilianoPizarro/ecommerce-oracle/main/jhipster-icon.png
+  icon: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/jhipster-icon.png
   website: https://start.jhipster.tech
   tags:
     - Java
@@ -12,14 +12,14 @@ metadata:
     - Angular
     - Spring
   language: Java
-  projectType: springboot      
+  projectType: springboot
 projects:
   - name: jhipster-online
     git:
       remotes:
-        origin: 'https://github.com/maximilianoPizarro/jhipster-online'
+        origin: 'https://github.com/redhat-developer-demos/jhipster-online'
       checkoutFrom:
-        revision: openshift
+        revision: main
 components:
   - name: tools
     container:
@@ -55,7 +55,7 @@ components:
         - exposure: public
           name: browser-sync
           protocol: https
-          targetPort: 3001                    
+          targetPort: 3001
       env:
         - value: '-XX:MaxRAMPercentage=50.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom -Duser.home=/home/jboss'
           name: JAVA_OPTS
@@ -84,7 +84,7 @@ commands:
       label: 'OpenShift apply MariaDB Instance (OpenShift cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'oc apply -f src/main/kubernetes/mysql.yaml'      
+      commandLine: 'oc apply -f src/main/kubernetes/mysql.yaml'
   - id: yarn-install
     exec:
       label: 'Package the application'
@@ -93,7 +93,7 @@ commands:
       commandLine: 'yarn install'
       group:
         kind: build
-        isDefault: true      
+        isDefault: true
   - id: start-frontend
     exec:
       label: 'Start Frontend'
@@ -102,7 +102,7 @@ commands:
       commandLine: 'yarn start'
       group:
         kind: run
-        isDefault: true                        
+        isDefault: true
   - id: start-backend
     exec:
       label: 'Start JHipster Online'
@@ -115,4 +115,4 @@ commands:
 events:
   postStart:
     - oc-add-mysql
-    - yarn-install 
+    - yarn-install
