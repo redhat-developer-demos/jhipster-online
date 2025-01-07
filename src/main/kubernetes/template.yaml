@@ -1,0 +1,310 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-jhipster-data
+  labels:
+    app: jhipster
+    app.kubernetes.io/instance: jhipster
+    app.kubernetes.io/name: jhipster
+    app.kubernetes.io/part-of: jhipster
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: jhipster
+  labels:
+    app: jhipster
+    app.kubernetes.io/instance: jhipster
+    app.kubernetes.io/name: jhipster
+    app.kubernetes.io/part-of: jhipster
+spec:
+  lookupPolicy:
+    local: false
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: mariadb-jhipster
+  labels:
+    app: jhipster
+    app.openshift.io/runtime: mariadb
+    template: mariadb-ephemeral-template
+    template.openshift.io/template-instance-owner: 5141732c-e33c-4366-82db-f5775278edc6
+  annotations:
+    template.openshift.io/expose-database_name: "{.data['database-name']}"
+    template.openshift.io/expose-password: "{.data['database-password']}"
+    template.openshift.io/expose-root_password: "{.data['database-root-password']}"
+    template.openshift.io/expose-username: "{.data['database-user']}"
+data:
+  database-name: amhpcHN0ZXJvbmxpbmU=
+  database-password: amhpcHN0ZXI=
+  database-root-password: amhpcHN0ZXI=
+  database-user: amhpcHN0ZXI=
+type: Opaque
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: jhipster-devspace
+  labels:
+    app: jhipster
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'jhipster:latest'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: DockerImage
+        name: >-
+          image-registry.openshift-image-registry.svc:5000/openshift/ubi8-openjdk-17:1.12
+      incremental: true
+  postCommit: {}
+  source:
+    type: Binary
+    binary: {}
+  runPolicy: Serial
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  annotations:
+    alpha.image.policy.openshift.io/resolve-names: '*'
+    app.openshift.io/route-disabled: 'false'
+    app.openshift.io/vcs-ref: ''
+    app.openshift.io/vcs-uri: 'https://github.com/maximilianoPizarro/jhipster-devspace'
+  name: jhipster
+  labels:
+    app: jhipster
+    app.kubernetes.io/component: jhipster
+    app.kubernetes.io/instance: jhipster
+    app.kubernetes.io/name: jhipster
+    app.kubernetes.io/part-of: jhipster
+    app.openshift.io/runtime: java
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: jhipster
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: jhipster
+        app.openshift.io/runtime: java
+        deployment: jhipster
+    spec:
+      containers:
+        - name: jhipster
+          image: image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,api-docs
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              value: YlhrdGMyVmpjbVYwTFhSdmEyVnVMWFJ2TFdOb1lXNW5aUzFwYmkxd2NtOWtkV04wYVc5dUxXRnVaQzEwYnkxclpXVndMV2x1TFdFdGMyVmpkWEpsTFhCc1lXTmwK
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mariadb://mariadb-jhipster.maximilianopizarro5-dev.svc.cluster.local:3306/jhipsteronline
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-jhipster
+                  key: database-user
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-jhipster
+                  key: database-password
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb-jhipster
+  labels:
+    app: mariadb-jhipster
+    app.kubernetes.io/component: mariadb-jhipster
+    app.kubernetes.io/instance: mariadb-jhipster
+    app.kubernetes.io/name: mariadb-jhipster
+    app.kubernetes.io/part-of: jhipster
+    app.openshift.io/runtime: mariadb
+spec:
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    activeDeadlineSeconds: 21600
+  replicas: 1
+  revisionHistoryLimit: 10
+  test: false
+  selector:
+    matchLabels:
+      app: mariadb-jhipster
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mariadb-jhipster
+        app.openshift.io/runtime: mariadb
+        deployment: mariadb-jhipster
+    spec:
+      volumes:
+        - name: mariadb-jhipster-data
+          persistentVolumeClaim:
+            claimName: mariadb-jhipster-data
+      containers:
+        - resources:
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-i'
+                - '-c'
+                - MYSQL_PWD="$MYSQL_PASSWORD" mysqladmin -u $MYSQL_USER ping
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: mariadb-jhipster
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-i'
+                - '-c'
+                - MYSQL_PWD="$MYSQL_PASSWORD" mysqladmin -u $MYSQL_USER ping
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-jhipster
+                  key: database-user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-jhipster
+                  key: database-password
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-jhipster
+                  key: database-root-password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-jhipster
+                  key: database-name
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: mariadb-jhipster-data
+              mountPath: /var/lib/mysql/data
+          terminationMessagePolicy: File
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/openshift/mariadb@sha256:513f7db527608c6c96b3659220ffc0397bdd30ff6617dad1790a90e14ac4f3b0
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: jhipster
+    app.kubernetes.io/component: jhipster
+    app.kubernetes.io/instance: jhipster
+    app.kubernetes.io/name: jhipster
+    app.kubernetes.io/part-of: jhipster
+    app.openshift.io/runtime: php
+  name: jhipster
+spec:
+  ports:
+    - name: 8080-tcp
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: jhipster
+    deployment: jhipster
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: jhipster
+    app.kubernetes.io/component: mariadb-jhipster
+    app.kubernetes.io/instance: mariadb-jhipster
+    app.kubernetes.io/name: mariadb-jhipster
+    app.kubernetes.io/part-of: jhipster
+  name: mariadb-jhipster
+spec:
+  ports:
+    - name: 3306-tcp
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+  selector:
+    app: mariadb-jhipster
+    deployment: mariadb-jhipster
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: jhipster
+  labels:
+    app: jhipster
+    app.kubernetes.io/component: jhipster
+    app.kubernetes.io/instance: jhipster
+    app.kubernetes.io/name: jhipster
+    app.kubernetes.io/part-of: jhipster
+spec:
+  to:
+    kind: Service
+    name: jhipster
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

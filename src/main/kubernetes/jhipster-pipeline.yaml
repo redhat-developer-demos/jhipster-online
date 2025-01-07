@@ -215,7 +215,7 @@ spec:
         - name: SCRIPT
           value: >-
             oc apply -f
-            https://raw.githubusercontent.com/maximilianoPizarro/jhipster-devspace/master/template.yaml
+            https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/refs/heads/main/src/main/kubernetes/template.yaml
         - name: VERSION
           value: latest
       runAfter:
