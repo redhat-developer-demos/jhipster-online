@@ -111,22 +111,24 @@ spec:
         - name: jhipster
           image: image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster
           env:
-            - name: SPRING_PROFILES_ACTIVE
+            - name: QUARKUS_PROFILE
               value: prod,api-docs
-            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
-              value: YlhrdGMyVmpjbVYwTFhSdmEyVnVMWFJ2TFdOb1lXNW5aUzFwYmkxd2NtOWtkV04wYVc5dUxXRnVaQzEwYnkxclpXVndMV2x1TFdFdGMyVmpkWEpsTFhCc1lXTmwK
-            - name: SPRING_DATASOURCE_URL
+            - name: QUARKUS_DATASOURCE_JDBC_URL
               value: jdbc:mariadb://mariadb-jhipster:3306/jhipsteronline
-            - name: SPRING_DATASOURCE_USERNAME
+            - name: QUARKUS_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: mariadb-jhipster
                   key: database-user
-            - name: SPRING_DATASOURCE_PASSWORD
+            - name: QUARKUS_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mariadb-jhipster
                   key: database-password
+            - name: QUARKUS_HTTP_CORS
+              value: 'true'
+          #  - name: QUARKUS_HTTP_CORS_ORIGINS
+          #    value: 'https://jhipster-maximilianopizarro5-dev.apps.rm2.thpm.p1.openshiftapps.com'
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
@@ -240,7 +242,7 @@ spec:
               mountPath: /var/lib/mysql/data
           terminationMessagePolicy: File
           image: >-
-            image-registry.openshift-image-registry.svc:5000/openshift/mariadb@sha256:513f7db527608c6c96b3659220ffc0397bdd30ff6617dad1790a90e14ac4f3b0
+            image-registry.openshift-image-registry.svc:5000/openshift/mariadb
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
