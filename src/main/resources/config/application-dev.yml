@@ -117,6 +117,9 @@ application:
   tmp-folder: /tmp
   jhipster-cmd:
     cmd: jhipster
+    #cmd: mhipster
+    #cmd: jhipster-quarkus
+    #cmd: jhipster-dotnetcore
     timeout: 120
   yq-cmd:
     cmd: yq
