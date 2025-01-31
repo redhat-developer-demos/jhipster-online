@@ -19,7 +19,7 @@ projects:
       remotes:
         origin: 'https://github.com/redhat-developer-demos/jhipster-online'
       checkoutFrom:
-        revision: main
+        revision: 2.33.0
 components:
   - name: tools
     container:
