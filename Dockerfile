@@ -13,6 +13,9 @@ RUN \
 USER root
 RUN \
     npm install -g generator-jhipster-azure-spring-apps
+    
+RUN mkdir /projects && chown -r jhipster:jhipster /projects
+USER jhipster
 
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
     JHIPSTER_SLEEP=0 \
