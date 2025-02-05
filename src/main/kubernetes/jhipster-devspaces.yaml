@@ -12,7 +12,7 @@ metadata:
 components:
   - name: tools
     container:
-      image: 'quay.io/devfile/jhipster-online@sha256:254c710006b1582b2ebc48cc74ae080a9e10caa99dc1b62c1adb3341f072aede'
+      image: 'quay.io/devfile/jhipster-online@sha256:1f284df66c8ef209ea2cd1a10516e9ba424508a11341eead650e88027858d3ee'
       mountSources: true
       cpuLimit: '4'
       cpuRequest: '1'
