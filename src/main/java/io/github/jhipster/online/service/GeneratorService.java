@@ -27,6 +27,7 @@ import io.github.jhipster.online.domain.enums.GitProvider;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.FileWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -188,9 +189,9 @@ public class GeneratorService {
         //String gitHost = JsonPath.read(document, "$.git-provider");
         String gitRepo = "https://github.com/" + gitCompany + "/" + repositoryName;
 
-        PrintWriter writer = new PrintWriter(workingDir + "/README.md", StandardCharsets.UTF_8);
+        PrintWriter writer = new PrintWriter(new FileWriter(new File(workingDir + "/README.md"), true));
 
-        writer.append(
+        writer.println(
             "[![Open](https://img.shields.io/static/v1?label=Open%20in&message=Developer%20Sandbox&logo=eclipseche&color=FDB940&labelColor=525C86)](https://workspaces.openshift.com/#" +
             gitRepo +
             ")"
