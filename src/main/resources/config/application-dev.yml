@@ -129,7 +129,8 @@ openshift:
   devspace:
     url-devfile: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-devspaces.yaml
   tekton:
-    url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline.yaml
+    url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline.yaml #Spring Boot
+    #url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-quarkus.yaml #Quarkus
     url-pipeline-run: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-run.yaml
 # ===================================================================
 # Application specific properties
