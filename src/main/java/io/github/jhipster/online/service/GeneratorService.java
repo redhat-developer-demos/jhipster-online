@@ -72,6 +72,9 @@ public class GeneratorService {
     @Value("${openshift.tekton.url-pipeline-run}")
     private String pipelineJhipsterRun;
 
+    @Value("${openshift.backstage.url-backstage}")
+    private String backstage;
+
     public GeneratorService(
         ApplicationProperties applicationProperties,
         GitService gitService,
@@ -121,6 +124,8 @@ public class GeneratorService {
         log.info("devfile.yaml created");
         this.generateTektonPipeline(applicationId, workingDir);
         log.info("pipeline.yaml and pipeline-run.yaml created");
+        this.generateBackstage(applicationId, workingDir);
+        log.info("catalog-info.yaml created");
         // this.jHipsterService.yqPatchPipelineRun(applicationId, workingDir, applicationConfiguration);
         log.info("yq script created");
         this.generateYqScript(applicationId, workingDir, applicationConfiguration);
@@ -154,6 +159,14 @@ public class GeneratorService {
 
         writer = new PrintWriter(workingDir + "/pipeline-run.yaml", StandardCharsets.UTF_8);
         writer.print(IOUtils.toString(new URL(pipelineJhipsterRun).openStream(), StandardCharsets.UTF_8));
+        writer.flush();
+        writer.close();
+    }
+
+    private void generateBackstage(String applicationId, File workingDir) throws IOException {
+        this.logsService.addLog(applicationId, "Creating `catalog-info.yaml` file");
+        PrintWriter writer = new PrintWriter(workingDir + "/catalog-info.yaml", StandardCharsets.UTF_8);
+        writer.print(IOUtils.toString(new URL(backstage).openStream(), StandardCharsets.UTF_8));
         writer.flush();
         writer.close();
     }

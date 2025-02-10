@@ -83,7 +83,7 @@ jhipster:
       max-entries: 100 # Number of objects in each cache entry
   # CORS is only enabled by default with the "dev" profile, so BrowserSync can access the API
   cors:
-    allowed-origins: 'http://localhost:8080,https://localhost:8100,http://localhost:9000,https://localhost:9000,http://localhost:9060,https://localhost:9060'
+    allowed-origins: '*,http://localhost:8080,https://localhost:8100,http://localhost:9000,https://localhost:9000,http://localhost:9060,https://localhost:9060'
     # Enable CORS when running in Dev Spaces
     #allowed-origin-patterns: 'https://*.apps.sandbox-m2.ll9k.p1.openshiftapps.com'
     allowed-origin-patterns: '*'
@@ -137,6 +137,8 @@ openshift:
     #url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-quarkus.yaml
 
     url-pipeline-run: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-run.yaml
+  backstage:
+    url-backstage: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/catalog-info.yaml
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
