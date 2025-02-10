@@ -85,7 +85,8 @@ jhipster:
   cors:
     allowed-origins: 'http://localhost:8080,https://localhost:8100,http://localhost:9000,https://localhost:9000,http://localhost:9060,https://localhost:9060'
     # Enable CORS when running in Dev Spaces
-    allowed-origin-patterns: 'https://*.apps.sandbox-m2.ll9k.p1.openshiftapps.com'
+    #allowed-origin-patterns: 'https://*.apps.sandbox-m2.ll9k.p1.openshiftapps.com'
+    allowed-origin-patterns: '*'
     allowed-methods: '*'
     allowed-headers: '*'
     exposed-headers: 'Authorization,Link,X-Total-Count,X-${jhipster.clientApp.name}-alert,X-${jhipster.clientApp.name}-error,X-${jhipster.clientApp.name}-params'
@@ -129,8 +130,12 @@ openshift:
   devspace:
     url-devfile: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-devspaces.yaml
   tekton:
-    url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline.yaml #Spring Boot
-    #url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-quarkus.yaml #Quarkus
+    #Spring Boot
+    url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline.yaml
+
+    #Quarkus
+    #url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-quarkus.yaml
+
     url-pipeline-run: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-run.yaml
 # ===================================================================
 # Application specific properties
