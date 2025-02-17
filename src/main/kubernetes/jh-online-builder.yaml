@@ -1,0 +1,61 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: jhipster-online-builder
+---  
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: jhipster-online-builder  
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: jhipster-online-builder
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'jhipster-online-builder:latest'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy:
+      from:
+        kind: DockerImage
+        name: 'registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5'
+  postCommit: {}
+  source:
+    type: Dockerfile
+    dockerfile: "FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5\r\n\r\nUSER root \r\n\r\nRUN microdnf install -y unzip\r\n\r\nWORKDIR /usr/share/maven\r\n\r\nRUN rm -rf /usr/share/maven/* /usr/bin/mvn\r\n\r\nRUN curl -L -o apache-maven-3.9.4-bin.zip https://dlcdn.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.zip\r\n\r\nRUN unzip apache-maven-3.9.4-bin.zip \"apache-maven-3.9.4/*\" -d \"/usr/share/maven\"\r\n\r\n#RUN cp /usr/share/maven/apache-maven-3.9.4/bin/* /usr/bin\r\n\r\nRUN ln -s /usr/share/maven/apache-maven-3.9.4/bin/mvn /usr/bin/mvn\r\n\r\nRUN rm -rf apache-maven-3.9.4-bin.zip\r\n\r\nENV MAVEN_VERSION=3.9.4\r\n\r\nENV MAVEN_OPTS=\"-Xmx3489m\"\r\n\r\nENV JAVA_TOOL_OPTION=\"-Xmx3489m\"\r\n\r\nENV M2_HOME=/usr/share/maven/apache-maven-3.9.4/bin\r\n\r\nENV PATH=$PATH:/usr/share/maven/apache-maven-3.9.4/bin\r\n\r\nRUN chown 1001:0 ${M2_HOME} && chgrp -R 0 ${M2_HOME} && chmod -R g=u ${M2_HOME}\r\n\r\nRUN microdnf install -y dnf\r\n\r\nRUN dnf -y module install nodejs:20\r\n\r\nRUN npm install -y -g yarn\r\n\r\nRUN dnf -y install git\r\n\r\nRUN npm install -y -g generator-jhipster@8.8.0\r\n\r\nRUN npm install -y -g generator-jhipster-quarkus@3.4.0\r\n\r\n\r\nUSER 1001"
+  runPolicy: Serial
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: jh-online
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'jhipster-online:quarkus'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: DockerImage
+#        name: 'image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster-online-builder:latest'
+        name: 'quay.io/maximilianopizarro/jhipster-universal-developer-image:2.33.0'
+      incremental: true
+  postCommit: {}
+  source:
+    type: Binary
+    binary: {}
+  runPolicy: Serial
