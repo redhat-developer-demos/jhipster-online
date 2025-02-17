@@ -1,6 +1,6 @@
 # JHipster Online
 
-[![Build Status][github-actions-jhonline-image]][github-actions-url] [![Docker Pulls](https://img.shields.io/docker/pulls/jhipster/jhipster-online.svg)](https://hub.docker.com/r/jhipster/jhipster-online/) [![Open](https://img.shields.io/static/v1?label=Open%20in&message=Developer%20Sandbox&logo=eclipseche&color=FDB940&labelColor=525C86)](https://workspaces.openshift.com/#https://github.com/redhat-developer-demos/jhipster-online)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jhipster/jhipster-online.svg)](https://hub.docker.com/r/jhipster/jhipster-online/) [![Open](https://img.shields.io/static/v1?label=Open%20in&message=Developer%20Sandbox&logo=eclipseche&color=FDB940&labelColor=525C86)](https://workspaces.openshift.com/#https://github.com/redhat-developer-demos/jhipster-online) [![Open](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/jhipster-online)](https://artifacthub.io/packages/helm/jhipster-online/jhipster-online)
 
 JHipster Online is a Web application that allows to generate [JHipster applications](https://www.jhipster.tech/)
 without installing JHipster on your machine.
@@ -269,6 +269,30 @@ openshift:
 - Increment the version numbers in [`pom.xml`](https://github.com/jhipster/jhipster-online/blob/d61bdbc3b6354516756c57626455be180eb4352e/pom.xml#L8) and [`package.json`](https://github.com/jhipster/jhipster-online/blob/d61bdbc3b6354516756c57626455be180eb4352e/package.json#L3).
 - Create a tagged release. All you have to do is got to the [releases section](https://github.com/jhipster/jhipster-online/releases)
   and edit the draft created by `github-actions`.
+
+## Helm Chart on Developer Sandbox
+
+#### Add repository
+
+```bash
+helm repo add jhipster-online https://maximilianopizarro.github.io/jhipster-online-helm-chart/
+```
+
+#### Install Chart with parameters
+
+```bash
+helm install jhipster-online jhipster-online/jhipster-online --version 0.1.0
+```
+
+#### Uninstall Chart
+
+```bash
+helm uninstall jhipster-online
+```
+
+#### Helm Chart sample Demo Video
+
+[![JHipster Online Helm Chart on Red Hat Developer Sandbox](https://img.youtube.com/vi/m11wvN2-d1Y/0.jpg)](https://www.youtube.com/watch?v=m11wvN2-d1Y)
 
 ## Help and contribution to the project
 
