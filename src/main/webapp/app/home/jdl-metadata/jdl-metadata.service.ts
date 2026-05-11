@@ -50,6 +50,11 @@ export class JdlMetadataService {
     return this.http.delete<any>(`${this.jdlUrl}/${id}`);
   }
 
+  /** Persists JDL content and returns metadata (used to open embedded JDL Studio with #!/view/:id). */
+  createJdl(name: string, content: string): Observable<JdlMetadata> {
+    return this.http.post<JdlMetadata>(this.jdlUrl, { name, content });
+  }
+
   private convert(jdlMetadata: JdlMetadata): JdlMetadata {
     return { ...jdlMetadata };
   }

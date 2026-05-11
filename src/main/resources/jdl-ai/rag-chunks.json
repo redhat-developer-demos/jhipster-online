@@ -1,7 +1,7 @@
 {
-  "version": 2,
+  "version": 3,
   "source": "JHipster JDL reference (curated for RAG; validate in https://start.jhipster.tech/jdl-studio/ and https://www.jhipster.tech/jdl/)",
-  "alwaysInclude": ["jdl-overview", "entity-basics", "jdl-syntax-gotchas", "invalid-index-blocks"],
+  "alwaysInclude": ["jdl-overview", "entity-basics", "jdl-syntax-gotchas", "invalid-er-in-entity-body", "invalid-index-blocks"],
   "chunks": [
     {
       "id": "jdl-overview",
@@ -30,9 +30,11 @@
         "Float",
         "Enum",
         "typeName",
-        "uuid"
+        "uuid",
+        "Auto",
+        "MismatchedToken"
       ],
-      "body": "Field line order is ALWAYS: FieldName FieldType [validations...]\n- FieldName: camelCase (e.g. title, authorName).\n- FieldType: PascalCase JDL type (String, Integer, Long, Boolean, Float, Double, BigDecimal, LocalDate, Instant, ZonedDateTime, Duration, UUID, byte[], AnyBlob, ImageBlob, TextBlob).\nDo NOT use Java declaration order (type before name).\nSyntax: entity EntityName { FieldName fieldType } or with table: entity EntityName (table_name) { ... }\nExample:\nentity Customer {\n  firstName String required\n  lastName String\n  email String unique\n  balance BigDecimal\n  createdAt Instant\n}"
+      "body": "Field line order is ALWAYS: FieldName FieldType [validations...]\n- FieldName: camelCase (e.g. title, authorName).\n- FieldType: PascalCase JDL type (String, Integer, Long, Boolean, Float, Double, BigDecimal, LocalDate, Instant, ZonedDateTime, Duration, UUID, byte[], AnyBlob, ImageBlob, TextBlob).\nDo NOT use Java declaration order (type before name).\nDo NOT invent pseudo-types like \"Auto\" for ids — omit the id field to use the default Long key, or declare a real type (e.g. UUID) per JHipster version docs.\nSyntax: entity EntityName { FieldName fieldType } or with table: entity EntityName (table_name) { ... }\nExample:\nentity Customer {\n  firstName String required\n  lastName String\n  email String unique\n  balance BigDecimal\n  createdAt Instant\n}"
     },
     {
       "id": "jdl-syntax-gotchas",
@@ -52,6 +54,41 @@
         "title"
       ],
       "body": "WRONG field order (looks like Java; triggers typeName / parser errors):\n  String title required\nRIGHT:\n  title String required\n\nRelationships MUST use the relationship { } block. Never emit Rails-style lines (they are not JDL and cause NoViableAltException):\nWRONG:\n  Blog hasMany Post\n  Post belongsTo Blog\nRIGHT:\n  relationship ManyToOne {\n    Post{blog required} to Blog{post}\n  }\n\nDTO declarations use the ENTITY name, not a fabricated DTO class name:\nWRONG: dto PostDto with mapstruct\nRIGHT: dto Post with mapstruct\n\nIf an entity already has a reference field (e.g. blog Blog on Post), still declare the matching relationship ManyToOne / OneToMany block so the JDL is complete and importable."
+    },
+    {
+      "id": "invalid-er-in-entity-body",
+      "title": "Invalid ER-style lines inside entity blocks",
+      "keywords": [
+        "oneToOne",
+        "oneToMany",
+        "manyToMany",
+        "manyToOne",
+        "category",
+        "OrderLine",
+        "Product",
+        "Auto",
+        "MismatchedToken",
+        "invalid token"
+      ],
+      "body": "Inside \"entity X { ... }\" you may only list: fieldName FieldType [validations].\nINVALID (ER / UML words inside the entity — cause MismatchedTokenException on closing }):\n  category Category oneToOne\n  orderLines OrderLine manyToMany\n  id Auto\nRIGHT: declare scalar fields only, then use top-level relationship blocks.\nExample WRONG entity body:\n  entity Product {\n    id Auto\n    category Category oneToOne\n  }\nExample RIGHT (split):\n  entity Product {\n    name String required\n    price BigDecimal required\n  }\n  entity Category {\n    name String required\n  }\n  relationship ManyToOne {\n    Product{category} to Category{product}\n  }\n\nEvery entity referenced in a relationship { A{b} to B{a} } must exist in the same file (e.g. define Customer before Order{customer} to Customer)."
+    },
+    {
+      "id": "validated-example-blog",
+      "title": "Validated example: blog (prompt + JDL)",
+      "keywords": ["blog", "post", "comment", "slug", "example", "validated"],
+      "body": "PROMPT (example user intent): JHipster monolith JWT; Blog with title slug publishedAt; Post belongs to Blog; Comment on Post with authorName and body.\n\nVALID JDL (manually checked shape; extend with application { } if needed):\nentity Blog {\n  title String required\n  slug String unique\n  publishedAt LocalDate\n}\nentity Post {\n  title String required\n  slug String unique\n  body TextBlob\n  publishedAt LocalDate\n  blog Blog required\n}\nentity Comment {\n  authorName String required\n  body TextBlob\n  post Post required\n}\nrelationship ManyToOne {\n  Post{blog required} to Blog{post}\n  Comment{post required} to Post{comment}\n}"
+    },
+    {
+      "id": "validated-example-ecommerce",
+      "title": "Validated example: orders (prompt + JDL)",
+      "keywords": ["order", "orderline", "product", "category", "customer", "ecommerce", "example"],
+      "body": "PROMPT (example): Monolith; Product, Category, Customer, Order with status enum, OrderLine with quantity and unitPrice; relations without ER words inside entities.\n\nVALID JDL:\nentity Category {\n  name String required\n}\nentity Product {\n  name String required\n  price BigDecimal required\n  stock Integer required\n}\nentity Customer {\n  name String required\n}\nenum OrderStatus {\n  PENDING,\n  PAID,\n  SHIPPED\n}\nentity Order {\n  status OrderStatus required\n}\nentity OrderLine {\n  quantity Integer required\n  unitPrice BigDecimal required\n}\nrelationship ManyToOne {\n  Product{category} to Category{product}\n  Order{customer} to Customer{order}\n  OrderLine{order} to Order{orderLine}\n  OrderLine{product} to Product{orderLine}\n}\npaginate Order, Product with pagination"
+    },
+    {
+      "id": "validated-example-library",
+      "title": "Validated example: library many-to-many (prompt + JDL)",
+      "keywords": ["author", "book", "library", "many-to-many", "isbn", "example"],
+      "body": "PROMPT (example): Authors and Books with many-to-many.\n\nVALID JDL:\nentity Author {\n  name String required\n  birthDate LocalDate\n}\nentity Book {\n  title String required\n  isbn String unique\n  publicationDate LocalDate\n}\nrelationship ManyToMany {\n  Author{book} to Book{author}\n}"
     },
     {
       "id": "relationships",

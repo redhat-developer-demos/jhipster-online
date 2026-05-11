@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { JhiAlertService } from 'ng-jhipster';
+import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 
+import { JdlMetadataService } from './jdl-metadata.service';
 import { JdlAiModelOption, JdlAiService } from './jdl-ai.service';
 
 @Component({
@@ -48,8 +49,14 @@ export class JdlAiAssistantComponent implements OnInit {
   prompt = '';
   generatedJdl = '';
   loading = false;
+  openingStudio = false;
 
-  constructor(private jdlAiService: JdlAiService, private alertService: JhiAlertService) {}
+  constructor(
+    private jdlAiService: JdlAiService,
+    private jdlMetadataService: JdlMetadataService,
+    private alertService: JhiAlertService,
+    private eventManager: JhiEventManager
+  ) {}
 
   ngOnInit(): void {
     this.jdlAiService.getConfig().subscribe(
@@ -114,5 +121,34 @@ export class JdlAiAssistantComponent implements OnInit {
       () => this.alertService.success('Copied to clipboard', null),
       () => this.alertService.error('Copy failed (clipboard may be unavailable)', null)
     );
+  }
+
+  /**
+   * JDL Studio loads models by id from the server. Persist the AI draft, then navigate to the bundled studio.
+   */
+  openDraftInJdlStudio(): void {
+    if (!this.generatedJdl?.trim()) {
+      return;
+    }
+    this.openingStudio = true;
+    const name = `AI draft ${new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace('T', ' ')}`;
+    this.jdlMetadataService.createJdl(name, this.generatedJdl).subscribe({
+      next: meta => {
+        this.openingStudio = false;
+        if (meta?.id) {
+          this.eventManager.broadcast('jdlMetadataListModification');
+          window.location.href = `jdl-studio/#!/view/${meta.id}`;
+        } else {
+          this.alertService.error('Could not open JDL Studio (missing model id).', null);
+        }
+      },
+      error: () => {
+        this.openingStudio = false;
+        this.alertService.error('Could not save the draft to open in JDL Studio. Try Copy JDL and paste manually.', null);
+      }
+    });
   }
 }

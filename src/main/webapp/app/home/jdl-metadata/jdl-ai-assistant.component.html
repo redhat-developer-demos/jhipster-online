@@ -37,7 +37,17 @@
       <span *ngIf="!loading">Generate draft</span>
       <span *ngIf="loading">Generating…</span>
     </button>
-    <a href="jdl-studio/" class="btn btn-outline-secondary">Open JDL Studio</a>
+    <button
+      type="button"
+      class="btn btn-outline-secondary me-2"
+      *ngIf="generatedJdl"
+      (click)="openDraftInJdlStudio()"
+      [disabled]="openingStudio"
+    >
+      <span *ngIf="!openingStudio">Open in JDL Studio</span>
+      <span *ngIf="openingStudio">Saving…</span>
+    </button>
+    <a *ngIf="!generatedJdl" href="jdl-studio/" class="btn btn-outline-secondary">Open empty JDL Studio</a>
     <div class="mt-3" *ngIf="generatedJdl">
       <label class="form-label">Draft JDL — review and fix before using in production</label>
       <textarea class="form-control font-monospace small mb-2" rows="12" readonly [value]="generatedJdl"></textarea>
