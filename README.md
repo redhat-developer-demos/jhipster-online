@@ -1,6 +1,11 @@
 # JHipster Online
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/jhipster/jhipster-online.svg)](https://hub.docker.com/r/jhipster/jhipster-online/) [![Open](https://img.shields.io/static/v1?label=Open%20in&message=Developer%20Sandbox&logo=eclipseche&color=FDB940&labelColor=525C86)](https://workspaces.openshift.com/#https://github.com/redhat-developer-demos/jhipster-online) [![Open](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/jhipster-online)](https://artifacthub.io/packages/helm/jhipster-online/jhipster-online)
+[![Application CI](https://github.com/redhat-developer-demos/jhipster-online/actions/workflows/github-ci.yml/badge.svg)](https://github.com/redhat-developer-demos/jhipster-online/actions/workflows/github-ci.yml)
+[![Build and Push Builder Images](https://github.com/redhat-developer-demos/jhipster-online/actions/workflows/build-push-quay.yml/badge.svg)](https://github.com/redhat-developer-demos/jhipster-online/actions/workflows/build-push-quay.yml)
+[![Publish Docker Image](https://github.com/redhat-developer-demos/jhipster-online/actions/workflows/docker.yml/badge.svg)](https://github.com/redhat-developer-demos/jhipster-online/actions/workflows/docker.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jhipster/jhipster-online.svg)](https://hub.docker.com/r/jhipster/jhipster-online/)
+[![Open in Developer Sandbox](https://img.shields.io/static/v1?label=Open%20in&message=Developer%20Sandbox&logo=eclipseche&color=FDB940&labelColor=525C86)](https://workspaces.openshift.com/#https://github.com/redhat-developer-demos/jhipster-online)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/jhipster-online)](https://artifacthub.io/packages/helm/jhipster-online/jhipster-online)
 
 JHipster Online is a Web application that allows to generate [JHipster applications](https://www.jhipster.tech/)
 without installing JHipster on your machine.
