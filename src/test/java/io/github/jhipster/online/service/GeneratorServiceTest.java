@@ -64,12 +64,22 @@ class GeneratorServiceTest {
     @Mock
     private KubernetesManifestSnippetService kubernetesManifestSnippetService;
 
+    @Mock
+    private OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService;
+
     private GeneratorService generatorService;
 
     @BeforeEach
     void shouldConstructGeneratorService() {
         generatorService =
-            new GeneratorService(applicationProperties, gitService, jHipsterService, logsService, kubernetesManifestSnippetService);
+            new GeneratorService(
+                applicationProperties,
+                gitService,
+                jHipsterService,
+                logsService,
+                kubernetesManifestSnippetService,
+                openshiftScaffoldApplicationService
+            );
     }
 
     @Test
