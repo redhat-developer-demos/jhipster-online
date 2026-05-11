@@ -8,16 +8,16 @@ WORKDIR /usr/share/maven
 
 RUN rm -rf /usr/share/maven/* /usr/bin/mvn
 
-RUN curl -L -o apache-maven-3.9.4-bin.zip https://dlcdn.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.zip && \
-    unzip apache-maven-3.9.4-bin.zip "apache-maven-3.9.4/*" -d "/usr/share/maven" && \
-    ln -s /usr/share/maven/apache-maven-3.9.4/bin/mvn /usr/bin/mvn && \
-    rm -rf apache-maven-3.9.4-bin.zip
+RUN curl -L -o apache-maven-3.9.15-bin.zip https://archive.apache.org/dist/maven/maven-3/3.9.15/binaries/apache-maven-3.9.15-bin.zip && \
+    unzip apache-maven-3.9.15-bin.zip "apache-maven-3.9.15/*" -d "/usr/share/maven" && \
+    ln -s /usr/share/maven/apache-maven-3.9.15/bin/mvn /usr/bin/mvn && \
+    rm -rf apache-maven-3.9.15-bin.zip
 
-ENV MAVEN_VERSION=3.9.4
+ENV MAVEN_VERSION=3.9.15
 ENV MAVEN_OPTS="-Xmx3489m"
 ENV JAVA_TOOL_OPTION="-Xmx3489m"
-ENV M2_HOME=/usr/share/maven/apache-maven-3.9.4/bin
-ENV PATH=$PATH:/usr/share/maven/apache-maven-3.9.4/bin
+ENV M2_HOME=/usr/share/maven/apache-maven-3.9.15/bin
+ENV PATH=$PATH:/usr/share/maven/apache-maven-3.9.15/bin
 
 RUN chown 1001:0 ${M2_HOME} && chgrp -R 0 ${M2_HOME} && chmod -R g=u ${M2_HOME}
 
