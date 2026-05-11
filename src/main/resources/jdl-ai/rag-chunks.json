@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "source": "JHipster JDL reference (curated for RAG; validate in https://start.jhipster.tech/jdl-studio/ and https://www.jhipster.tech/jdl/)",
-  "alwaysInclude": ["jdl-overview", "entity-basics", "invalid-index-blocks"],
+  "alwaysInclude": ["jdl-overview", "entity-basics", "jdl-syntax-gotchas", "invalid-index-blocks"],
   "chunks": [
     {
       "id": "jdl-overview",
@@ -28,9 +28,30 @@
         "ImageBlob",
         "Double",
         "Float",
-        "Enum"
+        "Enum",
+        "typeName",
+        "uuid"
       ],
-      "body": "Syntax: entity EntityName { FieldName fieldType } or with table: entity EntityName (table_name) { ... }\nCommon field types: String, Integer, Long, Boolean, Float, Double, BigDecimal, LocalDate, Instant, ZonedDateTime, Duration, UUID, byte[], AnyBlob, ImageBlob, TextBlob.\nExample:\nentity Customer {\n  firstName String required\n  lastName String\n  email String unique\n  balance BigDecimal\n  createdAt Instant\n}"
+      "body": "Field line order is ALWAYS: FieldName FieldType [validations...]\n- FieldName: camelCase (e.g. title, authorName).\n- FieldType: PascalCase JDL type (String, Integer, Long, Boolean, Float, Double, BigDecimal, LocalDate, Instant, ZonedDateTime, Duration, UUID, byte[], AnyBlob, ImageBlob, TextBlob).\nDo NOT use Java declaration order (type before name).\nSyntax: entity EntityName { FieldName fieldType } or with table: entity EntityName (table_name) { ... }\nExample:\nentity Customer {\n  firstName String required\n  lastName String\n  email String unique\n  balance BigDecimal\n  createdAt Instant\n}"
+    },
+    {
+      "id": "jdl-syntax-gotchas",
+      "title": "Common mistakes: field order, relationships, DTOs",
+      "keywords": [
+        "hasMany",
+        "belongsTo",
+        "hasOne",
+        "rails",
+        "error",
+        "typeName",
+        "NoViableAlt",
+        "parser",
+        "relationship",
+        "dto",
+        "required",
+        "title"
+      ],
+      "body": "WRONG field order (looks like Java; triggers typeName / parser errors):\n  String title required\nRIGHT:\n  title String required\n\nRelationships MUST use the relationship { } block. Never emit Rails-style lines (they are not JDL and cause NoViableAltException):\nWRONG:\n  Blog hasMany Post\n  Post belongsTo Blog\nRIGHT:\n  relationship ManyToOne {\n    Post{blog required} to Blog{post}\n  }\n\nDTO declarations use the ENTITY name, not a fabricated DTO class name:\nWRONG: dto PostDto with mapstruct\nRIGHT: dto Post with mapstruct\n\nIf an entity already has a reference field (e.g. blog Blog on Post), still declare the matching relationship ManyToOne / OneToMany block so the JDL is complete and importable."
     },
     {
       "id": "relationships",
