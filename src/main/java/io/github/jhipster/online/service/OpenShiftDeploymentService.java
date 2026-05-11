@@ -62,7 +62,7 @@ public class OpenShiftDeploymentService {
         }
 
         try (InputStream is = new ByteArrayInputStream(templateYaml.getBytes(StandardCharsets.UTF_8))) {
-            List<HasMetadata> resources = openShiftClient.load(is).items();
+            List<HasMetadata> resources = openShiftClient.load(is).get();
             openShiftClient.resourceList(resources).inNamespace(namespace).createOrReplace();
             log.info("Applied {} resources to namespace {}", resources.size(), namespace);
 
@@ -87,7 +87,7 @@ public class OpenShiftDeploymentService {
         pipelineYaml = pipelineYaml.replace("NAMESPACE", namespace).replace("OWNER/REPO_NAME", gitRepo.replace("https://github.com/", ""));
 
         try (InputStream is = new ByteArrayInputStream(pipelineYaml.getBytes(StandardCharsets.UTF_8))) {
-            List<HasMetadata> resources = openShiftClient.load(is).items();
+            List<HasMetadata> resources = openShiftClient.load(is).get();
             openShiftClient.resourceList(resources).inNamespace(namespace).createOrReplace();
         }
 
@@ -99,7 +99,7 @@ public class OpenShiftDeploymentService {
                 .replace("delivery-0.0.1-SNAPSHOT.jar", appJarVersion);
 
         try (InputStream is = new ByteArrayInputStream(pipelineRunYamlStr.getBytes(StandardCharsets.UTF_8))) {
-            List<HasMetadata> resources = openShiftClient.load(is).items();
+            List<HasMetadata> resources = openShiftClient.load(is).get();
             openShiftClient.resourceList(resources).inNamespace(namespace).createOrReplace();
             log.info("PipelineRun created in namespace {}", namespace);
         }
