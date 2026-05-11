@@ -2,7 +2,15 @@ schemaVersion: 2.2.2
 metadata:
   name: jhipster-online
   version: 2.40.0
-  description: Stack with the JHipster Online on DevSpaces Red Hat OpenShift
+  description: "Stack with JHipster Online on Red Hat OpenShift Dev Spaces.
+    This stack include:
+    - JHipster 9.0.0 for generate Spring Boot 3.4+ projects.
+    - generator-jhipster-micronaut 3.9.0 for generate Micronaut projects.
+    - generator-jhipster-quarkus 3.6.0 for generate Quarkus projects.
+    - generator-jhipster-dotnetcore 4.5.0 for generate .Net 8.0 projects.
+    - generator-jhipster-azure-container-apps for generate Azure Container Apps projects.
+    Watch the demo video:
+    - https://youtu.be/b7xbcTAGNIQ?si=snE57Th4S3gPv_Vn"
   displayName: JHipster Online
   icon: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/jhipster-icon.png
   website: https://start.jhipster.tech
@@ -11,6 +19,8 @@ metadata:
     - JHipster
     - Angular
     - Spring
+    - Quarkus
+    - Micronaut
   language: Java
   projectType: springboot
 projects:
@@ -118,7 +128,3 @@ commands:
       group:
         kind: run
         isDefault: false
-events:
-  postStart:
-    - oc-add-mysql
-    - yarn-install

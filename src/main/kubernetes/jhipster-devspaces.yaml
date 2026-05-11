@@ -1,14 +1,35 @@
-schemaVersion: 2.2.0
+schemaVersion: 2.2.2
 metadata:
-  name: jhipster
-  version: 1.0.0
-  description: Stack with the JHipster Online on DevSpaces
-  displayName: JHipster DevSpaces
+  name: jhipster-online
+  version: 2.40.0
+  description: "Stack with JHipster Online on Red Hat OpenShift Dev Spaces.
+    This stack include:
+    - JHipster 9.0.0 for generate Spring Boot 3.4+ projects.
+    - generator-jhipster-micronaut 3.9.0 for generate Micronaut projects.
+    - generator-jhipster-quarkus 3.6.0 for generate Quarkus projects.
+    - generator-jhipster-dotnetcore 4.5.0 for generate .Net 8.0 projects.
+    - generator-jhipster-azure-container-apps for generate Azure Container Apps projects.
+    Watch the demo video:
+    - https://youtu.be/b7xbcTAGNIQ?si=snE57Th4S3gPv_Vn"
+  displayName: JHipster Online
   icon: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/jhipster-icon.png
   website: https://start.jhipster.tech
-  versions:
-    - version: 1.0.0
-      default: true
+  tags:
+    - Java
+    - JHipster
+    - Angular
+    - Spring
+    - Quarkus
+    - Micronaut
+  language: Java
+  projectType: springboot
+projects:
+  - name: jhipster-online
+    git:
+      remotes:
+        origin: 'https://github.com/redhat-developer-demos/jhipster-online'
+      checkoutFrom:
+        revision: main
 components:
   - name: tools
     container:
@@ -31,9 +52,20 @@ components:
           protocol: https
           targetPort: 8080
         - exposure: public
+          name: debug
+          targetPort: 4200
+        - exposure: public
           name: frontend
           protocol: https
           targetPort: 9000
+        - exposure: public
+          name: debug-frontend
+          protocol: https
+          targetPort: 9001
+        - exposure: public
+          name: browser-sync
+          protocol: https
+          targetPort: 3001
       env:
         - value: '-XX:MaxRAMPercentage=50.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom -Duser.home=/home/jboss'
           name: JAVA_OPTS
@@ -51,48 +83,48 @@ components:
     volume:
       size: 512Mi
 commands:
-  - id: fix-permissions
+  - id: kubectl-add-mysql
     exec:
-      label: 'fix-permissions to mvnw and yq stripts'
+      label: 'Kubernetes apply MariaDB Instance (Kubernetes cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'chmod 777 ./mvnw && chmod 777 ./yq-script'
-  - id: deploy
+      commandLine: 'kubectl apply -f src/main/kubernetes/mysql.yaml'
+  - id: oc-add-mysql
     exec:
-      label: 'Create Tekton Pipeline and Deploy to OpenShift'
+      label: 'OpenShift apply MariaDB Instance (OpenShift cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: './yq-script && oc apply -f pipeline.yaml && oc apply -f pipeline-run.yaml'
-      group:
-        kind: run
-        isDefault: false
-  - id: build
+      commandLine: 'oc apply -f src/main/kubernetes/mysql.yaml'
+  - id: oc-remove-mysql
     exec:
-      label: 'Create Tekton Pipeline and install npm dependencies'
+      label: 'OpenShift remove MariaDB Instance (OpenShift cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'npm install'
+      commandLine: 'oc delete all --selector app=mariadb'
+  - id: yarn-install
+    exec:
+      label: 'Package the application'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'yarn install'
       group:
         kind: build
         isDefault: true
-  - id: run
+  - id: start-frontend
     exec:
-      label: 'Run Dev ./mvnw'
+      label: 'Start Frontend'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: './mvnw'
+      commandLine: 'yarn start'
       group:
         kind: run
         isDefault: true
-  - id: build-prod
+  - id: start-backend
     exec:
-      label: 'Run ./mvnw -Pprod clean verify'
+      label: 'Start JHipster Online'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: './mvnw -Pprod clean verify -DskipTests'
+      commandLine: 'chmod 777 ./mvnw && ./mvnw'
       group:
         kind: run
         isDefault: false
-events:
-  postStart:
-    - build
