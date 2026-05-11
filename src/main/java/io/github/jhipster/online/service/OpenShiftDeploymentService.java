@@ -1,6 +1,7 @@
 package io.github.jhipster.online.service;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.base.ResourceDefinitionContext;
 import io.fabric8.openshift.api.model.Project;
@@ -180,15 +181,21 @@ public class OpenShiftDeploymentService {
     private void applyYamlDocuments(String namespace, String rendered, List<String> applied) {
         InputStream is = new ByteArrayInputStream(rendered.getBytes(StandardCharsets.UTF_8));
         try {
-            List<HasMetadata> resources = filterParsedResources(openShiftClient.load(is).get());
+            List<HasMetadata> resources = flattenParsedKubernetesResources(openShiftClient.load(is).get());
             if (resources.isEmpty()) {
                 return;
             }
-            openShiftClient.resourceList(resources).inNamespace(namespace).createOrReplace();
-            applied.addAll(resources.stream().map(OpenShiftDeploymentService::resourceRef).collect(Collectors.toList()));
-        } catch (KubernetesClientException e) {
-            log.error("Failed to apply rendered YAML: {}", e.getMessage());
-            throw new OpenShiftPermissionException("Deployment failed: " + e.getMessage(), e);
+            // Apply one resource at a time: resourceList() builds a KubernetesList and can NPE on null items
+            // (empty docs between ---, or null entries inside a List document) even after top-level filtering.
+            for (HasMetadata r : resources) {
+                try {
+                    openShiftClient.resource(r).inNamespace(namespace).createOrReplace();
+                    applied.add(resourceRef(r));
+                } catch (KubernetesClientException e) {
+                    log.error("Failed to apply {}: {}", resourceRef(r), e.getMessage());
+                    throw new OpenShiftPermissionException("Deployment failed: " + e.getMessage(), e);
+                }
+            }
         } finally {
             try {
                 is.close();
@@ -199,19 +206,39 @@ public class OpenShiftDeploymentService {
     }
 
     /**
-     * Fabric8's multi-document YAML loader can return {@code null} entries for empty documents between {@code ---}
-     * separators; {@code resourceList} then throws NPE inside the client.
+     * Normalizes YAML {@code load().get()} output: skips nulls, expands {@link KubernetesList} documents, and drops
+     * resources without a {@code metadata.name} / {@code metadata.generateName}.
      */
-    private static List<HasMetadata> filterParsedResources(List<HasMetadata> raw) {
+    private static List<HasMetadata> flattenParsedKubernetesResources(List<HasMetadata> raw) {
         if (raw == null || raw.isEmpty()) {
             return Collections.emptyList();
         }
-        return raw
-            .stream()
-            .filter(Objects::nonNull)
-            .filter(r -> r.getMetadata() != null)
-            .filter(r -> StringUtils.isNotBlank(r.getMetadata().getName()) || StringUtils.isNotBlank(r.getMetadata().getGenerateName()))
-            .collect(Collectors.toList());
+        List<HasMetadata> out = new ArrayList<>();
+        for (HasMetadata r : raw) {
+            if (r == null) {
+                continue;
+            }
+            if (r instanceof KubernetesList) {
+                KubernetesList list = (KubernetesList) r;
+                if (list.getItems() != null) {
+                    for (HasMetadata item : list.getItems()) {
+                        if (hasRenderableMetadata(item)) {
+                            out.add(item);
+                        }
+                    }
+                }
+            } else if (hasRenderableMetadata(r)) {
+                out.add(r);
+            }
+        }
+        return out;
+    }
+
+    private static boolean hasRenderableMetadata(HasMetadata r) {
+        if (r == null || r.getMetadata() == null) {
+            return false;
+        }
+        return StringUtils.isNotBlank(r.getMetadata().getName()) || StringUtils.isNotBlank(r.getMetadata().getGenerateName());
     }
 
     private static String resourceRef(HasMetadata r) {
@@ -252,10 +279,15 @@ public class OpenShiftDeploymentService {
 
             InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
             try {
-                List<HasMetadata> resources = filterParsedResources(openShiftClient.load(is).get());
+                List<HasMetadata> resources = flattenParsedKubernetesResources(openShiftClient.load(is).get());
                 for (HasMetadata r : resources) {
                     String ns = r.getMetadata().getNamespace() != null ? r.getMetadata().getNamespace() : argoNs;
-                    openShiftClient.resource(r).inNamespace(ns).createOrReplace();
+                    try {
+                        openShiftClient.resource(r).inNamespace(ns).createOrReplace();
+                    } catch (KubernetesClientException e) {
+                        log.error("Failed to apply {}: {}", resourceRef(r), e.getMessage());
+                        throw new OpenShiftPermissionException("Deployment failed: " + e.getMessage(), e);
+                    }
                 }
             } finally {
                 try {
