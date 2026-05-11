@@ -34,10 +34,22 @@ This release merges all changes from the upstream [jhipster/jhipster-online](htt
 | `generator-jhipster-dotnetcore` | 4.2.0 | 4.5.0 |
 | `generator-jhipster-azure-container-apps` | N/A | latest |
 
-### Builder Image
+### Builder Images (NEW - GitHub Actions CI/CD)
 
-- `quay.io/maximilianopizarro/jhipster-universal-developer-image`: `2.33.0` -> `2.40.0`
-- Inline Dockerfile in `jh-online-builder.yaml`: generators updated to match (9.0.0)
+Two separate builder images are now published automatically via GitHub Actions to `quay.io/maximilianopizarro/jhipster-online`:
+
+| Image | Dockerfile | Base | Generators |
+|-------|-----------|------|------------|
+| `:spring-boot` / `:2.40.0-spring-boot` / `:latest` | `Dockerfile.spring-boot` | UBI8 OpenJDK 17 + Maven 3.9.4 + Node 20 | `generator-jhipster@9.0.0` |
+| `:quarkus` / `:2.40.0-quarkus` | `Dockerfile.quarkus` | UBI8 OpenJDK 17 + Maven 3.9.4 + Node 20 | `generator-jhipster@9.0.0` + `generator-jhipster-quarkus@3.6.0` |
+
+The Dev Spaces workspace image is also published: `quay.io/devfile/jhipster-online:2.40.0`
+
+**GitHub Actions workflow** (`.github/workflows/build-push-quay.yml`):
+- Triggers on push to `main`, version tags, or manual dispatch
+- Authenticates to `registry.redhat.io` (base image pull) and `quay.io` (image push)
+- Builds 3 images in parallel (spring-boot, quarkus, devspaces)
+- Uses repository secrets: `QUAY_USERNAME`, `QUAY_PASSWORD`, `REDHAT_REGISTRY_USERNAME`, `REDHAT_REGISTRY_PASSWORD`
 
 ### Version Alignment
 
@@ -45,6 +57,16 @@ This release merges all changes from the upstream [jhipster/jhipster-online](htt
 - `package.json`: `2.33.0` -> `2.40.0`
 - `devfile.yaml`: `2.33.1` -> `2.40.0`
 - Container image: `quay.io/devfile/jhipster-online:2.40.0`
+
+### Devfile Registry Compliance
+
+The `devfile.yaml` was updated to meet `devfile/registry` acceptance criteria (per [PR #571](https://github.com/devfile/registry/pull/571)):
+
+- Removed `postStart` events (odo v3 SA permission failures)
+- Added detailed description listing all generators and versions
+- Added `Quarkus` and `Micronaut` tags
+- Synced `devfile.yaml` and `src/main/kubernetes/jhipster-devspaces.yaml` to be identical
+- `schemaVersion: 2.2.2` matches registry standard
 
 ## New Features
 
@@ -121,9 +143,11 @@ All manifests in `src/main/kubernetes/` now use parameterized placeholders:
 - `README.md`: Comprehensive guide with table of contents, compatibility matrix, deployment methods
 - `RELEASE-NOTES-2.40.0.md`: This file
 
-## Manual Post-Release Steps
+## Post-Release Steps
 
-1. Build the Docker image from the updated `Dockerfile`
-2. Push to `quay.io/devfile/jhipster-online:2.40.0`
-3. Update SHA256 digests in `devfile.yaml` and `jhipster-devspaces.yaml` with actual pushed digest
-4. Push git tag `2.40.0` to the repository
+1. Push to `main` -- triggers GitHub Actions to build and push all 3 images
+2. Verify images on `quay.io/maximilianopizarro/jhipster-online` (`:spring-boot`, `:quarkus`)
+3. Verify Dev Spaces image on `quay.io/devfile/jhipster-online:2.40.0`
+4. Update `devfile.yaml` with SHA256 digest from Quay.io
+5. Submit PR to `devfile/registry` with `stacks/jhipster-online/2.40.0/devfile.yaml`
+6. Create git tag `v2.40.0` and GitHub Release
