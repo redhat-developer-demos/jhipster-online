@@ -1,0 +1,24 @@
+# Preset: HorizontalPodAutoscaler — scaleTargetRef matches helm/templates/deployment.yaml (app name).
+# Replace {{ .Values.app.name }} when applying without Helm, or keep this file under helm/templates/.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: '{{ .Values.app.name }}-hpa'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: '{{ .Values.app.name }}'
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: '{{ .Values.app.name }}'
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80

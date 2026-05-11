@@ -19,7 +19,6 @@
 
 package io.github.jhipster.online.service;
 
-import io.github.jhipster.online.config.ApplicationProperties;
 import io.github.jhipster.online.domain.GitCompany;
 import io.github.jhipster.online.domain.User;
 import io.github.jhipster.online.domain.enums.GitProvider;
@@ -51,64 +50,56 @@ public class GitlabService implements GitProviderService {
 
     private final GeneratorService generatorService;
 
-    private final ApplicationProperties applicationProperties;
-
     private final LogsService logsService;
 
     private final UserRepository userRepository;
 
     private final GitCompanyRepository gitCompanyRepository;
 
+    private final GitProviderCredentialsService gitProviderCredentialsService;
+
     public GitlabService(
         GeneratorService generatorService,
-        ApplicationProperties applicationProperties,
         LogsService logsService,
         UserRepository userRepository,
-        GitCompanyRepository gitCompanyRepository
+        GitCompanyRepository gitCompanyRepository,
+        GitProviderCredentialsService gitProviderCredentialsService
     ) {
         this.generatorService = generatorService;
-        this.applicationProperties = applicationProperties;
         this.logsService = logsService;
         this.userRepository = userRepository;
         this.gitCompanyRepository = gitCompanyRepository;
+        this.gitProviderCredentialsService = gitProviderCredentialsService;
     }
 
     @PostConstruct
     public void init() {
         if (isEnabled()) {
-            if (this.applicationProperties.getGitlab().getHost().equals("https://gitlab.com")) {
+            if (this.getHost().equals("https://gitlab.com")) {
                 log.warn("JHipster Online is configured to work on the public GitLab instance at https://gitlab.com");
             } else {
-                log.warn(
-                    "JHipster Online is configured to work on a private GitLab instance at {}",
-                    this.applicationProperties.getGitlab().getHost()
-                );
+                log.warn("JHipster Online is configured to work on a private GitLab instance at {}", this.getHost());
             }
         }
     }
 
     @Override
     public String getHost() {
-        return applicationProperties.getGitlab().getHost();
+        return gitProviderCredentialsService.effectiveGitlabHost();
     }
 
     @Override
     public String getClientId() {
-        return applicationProperties.getGitlab().getClientId();
+        return gitProviderCredentialsService.effectiveGitlabClientId();
     }
 
     public String getRedirectUri() {
-        return applicationProperties.getGitlab().getRedirectUri();
+        return gitProviderCredentialsService.effectiveGitlabRedirectUri();
     }
 
     @Override
     public boolean isEnabled() {
-        return (
-            this.applicationProperties.getGitlab().getClientId() != null &&
-            this.applicationProperties.getGitlab().getClientSecret() != null &&
-            this.applicationProperties.getGitlab().getHost() != null &&
-            this.applicationProperties.getGitlab().getRedirectUri() != null
-        );
+        return gitProviderCredentialsService.isGitlabOAuthConfigured();
     }
 
     @Transactional
@@ -284,7 +275,7 @@ public class GitlabService implements GitProviderService {
             throw new ConnectException("No GitLab token configured");
         }
         GitlabAPI gitlab = GitlabAPI.connect(
-            applicationProperties.getGitlab().getHost(),
+            gitProviderCredentialsService.effectiveGitlabHost(),
             user.getGitlabOAuthToken(),
             TokenType.ACCESS_TOKEN
         );

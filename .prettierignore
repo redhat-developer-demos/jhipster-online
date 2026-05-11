@@ -2,3 +2,6 @@ node_modules
 target
 package-lock.json
 .git
+# Helm templates with Go-template directives are not valid YAML for Prettier
+src/main/resources/helm-template/templates/deployment-app-spring.yaml
+src/main/resources/helm-template/templates/deployment-app-quarkus.yaml

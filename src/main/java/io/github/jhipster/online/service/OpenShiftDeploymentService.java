@@ -16,12 +16,14 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
 
@@ -37,27 +39,53 @@ public class OpenShiftDeploymentService {
 
     private final OpenShiftClient openShiftClient;
 
+    private final Environment environment;
+
     @Value("${openshift.argocd.application-namespace:openshift-gitops}")
     private String argocdApplicationNamespace;
 
-    public OpenShiftDeploymentService(OpenShiftClient openShiftClient) {
+    @Value("${openshift.deployment.default-namespace:}")
+    private String configuredDefaultNamespace;
+
+    public OpenShiftDeploymentService(OpenShiftClient openShiftClient, Environment environment) {
         this.openShiftClient = openShiftClient;
+        this.environment = environment;
     }
 
+    /**
+     * Namespaces for UI dropdowns. Merges the pod's namespace (where JHipster Online runs), an optional
+     * configured default, and OpenShift projects the API account can list — the in-cluster ServiceAccount
+     * often sees fewer Projects than a human {@code oc} user, so the pod namespace is always included first.
+     */
     public List<String> listNamespaces() {
+        LinkedHashSet<String> names = new LinkedHashSet<>();
+        addNamespace(names, environment.getProperty("KUBERNETES_NAMESPACE"));
+        addNamespace(names, openShiftClient.getNamespace());
+        addNamespace(names, configuredDefaultNamespace);
         try {
-            return openShiftClient
+            openShiftClient
                 .projects()
                 .list()
                 .getItems()
                 .stream()
                 .map(Project::getMetadata)
+                .filter(Objects::nonNull)
                 .map(m -> m.getName())
-                .collect(Collectors.toList());
+                .filter(StringUtils::isNotBlank)
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .forEach(names::add);
         } catch (KubernetesClientException e) {
-            log.warn("Cannot list projects, falling back to current namespace: {}", e.getMessage());
-            String current = openShiftClient.getNamespace();
-            return current != null ? Collections.singletonList(current) : Collections.emptyList();
+            log.warn("Cannot list OpenShift projects: {}", e.getMessage());
+        }
+        if (names.isEmpty()) {
+            addNamespace(names, openShiftClient.getNamespace());
+        }
+        return new ArrayList<>(names);
+    }
+
+    private static void addNamespace(Set<String> names, String ns) {
+        if (StringUtils.isNotBlank(ns)) {
+            names.add(ns.trim());
         }
     }
 
@@ -80,6 +108,7 @@ public class OpenShiftDeploymentService {
             @SuppressWarnings("unchecked")
             Map<String, Object> values = yaml.load(valuesYaml);
             Map<String, Object> flat = HelmTemplateRenderer.flattenValues(values);
+            ensureResolvedImageNamespace(flat, namespace);
 
             Path templatesDir = helmDir.resolve("templates");
             if (!Files.isDirectory(templatesDir)) {
@@ -93,6 +122,8 @@ public class OpenShiftDeploymentService {
                 "service-mariadb.yaml",
                 "imagestream.yaml",
                 "buildconfig.yaml",
+                "tekton-pipeline.yaml",
+                "tekton-triggers.yaml",
                 "deployment.yaml",
                 "service-app.yaml",
                 "route.yaml"
@@ -133,6 +164,17 @@ public class OpenShiftDeploymentService {
             }
         }
         return out;
+    }
+
+    /**
+     * If {@code values.yaml} still carries the deploy-time placeholder (e.g. YAML edge cases or manual edits),
+     * force the OpenShift project used for this install so {@code {{ .Values.image.namespace }}} renders correctly.
+     */
+    private static void ensureResolvedImageNamespace(Map<String, Object> flat, String namespace) {
+        Object v = flat.get("image.namespace");
+        if (v == null || String.valueOf(v).isBlank() || "__TARGET_NAMESPACE__".equals(String.valueOf(v).trim())) {
+            flat.put("image.namespace", namespace);
+        }
     }
 
     private void applyYamlDocuments(String namespace, String rendered, List<String> applied) {
@@ -306,6 +348,7 @@ public class OpenShiftDeploymentService {
             deleteLabeledServices(namespace, labels);
             deleteLabeledRoutes(namespace, labels);
             deleteLabeledSecrets(namespace, labels);
+            deleteTektonAndTriggers(namespace, name, labels);
             deleteLabeledPvcs(namespace, labels);
             deleteLabeledImageStreams(namespace, labels);
             deleteLabeledBuildConfigs(namespace, labels);
@@ -397,6 +440,118 @@ public class OpenShiftDeploymentService {
             .list()
             .getItems()
             .forEach(b -> openShiftClient.resource(b).delete());
+    }
+
+    /**
+     * Removes Tekton runs, Triggers CRs, pipeline, and tasks labeled for this app before PVCs (workspace) are deleted.
+     */
+    private void deleteTektonAndTriggers(String namespace, String appName, Map<String, String> labels) {
+        ResourceDefinitionContext pipelineRuns = new ResourceDefinitionContext.Builder()
+            .withGroup("tekton.dev")
+            .withVersion("v1")
+            .withPlural("pipelineruns")
+            .withKind("PipelineRun")
+            .withNamespaced(true)
+            .build();
+        ResourceDefinitionContext taskRuns = new ResourceDefinitionContext.Builder()
+            .withGroup("tekton.dev")
+            .withVersion("v1")
+            .withPlural("taskruns")
+            .withKind("TaskRun")
+            .withNamespaced(true)
+            .build();
+        ResourceDefinitionContext pipelines = new ResourceDefinitionContext.Builder()
+            .withGroup("tekton.dev")
+            .withVersion("v1")
+            .withPlural("pipelines")
+            .withKind("Pipeline")
+            .withNamespaced(true)
+            .build();
+        ResourceDefinitionContext tasks = new ResourceDefinitionContext.Builder()
+            .withGroup("tekton.dev")
+            .withVersion("v1")
+            .withPlural("tasks")
+            .withKind("Task")
+            .withNamespaced(true)
+            .build();
+        try {
+            openShiftClient
+                .genericKubernetesResources(pipelineRuns)
+                .inNamespace(namespace)
+                .withLabels(labels)
+                .list()
+                .getItems()
+                .forEach(pr -> openShiftClient.resource(pr).inNamespace(namespace).delete());
+        } catch (Exception e) {
+            log.debug("PipelineRuns cleanup: {}", e.getMessage());
+        }
+        try {
+            openShiftClient
+                .genericKubernetesResources(taskRuns)
+                .inNamespace(namespace)
+                .withLabels(labels)
+                .list()
+                .getItems()
+                .forEach(tr -> openShiftClient.resource(tr).inNamespace(namespace).delete());
+        } catch (Exception e) {
+            log.debug("TaskRuns cleanup: {}", e.getMessage());
+        }
+        deleteTriggersResources(namespace, labels);
+        try {
+            openShiftClient.genericKubernetesResources(pipelines).inNamespace(namespace).withName(appName).delete();
+        } catch (Exception e) {
+            log.debug("Pipeline {}: {}", appName, e.getMessage());
+        }
+        try {
+            openShiftClient
+                .genericKubernetesResources(tasks)
+                .inNamespace(namespace)
+                .withLabels(labels)
+                .list()
+                .getItems()
+                .forEach(t -> openShiftClient.resource(t).inNamespace(namespace).delete());
+        } catch (Exception e) {
+            log.debug("Tasks cleanup: {}", e.getMessage());
+        }
+    }
+
+    private void deleteTriggersResources(String namespace, Map<String, String> labels) {
+        ResourceDefinitionContext[] contexts = new ResourceDefinitionContext[] {
+            new ResourceDefinitionContext.Builder()
+                .withGroup("triggers.tekton.dev")
+                .withVersion("v1beta1")
+                .withPlural("eventlisteners")
+                .withKind("EventListener")
+                .withNamespaced(true)
+                .build(),
+            new ResourceDefinitionContext.Builder()
+                .withGroup("triggers.tekton.dev")
+                .withVersion("v1beta1")
+                .withPlural("triggertemplates")
+                .withKind("TriggerTemplate")
+                .withNamespaced(true)
+                .build(),
+            new ResourceDefinitionContext.Builder()
+                .withGroup("triggers.tekton.dev")
+                .withVersion("v1beta1")
+                .withPlural("triggerbindings")
+                .withKind("TriggerBinding")
+                .withNamespaced(true)
+                .build()
+        };
+        for (ResourceDefinitionContext ctx : contexts) {
+            try {
+                openShiftClient
+                    .genericKubernetesResources(ctx)
+                    .inNamespace(namespace)
+                    .withLabels(labels)
+                    .list()
+                    .getItems()
+                    .forEach(h -> openShiftClient.resource(h).inNamespace(namespace).delete());
+            } catch (Exception e) {
+                log.debug("Triggers cleanup ({}): {}", ctx.getPlural(), e.getMessage());
+            }
+        }
     }
 
     public Map<String, Boolean> checkPermissions(String namespace) {

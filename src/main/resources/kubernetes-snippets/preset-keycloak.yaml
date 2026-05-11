@@ -1,0 +1,28 @@
+# =============================================================================
+# Red Hat build of Keycloak (Operator: "Red Hat build of Keycloak", CR k8s.keycloak.org/v2alpha1)
+# =============================================================================
+# - Pin registry.redhat.io/rhbk/keycloak-rhel9:<tag> from catalog.redhat.com (avoid :latest in production).
+# - The operator creates a Service named <metadata.name>-service (here: {{ .Values.app.name }}-keycloak-service).
+# - On OpenShift the operator typically creates a Route/Ingress when hostname is configured; avoid duplicate Routes.
+# - Set helm/values.yaml → integrations.keycloak.issuerUri to your realm issuer, e.g.
+#     https://<route-host>/realms/jhipster
+#   then integrations.keycloak.enabled: true
+# - For production: enable HTTPS on Keycloak, set hostname.hostname, and use a supported external DB (see RH docs).
+# =============================================================================
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: '{{ .Values.app.name }}-keycloak'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: keycloak
+    app.openshift.io/runtime: keycloak
+spec:
+  instances: 1
+  image: registry.redhat.io/rhbk/keycloak-rhel9:latest
+  startOptimized: false
+  http:
+    httpEnabled: true
+  hostname:
+    strict: false

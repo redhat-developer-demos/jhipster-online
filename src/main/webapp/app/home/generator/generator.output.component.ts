@@ -39,9 +39,14 @@ export class GeneratorOutputDialogComponent implements OnInit {
 
   githubConfigured = false;
   gitlabConfigured = false;
+  giteaConfigured = false;
 
   gitlabHost: string | undefined;
   githubHost: string | undefined;
+  giteaHost: string | undefined;
+
+  /** Optional: parent hook when logs show successful end of generation. */
+  onGenerationComplete?: () => void;
 
   constructor(private activeModal: NgbActiveModal, private generatorService: GeneratorService) {}
 
@@ -68,6 +73,7 @@ export class GeneratorOutputDialogComponent implements OnInit {
             }, 500);
           } else if (data.endsWith('Generation finished\n')) {
             this.displayApplicationUrl = true;
+            this.onGenerationComplete?.();
           }
         },
         () => {

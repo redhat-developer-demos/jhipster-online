@@ -1,6 +1,12 @@
 <div class="row">
-  <div class="col-md-2">
-    <span class="hipster img-fluid img-rounded"></span>
+  <div class="col-md-2 d-flex align-items-start justify-content-center justify-content-md-start">
+    <img
+      class="welcome-brand-logo img-fluid"
+      src="content/images/logo-jhipster.svg"
+      alt="JHipster"
+      width="394"
+      height="82"
+    />
   </div>
 
   <div class="col-md-10">
@@ -231,6 +237,46 @@
 
     <hr />
 
+    <h2 class="section-title-sm">Create OpenShift Application</h2>
+    <p class="section-description">
+      Generate a JHipster app tuned for OpenShift (MariaDB, Tekton, Helm chart, optional Argo CD) and deploy from your Git repository.
+    </p>
+    <ul class="stepper">
+      <li class="stepper-item">
+        <span class="stepper-icon openshift-step-icon" aria-hidden="true">
+          <img src="content/images/openshift-logo.svg" alt="" width="18" height="18" />
+        </span>
+        <a routerLink="/generate-openshift-application">Step 1: Open the OpenShift generator and fill the application form</a>
+      </li>
+      <li class="stepper-item">
+        <span class="stepper-icon">2</span>
+        <a routerLink="/generate-openshift-application">Step 2: Optionally add extra Kubernetes / Helm YAML (HPA, routes, operators)</a>
+      </li>
+      <li class="stepper-item">
+        <span class="stepper-icon">3</span>
+        <a routerLink="/generate-openshift-application">Step 3: Push to Git, then deploy to your namespace (Fabric8 or Argo CD)</a>
+      </li>
+    </ul>
+
+    <hr />
+
+    <h2 class="section-title-sm">Deployed Applications</h2>
+    <p class="section-description">
+      List and remove Helm-managed releases that JHipster Online deployed to your OpenShift project (label-based uninstall).
+    </p>
+    <ul class="stepper">
+      <li class="stepper-item stepper-plain">
+        <span class="stepper-plain-marker" aria-hidden="true"></span>
+        <a routerLink="/deployed-applications">Step 1: Choose your target namespace and refresh the list of deployed applications</a>
+      </li>
+      <li class="stepper-item stepper-plain">
+        <span class="stepper-plain-marker" aria-hidden="true"></span>
+        <a routerLink="/deployed-applications">Step 2: Delete an application when you no longer need it in the cluster</a>
+      </li>
+    </ul>
+
+    <hr />
+
     <!-- Next steps -->
     <div>
       <h2 class="section-title-sm">Next steps</h2>
@@ -273,13 +319,13 @@
                 <li>
                   <a
                     class="text-secondary"
-                    href="https://github.com/jhipster/generator-jhipster/issues?state=open"
+                    href="https://github.com/jhipster/jhipster-online/issues"
                     target="_blank"
                     rel="noopener noreferrer"
                     data-translate="home.link.bugtracker"
                   >
                     <fa-icon [icon]="['fas', 'bug']"></fa-icon>
-                    <span>JHipster bug tracker</span>
+                    <span>JHipster Online (developers) — issues</span>
                   </a>
                 </li>
                 <li>

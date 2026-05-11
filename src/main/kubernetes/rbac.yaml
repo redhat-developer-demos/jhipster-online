@@ -1,3 +1,8 @@
+# Bind the ClusterRole below to the ServiceAccount your JHipster Online pod uses
+# (replace NAMESPACE twice in the RoleBinding). If you cannot create ClusterRoles
+# (e.g. Developer Sandbox), grant the built-in edit role to that SA instead:
+#   oc policy add-role-to-user edit "system:serviceaccount:NAMESPACE:default" -n NAMESPACE
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -42,6 +47,9 @@ rules:
   - apiGroups: ['tekton.dev']
     resources: ['pipelineruns/status', 'taskruns/status']
     verbs: ['get']
+  - apiGroups: ['triggers.tekton.dev']
+    resources: ['eventlisteners', 'triggerbindings', 'triggertemplates', 'triggers']
+    verbs: ['get', 'list', 'create', 'update', 'patch', 'delete']
   - apiGroups: ['argoproj.io']
     resources: ['applications']
     verbs: ['get', 'list', 'create', 'update', 'delete']

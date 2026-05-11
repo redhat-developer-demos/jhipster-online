@@ -24,6 +24,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { CallbackComponent } from './git/callback/callback.component';
 import { GeneratorOutputDialogComponent } from './generator/generator.output.component';
 import { JdlMetadataComponent } from './jdl-metadata/jdl-metadata.component';
+import { JdlAiAssistantComponent } from './jdl-metadata/jdl-ai-assistant.component';
 import { ApplyJdlStudioComponent, DeleteJdlStudioComponent } from './jdl-metadata/jdl-studio.component';
 import { JdlOutputDialogComponent } from './jdl-metadata/jdl.output.component';
 import { CiCdComponent } from './ci-cd/ci-cd.component';
@@ -52,6 +53,7 @@ import { DeployedAppsComponent } from './deployed-apps/deployed-apps.component';
     GitComponent,
     CallbackComponent,
     JdlMetadataComponent,
+    JdlAiAssistantComponent,
     DeleteJdlStudioComponent,
     ApplyJdlStudioComponent,
     JdlOutputDialogComponent,

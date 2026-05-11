@@ -33,6 +33,7 @@ public class JdlStudio {
 
     @GetMapping("/jdl-studio/")
     public ModelAndView jdlstudio() {
-        return new ModelAndView("/jdl-studio/index.html");
+        // Forward so Spring's resource handlers serve classpath:static/jdl-studio/index.html (not a view name).
+        return new ModelAndView("forward:/jdl-studio/index.html");
     }
 }

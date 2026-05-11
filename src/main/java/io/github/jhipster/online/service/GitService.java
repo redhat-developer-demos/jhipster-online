@@ -44,8 +44,11 @@ public class GitService {
 
     private final ApplicationProperties applicationProperties;
 
-    public GitService(ApplicationProperties applicationProperties) {
+    private final GitProviderCredentialsService gitProviderCredentialsService;
+
+    public GitService(ApplicationProperties applicationProperties, GitProviderCredentialsService gitProviderCredentialsService) {
         this.applicationProperties = applicationProperties;
+        this.gitProviderCredentialsService = gitProviderCredentialsService;
     }
 
     public void pushNewApplicationToGit(User user, File workingDir, String organization, String applicationName, GitProvider gitProvider)
@@ -64,6 +67,9 @@ public class GitService {
             urIish =
                 new URIish(applicationProperties.getGitlab().getHost() + "/" + organization + "/" + applicationName + ".git")
                 .setPass(user.getGitlabOAuthToken());
+        } else if (gitProvider.equals(GitProvider.GITEA)) {
+            String base = trimTrailingSlash(gitProviderCredentialsService.effectiveGiteaHost());
+            urIish = new URIish(base + "/" + organization + "/" + applicationName + ".git").setPass(user.getGiteaOAuthToken());
         }
         RemoteAddCommand remoteAddCommand = git.remoteAdd();
         remoteAddCommand.setName("origin");
@@ -118,6 +124,16 @@ public class GitService {
                     .setCredentialsProvider(getCredentialProvider(user, gitProvider))
                     .setCloneAllBranches(false)
                     .call();
+        } else if (gitProvider.equals(GitProvider.GITEA)) {
+            String base = trimTrailingSlash(gitProviderCredentialsService.effectiveGiteaHost());
+            git =
+                Git
+                    .cloneRepository()
+                    .setURI(base + "/" + organization + "/" + applicationName + ".git")
+                    .setDirectory(workingDir)
+                    .setCredentialsProvider(getCredentialProvider(user, gitProvider))
+                    .setCloneAllBranches(false)
+                    .call();
         }
 
         log.debug("Repository successfully cloned");
@@ -158,7 +174,20 @@ public class GitService {
             return new UsernamePasswordCredentialsProvider(user.getGithubUser(), user.getGithubOAuthToken());
         } else if (gitProvider.equals(GitProvider.GITLAB)) {
             return new UsernamePasswordCredentialsProvider("oauth2", user.getGitlabOAuthToken());
+        } else if (gitProvider.equals(GitProvider.GITEA)) {
+            return new UsernamePasswordCredentialsProvider("oauth2", user.getGiteaOAuthToken());
         }
         return null;
+    }
+
+    private static String trimTrailingSlash(String host) {
+        if (host == null) {
+            return "";
+        }
+        String h = host.trim();
+        while (h.endsWith("/")) {
+            h = h.substring(0, h.length() - 1);
+        }
+        return h;
     }
 }

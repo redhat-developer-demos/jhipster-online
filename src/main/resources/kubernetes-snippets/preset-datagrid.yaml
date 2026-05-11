@@ -1,0 +1,26 @@
+# =============================================================================
+# Red Hat Data Grid 8 / Infinispan Operator (CR infinispan.org/v1 — certified image from registry.redhat.io/datagrid/*)
+# =============================================================================
+# - The operator creates Services for cache/Hot Rod; confirm the Hot Rod Service name and port in the console
+#   (commonly 11222 on the internal Service matching this CR name).
+# - Example for helm/values.yaml integrations.infinispan.serverList (adjust if your operator uses a different SVC):
+#     {{ .Values.app.name }}-datagrid:11222
+#   then integrations.infinispan.enabled: true
+# - TLS and authentication: follow "Securing Data Grid" in the Red Hat Data Grid documentation before production.
+# =============================================================================
+apiVersion: infinispan.org/v1
+kind: Infinispan
+metadata:
+  name: '{{ .Values.app.name }}-datagrid'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: datagrid
+    app.openshift.io/runtime: datagrid
+spec:
+  replicas: 2
+  image: registry.redhat.io/datagrid/datagrid-8-rhel9:latest
+  service:
+    type: DataGrid
+  expose:
+    type: Route

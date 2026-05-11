@@ -42,6 +42,14 @@ import {
 export class GeneratorComponent implements OnInit {
   @Input() config: GeneratorConfigurationModel = {};
   @Input() defaultModel: Partial<JHipsterConfigurationModel> | undefined;
+  /** Optional YAML merged into generated `src/main/kubernetes/jh-online-kubernetes-extras.yaml` (OpenShift flow). */
+  @Input() kubernetesExtrasYaml = '';
+
+  /** When true, server stores this Git repo in the OpenShift deploy list after generation. */
+  @Input() openshiftGeneratorApplication = false;
+
+  /** Invoked when async Git generation completes successfully (log modal sees "Generation finished"). */
+  @Input() generationFinishedCallback?: () => void;
 
   model: JHipsterConfigurationModel = new JHipsterConfigurationModel();
 
@@ -55,6 +63,7 @@ export class GeneratorComponent implements OnInit {
 
   githubConfigured = false;
   gitlabConfigured = false;
+  giteaConfigured = false;
 
   repositoryName: string | undefined;
 
@@ -132,11 +141,13 @@ export class GeneratorComponent implements OnInit {
     if (this.gitConfig) {
       this.gitlabConfigured = this.gitConfig.gitlabConfigured ?? false;
       this.githubConfigured = this.gitConfig.githubConfigured ?? false;
+      this.giteaConfigured = this.gitConfig.giteaConfigured ?? false;
     }
     this.gitConfigurationService.sharedData.subscribe((gitConfig: GitConfigurationModel) => {
       if (gitConfig) {
         this.gitlabConfigured = gitConfig.gitlabConfigured ?? false;
         this.githubConfigured = gitConfig.githubConfigured ?? false;
+        this.giteaConfigured = gitConfig.giteaConfigured ?? false;
       }
     });
   }
@@ -174,22 +185,27 @@ export class GeneratorComponent implements OnInit {
     this.checkModelBeforeSubmit();
 
     if (this.selectedGitProvider && this.selectedGitCompany && this.repositoryName) {
-      this.generatorService.generateOnGit(this.model, this.selectedGitProvider, this.selectedGitCompany, this.repositoryName).subscribe(
-        (res: any) => {
-          this.openOutputModal(res);
-          this.submitted = false;
-        },
-        (error: any) => {
-          console.error('Error generating the application.');
-          console.error(error);
-        }
-      );
+      this.generatorService
+        .generateOnGit(this.model, this.selectedGitProvider, this.selectedGitCompany, this.repositoryName, {
+          kubernetesExtrasYaml: this.kubernetesExtrasYaml,
+          openshiftGeneratorApplication: this.openshiftGeneratorApplication
+        })
+        .subscribe(
+          (res: any) => {
+            this.openOutputModal(res);
+            this.submitted = false;
+          },
+          (error: any) => {
+            console.error('Error generating the application.');
+            console.error(error);
+          }
+        );
     }
   }
 
   onSubmitDownload(): void {
     this.checkModelBeforeSubmit();
-    this.generatorService.download(this.model).subscribe(
+    this.generatorService.download(this.model, { kubernetesExtrasYaml: this.kubernetesExtrasYaml }).subscribe(
       (data: any) => this.downloadFile(data.body),
       // eslint-disable-next-line no-console
       (error: any) => console.log(error),
@@ -210,8 +226,11 @@ export class GeneratorComponent implements OnInit {
     modalRef.repositoryName = this.repositoryName;
     modalRef.gitlabHost = this.gitConfig!.gitlabHost;
     modalRef.githubHost = this.gitConfig!.githubHost;
+    modalRef.giteaHost = this.gitConfig!.giteaHost;
     modalRef.gitlabConfigured = this.gitConfig!.gitlabAvailable;
     modalRef.githubConfigured = this.gitConfig!.githubAvailable;
+    modalRef.giteaConfigured = this.gitConfig!.giteaAvailable;
+    modalRef.onGenerationComplete = this.generationFinishedCallback;
   }
 
   downloadFile(blob: Blob): void {

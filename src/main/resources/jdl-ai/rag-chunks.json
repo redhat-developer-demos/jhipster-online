@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "source": "JHipster JDL reference (curated for RAG; validate in https://start.jhipster.tech/jdl-studio/ and https://www.jhipster.tech/jdl/)",
+  "alwaysInclude": ["jdl-overview", "entity-basics", "invalid-index-blocks"],
+  "chunks": [
+    {
+      "id": "jdl-overview",
+      "title": "JDL scope and tooling",
+      "keywords": ["jdl", "studio", "entity", "application"],
+      "body": "JHipster Domain Language (JDL) describes applications, entities, fields, relationships, and options. The same grammar is edited in JDL Studio (https://start.jhipster.tech/jdl-studio/) and documented at https://www.jhipster.tech/jdl/ . A .jdl file lists declarations; order matters for relationships referencing existing entities."
+    },
+    {
+      "id": "entity-basics",
+      "title": "Entity and fields",
+      "keywords": [
+        "entity",
+        "table",
+        "field",
+        "String",
+        "Long",
+        "Integer",
+        "Boolean",
+        "BigDecimal",
+        "LocalDate",
+        "Instant",
+        "ZonedDateTime",
+        "TextBlob",
+        "ImageBlob",
+        "Double",
+        "Float",
+        "Enum"
+      ],
+      "body": "Syntax: entity EntityName { FieldName fieldType } or with table: entity EntityName (table_name) { ... }\nCommon field types: String, Integer, Long, Boolean, Float, Double, BigDecimal, LocalDate, Instant, ZonedDateTime, Duration, UUID, byte[], AnyBlob, ImageBlob, TextBlob.\nExample:\nentity Customer {\n  firstName String required\n  lastName String\n  email String unique\n  balance BigDecimal\n  createdAt Instant\n}"
+    },
+    {
+      "id": "relationships",
+      "title": "Relationships",
+      "keywords": ["relationship", "OneToMany", "ManyToOne", "ManyToMany", "OneToOne", "javadoc", "required"],
+      "body": "Declare with: relationship RelationshipType { FromEntity{fieldName} to ToEntity{fieldName} [with javadoc(\"...\")] }\nTypes: OneToMany, ManyToOne, ManyToMany, OneToOne.\nExample:\nrelationship ManyToOne {\n  Order{customer} to Customer\n}\nrelationship OneToMany {\n  Customer{order} to Order{customer}\n}\nManyToMany uses join entity or implicit mapping depending on generator; prefer explicit owning side field names."
+    },
+    {
+      "id": "enums",
+      "title": "Enums",
+      "keywords": ["enum", "value"],
+      "body": "enum Language { FRENCH, ENGLISH, SPANISH }\nEntity fields may use the enum type: language Language"
+    },
+    {
+      "id": "pagination-service-dto",
+      "title": "Pagination, service, DTO",
+      "keywords": ["paginate", "service", "dto", "skipClient", "readOnly", "filter"],
+      "body": "Use: paginate * with pagination except Entity\nOr: paginate EntityA, EntityB with pagination\nOr: paginate Entity with infinite-scroll\nService: service all with serviceImpl except Entity, Employee\nDto: dto * with mapstruct except Entity\nreadOnly, skipClient, filter (JHipster options) appear as annotations on entity or field, e.g. @readOnly on entity."
+    },
+    {
+      "id": "invalid-index-blocks",
+      "title": "Invalid patterns to avoid",
+      "keywords": ["index", "mongodb", "colon", "syntax error"],
+      "body": "INVALID (do not generate): standalone blocks after entities such as:\nDevice\n  lastSeen: index\n  deviceId: index\nThat is not JDL — colons cause parse errors like \"unexpected character: ->:<-\".\nJHipster JDL has no \"field: index\" lines. For MongoDB, declare fields only inside \"entity Name { ... }\"; add DB indexes later with @Indexed in code or Mongock, or rely on unique/required on fields.\nVALID paginate example: paginate Device, SensorReading with pagination"
+    },
+    {
+      "id": "validations",
+      "title": "Field validations",
+      "keywords": ["required", "min", "max", "minlength", "maxlength", "pattern"],
+      "body": "Validations on fields: required, min(n), max(n), minlength(n), maxlength(n), pattern(/regex/)\nExample: code String minlength(3) maxlength(20) required"
+    },
+    {
+      "id": "application-block",
+      "title": "Application configuration block",
+      "keywords": ["application", "baseName", "packageName", "authenticationType", "databaseType", "prodDatabaseType", "devDatabaseType"],
+      "body": "Optional top-level block:\napplication {\n  config {\n    baseName myapp\n    applicationType monolith\n    packageName com.example\n    authenticationType jwt\n    databaseType sql\n    devDatabaseType h2Disk\n    prodDatabaseType postgresql\n  }\n}\nOnly use keys you need; invalid keys break import."
+    },
+    {
+      "id": "microservice-gateway",
+      "title": "Microservices",
+      "keywords": ["microservice", "gateway", "searchEngine", "clientRootFolder"],
+      "body": "microservice Customer with gateway\nsearchEngine Customer with elasticsearch (when applicable)\nUse applicationType microservice or gateway in application config when modeling microservice architectures."
+    }
+  ]
+}

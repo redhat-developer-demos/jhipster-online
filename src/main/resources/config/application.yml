@@ -163,4 +163,20 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:
+  jdl-ai:
+    # Set enabled: true and either api-url or models[].api-url to an OpenAI-compatible /v1/chat/completions endpoint.
+    enabled: false
+    api-url: ''
+    api-key: ''
+    model: ''
+    default-model-id: ''
+    insecure-tls: false
+    models: []
+    connect-timeout-ms: 15000
+    read-timeout-ms: 120000
+    help-text: ''
+    # Lexical RAG over bundled jdl-ai/rag-chunks.json (curated from https://www.jhipster.tech/jdl/; validate in https://start.jhipster.tech/jdl-studio/)
+    rag-enabled: true
+    rag-top-k: 6
+    rag-max-chars: 14000

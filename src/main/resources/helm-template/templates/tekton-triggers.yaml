@@ -1,0 +1,87 @@
+# Tekton Triggers: HTTP POST to EventListener creates a PipelineRun (repo/branch from chart values).
+# Any POST to the Route triggers a run; secure with network policy / OAuth proxy in production.
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: '{{ .Values.app.name }}-webhook-binding'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+spec:
+  params:
+    - name: gitrepository
+      value: '{{ .Values.git.repoUrl }}'
+    - name: gitrevision
+      value: '{{ .Values.tekton.defaultBranch }}'
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: '{{ .Values.app.name }}-webhook-template'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+spec:
+  params:
+    - name: gitrepository
+    - name: gitrevision
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: '{{ .Values.app.name }}-'
+        labels:
+          app.kubernetes.io/managed-by: jhipster-online
+          app.kubernetes.io/instance: '{{ .Values.app.name }}'
+          tekton.dev/pipeline: '{{ .Values.app.name }}'
+      spec:
+        pipelineRef:
+          name: '{{ .Values.app.name }}'
+        params:
+          - name: GIT_REPO
+            value: $(tt.params.gitrepository)
+          - name: GIT_BRANCH
+            value: $(tt.params.gitrevision)
+        taskRunTemplate:
+          serviceAccountName: pipeline
+        timeouts:
+          pipeline: 1h0m0s
+        workspaces:
+          - name: workspace
+            persistentVolumeClaim:
+              claimName: '{{ .Values.app.name }}-workspace'
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: '{{ .Values.app.name }}-git'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - name: webhook-run
+      bindings:
+        - ref: '{{ .Values.app.name }}-webhook-binding'
+      template:
+        ref: '{{ .Values.app.name }}-webhook-template'
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: '{{ .Values.app.name }}-el'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+spec:
+  to:
+    kind: Service
+    name: 'el-{{ .Values.app.name }}-git'
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow

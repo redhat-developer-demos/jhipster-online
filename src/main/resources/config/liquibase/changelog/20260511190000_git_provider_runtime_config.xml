@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="20260511190000-1" author="jhipster-online">
+        <createTable tableName="git_provider_runtime_config">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="github_host" type="varchar(512)"/>
+            <column name="github_client_id" type="varchar(512)"/>
+            <column name="github_client_secret" type="varchar(1024)"/>
+            <column name="gitlab_host" type="varchar(512)"/>
+            <column name="gitlab_client_id" type="varchar(512)"/>
+            <column name="gitlab_client_secret" type="varchar(1024)"/>
+            <column name="gitlab_redirect_uri" type="varchar(1024)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20260511190000-2" author="jhipster-online">
+        <insert tableName="git_provider_runtime_config">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

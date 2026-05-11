@@ -1,0 +1,79 @@
+# =============================================================================
+# Redis — Red Hat Universal Base Image redis (registry.redhat.io/rhel9/redis-7)
+# =============================================================================
+# - Pull secret: clusters using only registry.redhat.io often need a pull secret linked to the namespace SA.
+# - Enable app wiring: helm/values.yaml → integrations.redis.enabled: true (host {{ .Values.app.name }}-redis:6379).
+# - Matches chart label conventions (app.kubernetes.io/instance / name) used by helm/templates/service-app.yaml.
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: '{{ .Values.app.name }}-redis'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: redis
+    app.openshift.io/runtime: redis
+spec:
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: '{{ .Values.app.name }}-redis'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: redis
+    app.openshift.io/runtime: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: '{{ .Values.app.name }}'
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: jhipster-online
+        app.kubernetes.io/instance: '{{ .Values.app.name }}'
+        app.kubernetes.io/name: redis
+        app.openshift.io/runtime: redis
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: redis
+          image: registry.redhat.io/rhel9/redis-7:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: redis
+              containerPort: 6379
+          readinessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: '100m'
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

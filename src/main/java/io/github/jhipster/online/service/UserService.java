@@ -65,6 +65,8 @@ public class UserService {
 
     private final GitlabService gitlabService;
 
+    private final GiteaService giteaService;
+
     private final GitCompanyRepository gitCompanyRepository;
 
     private final JHipsterProperties jHipsterProperties;
@@ -88,6 +90,7 @@ public class UserService {
         JHipsterProperties jHipsterProperties,
         GitCompanyRepository gitCompanyRepository,
         GitlabService gitlabService,
+        GiteaService giteaService,
         JdlMetadataService jdlMetadataService,
         JdlService jdlService
     ) {
@@ -98,6 +101,7 @@ public class UserService {
         this.cacheManager = cacheManager;
         this.gitCompanyRepository = gitCompanyRepository;
         this.gitlabService = gitlabService;
+        this.giteaService = giteaService;
         this.jHipsterProperties = jHipsterProperties;
         this.jdlMetadataService = jdlMetadataService;
         this.jdlService = jdlService;
@@ -330,6 +334,9 @@ public class UserService {
                     if (gitlabService.isEnabled()) {
                         gitlabService.deleteAllOrganizationsUser(user);
                     }
+                    if (giteaService.isEnabled()) {
+                        giteaService.deleteAllOrganizationsUser(user);
+                    }
                     userRepository.delete(user);
                     this.clearUserCaches(user);
                     log.debug("Deleted User: {}", user);
@@ -348,6 +355,9 @@ public class UserService {
         } else if (gitProvider.equals(GitProvider.GITLAB)) {
             user.setGitlabOAuthToken(code);
             user = this.gitlabService.getSyncedUserFromGitProvider(user);
+        } else if (gitProvider.equals(GitProvider.GITEA)) {
+            user.setGiteaOAuthToken(code);
+            user = this.giteaService.getSyncedUserFromGitProvider(user);
         }
 
         userRepository.save(user);

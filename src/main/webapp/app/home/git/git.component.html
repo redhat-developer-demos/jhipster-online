@@ -1,11 +1,11 @@
-<div *ngIf="!gitConfig.githubAvailable && !gitConfig.gitlabAvailable">
-  <h2 class="section-title">No GitHub or GitLab configuration available</h2>
+<div *ngIf="!gitConfig.githubAvailable && !gitConfig.gitlabAvailable && !gitConfig.giteaAvailable">
+  <h2 class="section-title">No Git provider configuration available</h2>
 
   <div class="alert alert-info" role="alert">
-    This JHipster Online instance is not configured with GitHub or GitLab, so you cannot generate applications on those services.
+    This JHipster Online instance is not configured with GitHub, GitLab, or Gitea, so you cannot generate applications on those services.
   </div>
   <p>
-    If you want to use GitHub or GitLab with JHipster Online, please contact your system administrator.
+    If you want to use GitHub, GitLab, or Gitea with JHipster Online, please contact your system administrator.
   </p>
 </div>
 
@@ -87,6 +87,37 @@
       >
         <fa-icon [icon]="['fab', 'gitlab']"></fa-icon> &nbsp;JHipster is already authorized, click here to re-synchronize your GitLab
         account
+      </a>
+    </p>
+  </ng-container>
+</div>
+
+<div *ngIf="gitConfig.giteaAvailable">
+  <h2><fa-icon [icon]="'link'"></fa-icon>&nbsp;<span>Gitea configuration</span></h2>
+  <p>
+    If you give access to your Gitea account to JHipster Online, it will:
+  </p>
+  <ul>
+    <li>Create JHipster applications on your account, using <a routerLink="/generate-application">the online application generator</a>.</li>
+    <li>Read basic user data (your username and organizations) that are necessary for generating the project</li>
+  </ul>
+
+  <div class="alert alert-info" role="alert">
+    You can revoke this access at any time in your Gitea instance under <strong>Settings → Applications</strong> (OAuth2 applications).
+  </div>
+
+  <ng-container>
+    <p class="text-center" *ngIf="!giteaConfigured">
+      <a class="btn btn-primary" [href]="giteaAuthorizeHref()" role="button">
+        <span>
+          <fa-icon [icon]="'link'"></fa-icon>
+          &nbsp;Authorize Gitea
+        </span>
+      </a>
+    </p>
+    <p class="text-center" *ngIf="giteaConfigured">
+      <a class="btn btn-warning" [href]="giteaAuthorizeHref()" role="button">
+        <fa-icon [icon]="'link'"></fa-icon>&nbsp;JHipster is already authorized, click here to re-synchronize your Gitea account
       </a>
     </p>
   </ng-container>

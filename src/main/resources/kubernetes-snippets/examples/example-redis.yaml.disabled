@@ -1,0 +1,29 @@
+# DISABLED EXAMPLE — Redis single replica (dev only).
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-redis
+spec:
+  selector:
+    app: sample-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample-redis
+  template:
+    metadata:
+      labels:
+        app: sample-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine

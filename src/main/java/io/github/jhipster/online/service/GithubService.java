@@ -19,7 +19,6 @@
 
 package io.github.jhipster.online.service;
 
-import io.github.jhipster.online.config.ApplicationProperties;
 import io.github.jhipster.online.domain.GitCompany;
 import io.github.jhipster.online.domain.User;
 import io.github.jhipster.online.domain.enums.GitProvider;
@@ -46,57 +45,52 @@ public class GithubService implements GitProviderService {
 
     private final GeneratorService generatorService;
 
-    private final ApplicationProperties applicationProperties;
-
     private final LogsService logsService;
 
     private final GitCompanyRepository gitCompanyRepository;
 
     private final UserRepository userRepository;
 
+    private final GitProviderCredentialsService gitProviderCredentialsService;
+
     public GithubService(
         GeneratorService generatorService,
         LogsService logsService,
-        ApplicationProperties applicationProperties,
         GitCompanyRepository gitCompanyRepository,
-        UserRepository userRepository
+        UserRepository userRepository,
+        GitProviderCredentialsService gitProviderCredentialsService
     ) {
         this.generatorService = generatorService;
-        this.applicationProperties = applicationProperties;
         this.logsService = logsService;
         this.gitCompanyRepository = gitCompanyRepository;
         this.userRepository = userRepository;
+        this.gitProviderCredentialsService = gitProviderCredentialsService;
     }
 
     @PostConstruct
     public void init() {
         if (isEnabled()) {
-            if (this.applicationProperties.getGithub().getHost().equals("https://github.com")) {
+            if (this.getHost().equals("https://github.com")) {
                 log.warn("JHipster Online is configured to work on the public GitHub instance at https://github.com");
             } else {
-                log.warn(
-                    "JHipster Online is configured to work on a private GitHub instance at {}",
-                    this.applicationProperties.getGithub().getHost()
-                );
+                log.warn("JHipster Online is configured to work on a private GitHub instance at {}", this.getHost());
             }
         }
     }
 
     @Override
     public boolean isEnabled() {
-        return (
-            this.applicationProperties.getGithub().getClientId() != null && this.applicationProperties.getGithub().getClientSecret() != null
-        );
+        return gitProviderCredentialsService.isGithubOAuthConfigured();
     }
 
     @Override
     public String getHost() {
-        return applicationProperties.getGithub().getHost();
+        return gitProviderCredentialsService.effectiveGithubHost();
     }
 
     @Override
     public String getClientId() {
-        return applicationProperties.getGithub().getClientId();
+        return gitProviderCredentialsService.effectiveGithubClientId();
     }
 
     /**

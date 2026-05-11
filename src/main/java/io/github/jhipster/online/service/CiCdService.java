@@ -44,6 +44,8 @@ public class CiCdService {
 
     private final GitlabService gitlabService;
 
+    private final GiteaService giteaService;
+
     private final JHipsterService jHipsterService;
 
     private final ApplicationProperties applicationProperties;
@@ -53,6 +55,7 @@ public class CiCdService {
         GitService gitService,
         GithubService githubService,
         GitlabService gitlabService,
+        GiteaService giteaService,
         JHipsterService jHipsterService,
         ApplicationProperties applicationProperties
     ) {
@@ -60,6 +63,7 @@ public class CiCdService {
         this.gitService = gitService;
         this.githubService = githubService;
         this.gitlabService = gitlabService;
+        this.giteaService = giteaService;
         this.jHipsterService = jHipsterService;
         this.applicationProperties = applicationProperties;
     }
@@ -78,11 +82,10 @@ public class CiCdService {
     ) {
         try {
             log.info("Beginning to configure CI with {} to {} / {}", ciCdTool, organizationName, projectName);
-            boolean isGitHub = gitProvider.equals(GitProvider.GITHUB);
-            this.logsService.addLog(
-                    ciCdId,
-                    "Cloning " + (isGitHub ? "GitHub" : "GitLab") + " repository `" + organizationName + "/" + projectName + "`"
-                );
+            String providerLabel = gitProvider.equals(GitProvider.GITHUB)
+                ? "GitHub"
+                : gitProvider.equals(GitProvider.GITLAB) ? "GitLab" : gitProvider.equals(GitProvider.GITEA) ? "Gitea" : "Git";
+            this.logsService.addLog(ciCdId, "Cloning " + providerLabel + " repository `" + organizationName + "/" + projectName + "`");
 
             File workingDir = new File(applicationProperties.getTmpFolder() + "/jhipster/applications/" + ciCdId);
             FileUtils.forceMkdir(workingDir);
@@ -98,18 +101,15 @@ public class CiCdService {
             this.gitService.addAllFilesToRepository(git, workingDir);
             this.gitService.commit(git, workingDir, "Configure " + ciCdTool.getCiCdToolName() + " Continuous Integration");
 
-            this.logsService.addLog(
-                    ciCdId,
-                    "Pushing the application to the " + (isGitHub ? "GitHub" : "GitLab") + " " + "remote repository"
-                );
+            this.logsService.addLog(ciCdId, "Pushing the application to the " + providerLabel + " remote repository");
             this.gitService.push(git, workingDir, user, organizationName, projectName, gitProvider);
             this.logsService.addLog(ciCdId, "Application successfully pushed!");
-            this.logsService.addLog(ciCdId, "Creating " + (isGitHub ? "Pull" : "Merge") + " Request");
+            this.logsService.addLog(ciCdId, "Creating " + (gitProvider.equals(GitProvider.GITLAB) ? "Merge" : "Pull") + " Request");
 
             String pullRequestTitle = "Configure Continuous Integration with " + ciCdTool.getCiCdToolName();
             String pullRequestBody = "Continuous Integration configured by JHipster";
 
-            if (isGitHub) {
+            if (gitProvider.equals(GitProvider.GITHUB)) {
                 int pullRequestNumber =
                     this.githubService.createPullRequest(
                             user,
@@ -122,7 +122,7 @@ public class CiCdService {
                 this.logsService.addLog(
                         ciCdId,
                         "Pull Request created at " +
-                        applicationProperties.getGitlab().getHost() +
+                        githubService.getHost() +
                         "/" +
                         organizationName +
                         "/" +
@@ -142,7 +142,7 @@ public class CiCdService {
                         );
                 this.logsService.addLog(
                         ciCdId,
-                        "Pull Request created at " +
+                        "Merge Request created at " +
                         gitlabService.getHost() +
                         "/" +
                         organizationName +
@@ -150,6 +150,14 @@ public class CiCdService {
                         projectName +
                         "/merge_requests/" +
                         pullRequestNumber
+                    );
+            } else if (gitProvider.equals(GitProvider.GITEA)) {
+                int pullRequestNumber =
+                    this.giteaService.createPullRequest(user, organizationName, projectName, pullRequestTitle, branchName, pullRequestBody);
+                String base = giteaService.getHost().replaceAll("/+$", "");
+                this.logsService.addLog(
+                        ciCdId,
+                        "Pull Request created at " + base + "/" + organizationName + "/" + projectName + "/pulls/" + pullRequestNumber
                     );
             }
 

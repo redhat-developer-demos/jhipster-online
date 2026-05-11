@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20260511210000-1" author="jhipster-online">
+        <addColumn tableName="jhi_user">
+            <column name="gitea_oauth_token" type="varchar(255)"/>
+            <column name="gitea_user" type="varchar(191)"/>
+            <column name="gitea_email" type="varchar(254)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20260511210000-2" author="jhipster-online">
+        <addColumn tableName="git_provider_runtime_config">
+            <column name="gitea_host" type="varchar(512)"/>
+            <column name="gitea_client_id" type="varchar(255)"/>
+            <column name="gitea_client_secret" type="varchar(255)"/>
+            <column name="gitea_redirect_uri" type="varchar(512)"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -193,7 +193,7 @@ See `src/main/kubernetes/rbac.yaml` for the full ClusterRole definition. Key per
 - **Tekton**: Pipelines, Tasks, PipelineRuns, TaskRuns
 - **Monitoring**: Pods, pods/log, events
 
-On Developer Sandbox, the pre-existing `edit` ClusterRole covers most permissions.
+Pods use a **ServiceAccount** (often `default`); they do not inherit your user’s `edit` role. Grant `edit` to that ServiceAccount in the project (see README “RBAC Requirements”) or apply the RoleBinding in `rbac.yaml` after replacing `NAMESPACE`.
 
 ## MCP (Model Context Protocol) Ecosystem Status
 

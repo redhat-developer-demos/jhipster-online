@@ -1,9 +1,7 @@
-.hipster {
-  display: inline-block;
-  width: 170px;
-  height: 89px;
-  background: url('../../../content/images/logo-jhipster.svg') no-repeat center top;
-  background-size: contain;
+.welcome-brand-logo {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 .welcome-title {

@@ -56,6 +56,8 @@ public class JdlService {
 
     private final GitlabService gitlabService;
 
+    private final GiteaService giteaService;
+
     private final JdlRepository jdlRepository;
 
     private final ApplicationProperties applicationProperties;
@@ -66,6 +68,7 @@ public class JdlService {
         JHipsterService jHipsterService,
         GithubService githubService,
         GitlabService gitlabService,
+        GiteaService giteaService,
         JdlRepository jdlRepository,
         ApplicationProperties applicationProperties
     ) {
@@ -74,6 +77,7 @@ public class JdlService {
         this.jHipsterService = jHipsterService;
         this.githubService = githubService;
         this.gitlabService = gitlabService;
+        this.giteaService = giteaService;
         this.jdlRepository = jdlRepository;
         this.applicationProperties = applicationProperties;
     }
@@ -92,11 +96,10 @@ public class JdlService {
     ) {
         try {
             log.info("Beginning to apply JDL Model {} to {} / {}", jdlMetadata.getId(), organizationName, projectName);
-            boolean isGitHub = gitProvider.equals(GitProvider.GITHUB);
-            this.logsService.addLog(
-                    applyJdlId,
-                    "Cloning " + (isGitHub ? "GitHub" : "GitLab") + " repository `" + organizationName + "/" + projectName + "`"
-                );
+            String providerLabel = gitProvider.equals(GitProvider.GITHUB)
+                ? "GitHub"
+                : gitProvider.equals(GitProvider.GITLAB) ? "GitLab" : gitProvider.equals(GitProvider.GITEA) ? "Gitea" : "Git";
+            this.logsService.addLog(applyJdlId, "Cloning " + providerLabel + " repository `" + organizationName + "/" + projectName + "`");
 
             File workingDir = new File(applicationProperties.getTmpFolder() + "/jhipster/applications/" + applyJdlId);
             FileUtils.forceMkdir(workingDir);
@@ -133,13 +136,10 @@ public class JdlService {
                     jdlMetadata.getId()
                 );
 
-            this.logsService.addLog(
-                    applyJdlId,
-                    "Pushing the application to the " + (isGitHub ? "GitHub" : "GitLab") + " remote repository"
-                );
+            this.logsService.addLog(applyJdlId, "Pushing the application to the " + providerLabel + " remote repository");
             this.gitService.push(git, workingDir, user, organizationName, projectName, gitProvider);
             this.logsService.addLog(applyJdlId, "Application successfully pushed!");
-            this.logsService.addLog(applyJdlId, "Creating " + (isGitHub ? "Pull" : "Merge") + " Request");
+            this.logsService.addLog(applyJdlId, "Creating " + (gitProvider.equals(GitProvider.GITLAB) ? "Merge" : "Pull") + " Request");
 
             String pullRequestTitle = "Add entities using the JDL model `" + jdlMetadata.getName() + "`";
             String pullRequestBody =
@@ -147,7 +147,7 @@ public class JdlService {
                 ".tech/jdl-studio/#!/view/" +
                 jdlMetadata.getId();
 
-            if (isGitHub) {
+            if (gitProvider.equals(GitProvider.GITHUB)) {
                 int pullRequestNumber =
                     this.githubService.createPullRequest(
                             user,
@@ -168,7 +168,7 @@ public class JdlService {
                         "/pull/" +
                         pullRequestNumber
                     );
-            } else {
+            } else if (gitProvider.equals(GitProvider.GITLAB)) {
                 int pullRequestNumber =
                     this.gitlabService.createPullRequest(
                             user,
@@ -188,6 +188,14 @@ public class JdlService {
                         projectName +
                         "/merge_requests/" +
                         pullRequestNumber
+                    );
+            } else if (gitProvider.equals(GitProvider.GITEA)) {
+                int pullRequestNumber =
+                    this.giteaService.createPullRequest(user, organizationName, projectName, pullRequestTitle, branchName, pullRequestBody);
+                String base = giteaService.getHost().replaceAll("/+$", "");
+                this.logsService.addLog(
+                        applyJdlId,
+                        "Pull Request created at " + base + "/" + organizationName + "/" + projectName + "/pulls/" + pullRequestNumber
                     );
             }
 

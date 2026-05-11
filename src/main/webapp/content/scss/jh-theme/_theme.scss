@@ -123,3 +123,24 @@
   background-color: rgba($primary, 0.1);
   color: $primary;
 }
+
+.stepper-icon.openshift-step-icon {
+  padding: 0.1rem;
+}
+
+.stepper-item.stepper-plain {
+  padding-left: 0.125rem;
+
+  &::after {
+    left: 0.55rem;
+  }
+}
+
+.stepper-plain-marker {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: $primary;
+  margin: 0 0.35rem 0 0.35rem;
+}

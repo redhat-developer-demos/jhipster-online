@@ -25,4 +25,7 @@
     <include file="config/liquibase/changelog/20180730134859_statistics.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20201108212700_update_entity_YoRC.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20230216080000_update_column_types.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260511190000_git_provider_runtime_config.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260511210000_gitea_git_provider.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260512120000_openshift_scaffold_application.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

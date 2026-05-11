@@ -28,7 +28,23 @@ export class GitConfigurationService {
   gitConfig: GitConfigurationModel;
 
   constructor(public gitProviderService: GitProviderService) {
-    this.gitConfig = new GitConfigurationModel([], false, undefined, undefined, false, undefined, undefined, undefined, false, false);
+    this.gitConfig = new GitConfigurationModel(
+      [],
+      false,
+      undefined,
+      undefined,
+      false,
+      undefined,
+      undefined,
+      undefined,
+      false,
+      false,
+      undefined,
+      undefined,
+      undefined,
+      false,
+      false
+    );
     this.newGitConfig();
   }
 

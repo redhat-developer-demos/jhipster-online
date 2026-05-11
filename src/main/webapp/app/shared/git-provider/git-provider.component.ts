@@ -40,6 +40,7 @@ export class JhiGitProviderAlertComponent implements OnInit {
 
   githubConfigured = false;
   gitlabConfigured = false;
+  giteaConfigured = false;
 
   constructor(private gitConfigurationService: GitConfigurationService) {}
 
@@ -47,10 +48,12 @@ export class JhiGitProviderAlertComponent implements OnInit {
     this.gitConfig = this.gitConfigurationService.gitConfig;
     this.gitlabConfigured = this.gitConfig.gitlabConfigured;
     this.githubConfigured = this.gitConfig.githubConfigured;
+    this.giteaConfigured = this.gitConfig.giteaConfigured;
     this.gitConfigurationService.sharedData.subscribe((gitConfig: any) => {
       this.gitConfig = gitConfig;
       this.gitlabConfigured = gitConfig.gitlabConfigured;
       this.githubConfigured = gitConfig.githubConfigured;
+      this.giteaConfigured = gitConfig.giteaConfigured;
       this.updateGitProviderName();
     });
     this.updateGitProviderName();
@@ -78,25 +81,35 @@ export class JhiGitProviderAlertComponent implements OnInit {
   }
 
   isAlertShowing(): boolean {
-    return (this.gitConfig.githubAvailable || this.gitConfig.gitlabAvailable) && !this.githubConfigured && !this.gitlabConfigured;
+    const anyAvailable = this.gitConfig.githubAvailable || this.gitConfig.gitlabAvailable || this.gitConfig.giteaAvailable;
+    const anyConfigured = this.githubConfigured || this.gitlabConfigured || this.giteaConfigured;
+    return anyAvailable && !anyConfigured;
   }
 
   isAtLeastOneGitProviderAvailableAndConfigured(): boolean {
-    return (this.gitConfig.githubAvailable && this.githubConfigured) || (this.gitConfig.githubAvailable && this.gitlabConfigured);
+    return (
+      (this.gitConfig.githubAvailable && this.githubConfigured) ||
+      (this.gitConfig.gitlabAvailable && this.gitlabConfigured) ||
+      (this.gitConfig.giteaAvailable && this.giteaConfigured)
+    );
   }
 
   isNoGitProviders(): boolean {
-    return !this.gitConfig.githubAvailable && !this.gitConfig.gitlabAvailable;
+    return !this.gitConfig.githubAvailable && !this.gitConfig.gitlabAvailable && !this.gitConfig.giteaAvailable;
   }
 
   updateGitProviderName(): void {
-    if (this.gitConfig.githubAvailable && this.gitConfig.gitlabAvailable) {
-      this.displayedGitProvider = 'GitHub or GitLab';
-    } else if (this.gitConfig.githubAvailable && !this.gitConfig.gitlabAvailable) {
-      this.displayedGitProvider = 'GitHub';
-    } else if (!this.gitConfig.githubAvailable && this.gitConfig.gitlabAvailable) {
-      this.displayedGitProvider = 'GitLab';
+    const labels: string[] = [];
+    if (this.gitConfig.githubAvailable) {
+      labels.push('GitHub');
     }
+    if (this.gitConfig.gitlabAvailable) {
+      labels.push('GitLab');
+    }
+    if (this.gitConfig.giteaAvailable) {
+      labels.push('Gitea');
+    }
+    this.displayedGitProvider = labels.join(' or ');
     this.updateMessages();
   }
 }
@@ -116,6 +129,7 @@ export class JhiGitProviderComponent implements OnInit {
 
   githubConfigured = false;
   gitlabConfigured = false;
+  giteaConfigured = false;
 
   constructor(private gitConfigurationService: GitConfigurationService, public router: Router) {
     this.data = new GitProviderModel(false, false, false, [], [], [], undefined, undefined, undefined);
@@ -125,10 +139,12 @@ export class JhiGitProviderComponent implements OnInit {
     this.gitConfig = this.gitConfigurationService.gitConfig;
     this.gitlabConfigured = this.gitConfig.gitlabConfigured;
     this.githubConfigured = this.gitConfig.githubConfigured;
+    this.giteaConfigured = this.gitConfig.giteaConfigured;
     this.gitConfigurationService.sharedData.subscribe((gitConfig: any) => {
       this.gitConfig = gitConfig;
       this.gitlabConfigured = gitConfig.gitlabConfigured;
       this.githubConfigured = gitConfig.githubConfigured;
+      this.giteaConfigured = gitConfig.giteaConfigured;
       this.updateAvailableProviders();
     });
 
@@ -136,13 +152,17 @@ export class JhiGitProviderComponent implements OnInit {
   }
 
   updateAvailableProviders(): void {
+    if (this.gitConfig.githubAvailable && this.githubConfigured && !this.data.availableGitProviders.includes('GitHub')) {
+      this.data.availableGitProviders.push('GitHub');
+      this.data.selectedGitProvider = 'GitHub';
+    }
     if (this.gitConfig.gitlabAvailable && this.gitlabConfigured && !this.data.availableGitProviders.includes('GitLab')) {
       this.data.availableGitProviders.push('GitLab');
       this.data.selectedGitProvider = 'GitLab';
     }
-    if (this.gitConfig.githubAvailable && this.githubConfigured && !this.data.availableGitProviders.includes('GitHub')) {
-      this.data.availableGitProviders.push('GitHub');
-      this.data.selectedGitProvider = 'GitHub';
+    if (this.gitConfig.giteaAvailable && this.giteaConfigured && !this.data.availableGitProviders.includes('Gitea')) {
+      this.data.availableGitProviders.push('Gitea');
+      this.data.selectedGitProvider = 'Gitea';
     }
 
     this.refreshGitCompanyListByGitProvider(this.data.selectedGitProvider ?? '');
@@ -179,7 +199,7 @@ export class JhiGitProviderComponent implements OnInit {
     this.data.gitProjectListRefresh = true;
     this.emitSharedData();
     if (this.data.selectedGitProvider) {
-      this.gitConfigurationService.gitProviderService.refreshGitProvider(this.data.selectedGitProvider).subscribe(
+      this.gitConfigurationService.gitProviderService.refreshGitProvider(this.data.selectedGitProvider.toLowerCase()).subscribe(
         () => {
           this.data.gitProjectListRefresh = false;
           if (this.data.selectedGitCompany) {
@@ -196,17 +216,19 @@ export class JhiGitProviderComponent implements OnInit {
   updateGitProjectList(companyName: string): void {
     this.data.gitProjects = null;
     if (this.data.selectedGitProvider) {
-      this.gitConfigurationService.gitProviderService.getProjects(this.data.selectedGitProvider, companyName).subscribe((projects: any) => {
-        this.data.gitProjects = projects.sort();
-        this.data.selectedGitRepository = projects[0];
-        this.data = {
-          ...this.data,
-          selectedGitProvider: this.data.selectedGitProvider,
-          selectedGitCompany: this.data.selectedGitCompany,
-          selectedGitRepository: this.data.selectedGitRepository
-        };
-        this.emitSharedData();
-      });
+      this.gitConfigurationService.gitProviderService
+        .getProjects(this.data.selectedGitProvider.toLowerCase(), companyName)
+        .subscribe((projects: any) => {
+          this.data.gitProjects = projects.sort();
+          this.data.selectedGitRepository = projects[0];
+          this.data = {
+            ...this.data,
+            selectedGitProvider: this.data.selectedGitProvider,
+            selectedGitCompany: this.data.selectedGitCompany,
+            selectedGitRepository: this.data.selectedGitRepository
+          };
+          this.emitSharedData();
+        });
     }
   }
 

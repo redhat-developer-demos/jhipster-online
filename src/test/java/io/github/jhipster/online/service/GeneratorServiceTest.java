@@ -61,11 +61,15 @@ class GeneratorServiceTest {
     @Mock
     private LogsService logsService;
 
+    @Mock
+    private KubernetesManifestSnippetService kubernetesManifestSnippetService;
+
     private GeneratorService generatorService;
 
     @BeforeEach
     void shouldConstructGeneratorService() {
-        generatorService = new GeneratorService(applicationProperties, gitService, jHipsterService, logsService);
+        generatorService =
+            new GeneratorService(applicationProperties, gitService, jHipsterService, logsService, kubernetesManifestSnippetService);
     }
 
     @Test

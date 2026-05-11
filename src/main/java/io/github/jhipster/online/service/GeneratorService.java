@@ -21,12 +21,14 @@ package io.github.jhipster.online.service;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import io.github.jhipster.online.config.ApplicationProperties;
 import io.github.jhipster.online.domain.User;
 import io.github.jhipster.online.domain.enums.GitProvider;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -41,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 import org.zeroturnaround.zip.ZipUtil;
@@ -66,6 +69,10 @@ public class GeneratorService {
 
     private final LogsService logsService;
 
+    private final KubernetesManifestSnippetService kubernetesManifestSnippetService;
+
+    private final OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService;
+
     @Value("${openshift.devspace.url-devfile}")
     private String devSpaces;
 
@@ -82,12 +89,16 @@ public class GeneratorService {
         ApplicationProperties applicationProperties,
         GitService gitService,
         JHipsterService jHipsterService,
-        LogsService logsService
+        LogsService logsService,
+        KubernetesManifestSnippetService kubernetesManifestSnippetService,
+        OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService
     ) {
         this.applicationProperties = applicationProperties;
         this.gitService = gitService;
         this.jHipsterService = jHipsterService;
         this.logsService = logsService;
+        this.kubernetesManifestSnippetService = kubernetesManifestSnippetService;
+        this.openshiftScaffoldApplicationService = openshiftScaffoldApplicationService;
     }
 
     public String generateZippedApplication(String applicationId, String applicationConfiguration) throws IOException {
@@ -113,6 +124,7 @@ public class GeneratorService {
         this.logsService.addLog(applicationId, "Pushing the application to the Git remote repository");
         this.gitService.pushNewApplicationToGit(user, workingDir, githubOrganization, repositoryName, gitProvider);
         this.logsService.addLog(applicationId, "Application successfully pushed!");
+        openshiftScaffoldApplicationService.registerIfRequested(user, applicationConfiguration, gitProvider);
         this.gitService.cleanUpDirectory(workingDir);
     }
 
@@ -133,6 +145,8 @@ public class GeneratorService {
         log.info("yq script created");
         this.generateYqScript(applicationId, workingDir, applicationConfiguration);
         this.jHipsterService.generateApplication(applicationId, workingDir);
+        this.writeKubernetesExtrasIfPresent(applicationId, workingDir, applicationConfiguration);
+        this.copyDisabledKubernetesExamples(applicationId, workingDir);
         this.generateHelmBundle(applicationId, workingDir, applicationConfiguration);
         this.openInDevSpaces(applicationId, workingDir, applicationConfiguration);
         log.info("Application generated");
@@ -240,6 +254,15 @@ public class GeneratorService {
         );
         copyClasspathResource("helm-template/templates/service-app.yaml", new File(workingDir, "helm/templates/service-app.yaml"));
         copyClasspathResource("helm-template/templates/route.yaml", new File(workingDir, "helm/templates/route.yaml"));
+        copyClasspathResource(
+            "helm-template/templates/tekton-pipeline-spring.yaml",
+            new File(workingDir, "helm/templates/tekton-pipeline-spring.yaml")
+        );
+        copyClasspathResource(
+            "helm-template/templates/tekton-pipeline-quarkus.yaml",
+            new File(workingDir, "helm/templates/tekton-pipeline-quarkus.yaml")
+        );
+        copyClasspathResource("helm-template/templates/tekton-triggers.yaml", new File(workingDir, "helm/templates/tekton-triggers.yaml"));
         copyClasspathResource("helm-template/argocd/application.yaml", new File(workingDir, "argocd/application.yaml"));
 
         Map<String, String> tokenReplacements = new LinkedHashMap<>();
@@ -254,6 +277,7 @@ public class GeneratorService {
         replaceTokensInTree(new File(workingDir, "helm/templates"), tokenReplacements);
 
         selectDeploymentVariant(new File(workingDir, "helm/templates"), framework);
+        selectTektonPipelineVariant(new File(workingDir, "helm/templates"), framework);
     }
 
     private static String sanitizeKubernetesName(String name) {
@@ -310,6 +334,62 @@ public class GeneratorService {
             FileUtils.deleteQuietly(quarkus);
             FileUtils.moveFile(spring, target);
         }
+    }
+
+    private static void selectTektonPipelineVariant(File templatesDir, String framework) throws IOException {
+        File spring = new File(templatesDir, "tekton-pipeline-spring.yaml");
+        File quarkus = new File(templatesDir, "tekton-pipeline-quarkus.yaml");
+        File target = new File(templatesDir, "tekton-pipeline.yaml");
+        if ("quarkus".equals(framework)) {
+            FileUtils.deleteQuietly(spring);
+            FileUtils.moveFile(quarkus, target);
+        } else {
+            FileUtils.deleteQuietly(quarkus);
+            FileUtils.moveFile(spring, target);
+        }
+    }
+
+    private void writeKubernetesExtrasIfPresent(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
+        try {
+            Object document = Configuration.defaultConfiguration().jsonProvider().parse(applicationConfiguration);
+            Object raw = JsonPath.read(document, "$.kubernetesExtrasYaml");
+            if (!(raw instanceof String)) {
+                return;
+            }
+            String yaml = ((String) raw).trim();
+            if (yaml.isEmpty()) {
+                return;
+            }
+            File dir = new File(workingDir, "src/main/kubernetes");
+            FileUtils.forceMkdir(dir);
+            File out = new File(dir, "jh-online-kubernetes-extras.yaml");
+            FileUtils.writeStringToFile(out, yaml, StandardCharsets.UTF_8);
+            this.logsService.addLog(applicationId, "Wrote custom Kubernetes YAML to src/main/kubernetes/jh-online-kubernetes-extras.yaml");
+        } catch (PathNotFoundException e) {
+            // optional field in request JSON
+        }
+    }
+
+    private void copyDisabledKubernetesExamples(String applicationId, File workingDir) throws IOException {
+        Resource[] examples = kubernetesManifestSnippetService.loadDisabledExamples();
+        if (examples == null || examples.length == 0) {
+            return;
+        }
+        File destDir = new File(workingDir, "src/main/kubernetes/examples");
+        FileUtils.forceMkdir(destDir);
+        for (Resource r : examples) {
+            String fn = r.getFilename();
+            if (fn == null) {
+                continue;
+            }
+            try (InputStream in = r.getInputStream()) {
+                FileUtils.copyInputStreamToFile(in, new File(destDir, fn));
+            }
+        }
+        this.logsService.addLog(
+                applicationId,
+                "Added sample Kubernetes manifests under src/main/kubernetes/examples (*.yaml.disabled — enable by renaming)"
+            );
     }
 
     private void openInDevSpaces(String applicationId, File workingDir, String applicationConfiguration) throws IOException {

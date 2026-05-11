@@ -21,34 +21,46 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { JHipsterConfigurationModel } from './jhipster.configuration.model';
 import { Observable } from 'rxjs';
 
+export interface GeneratorRequestOptions {
+  kubernetesExtrasYaml?: string;
+  /** When true, persist this repo for the OpenShift generator deploy list after push succeeds. */
+  openshiftGeneratorApplication?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GeneratorService {
   constructor(private http: HttpClient) {}
 
-  download(jhipsterConfigurationModel: JHipsterConfigurationModel): Observable<HttpResponse<Blob>> {
-    return this.http.post(
-      'api/download-application',
-      { 'generator-jhipster': jhipsterConfigurationModel },
-      { observe: 'response', responseType: 'blob' }
-    );
+  download(jhipsterConfigurationModel: JHipsterConfigurationModel, options?: GeneratorRequestOptions): Observable<HttpResponse<Blob>> {
+    const body: Record<string, unknown> = { 'generator-jhipster': jhipsterConfigurationModel };
+    const extras = options?.kubernetesExtrasYaml?.trim();
+    if (extras) {
+      body.kubernetesExtrasYaml = extras;
+    }
+    return this.http.post('api/download-application', body, { observe: 'response', responseType: 'blob' });
   }
 
   generateOnGit(
     jhipsterConfigurationModel: JHipsterConfigurationModel,
     gitProvider: string,
     gitCompany: string,
-    repositoryName: string
+    repositoryName: string,
+    options?: GeneratorRequestOptions
   ): Observable<string> {
-    return this.http.post(
-      'api/generate-application',
-      {
-        'generator-jhipster': jhipsterConfigurationModel,
-        'git-provider': gitProvider,
-        'git-company': gitCompany,
-        'repository-name': repositoryName
-      },
-      { responseType: 'text' }
-    );
+    const body: Record<string, unknown> = {
+      'generator-jhipster': jhipsterConfigurationModel,
+      'git-provider': gitProvider,
+      'git-company': gitCompany,
+      'repository-name': repositoryName
+    };
+    const extras = options?.kubernetesExtrasYaml?.trim();
+    if (extras) {
+      body.kubernetesExtrasYaml = extras;
+    }
+    if (options?.openshiftGeneratorApplication) {
+      body.openshiftGeneratorApplication = true;
+    }
+    return this.http.post('api/generate-application', body, { responseType: 'text' });
   }
 
   getGenerationData(applicationId: string): Observable<string> {

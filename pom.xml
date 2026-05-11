@@ -22,8 +22,8 @@
     <properties>
         <!-- Build properties -->
         <maven.version>3.3.9</maven.version>
-        <java.version>11</java.version>
-        <node.version>v16.20.2</node.version>
+        <java.version>17</java.version>
+        <node.version>v22.19.0</node.version>
         <yarn.version>v1.22.19</yarn.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -73,12 +73,11 @@
         <nohttp-checkstyle.version>0.0.10</nohttp-checkstyle.version>
         <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
         <checksum-maven-plugin.version>1.11</checksum-maven-plugin.version>
-        <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <git-commit-id-plugin.version>5.0.0</git-commit-id-plugin.version>
         <modernizer-maven-plugin.version>2.4.0</modernizer-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <jib-maven-plugin.version>3.2.1</jib-maven-plugin.version>
-        <jib-maven-plugin.image>eclipse-temurin:11-jre-focal</jib-maven-plugin.image>
+        <jib-maven-plugin.image>eclipse-temurin:17-jre-jammy</jib-maven-plugin.image>
         <jib-maven-plugin.architecture>amd64</jib-maven-plugin.architecture>
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
         <properties-maven-plugin.version>1.1.0</properties-maven-plugin.version>
@@ -97,6 +96,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Must precede jhipster-dependencies: that BOM still manages Fabric8 5.x model jars, which breaks openshift-client 6.x at runtime. -->
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client-bom</artifactId>
+                <version>${fabric8.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>tech.jhipster</groupId>
                 <artifactId>jhipster-dependencies</artifactId>
@@ -282,6 +289,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- WAR + no active dev/undertow profile: starter-web does not pull embedded Tomcat; still need Servlet API for compilation. -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -724,8 +738,8 @@
                                 <version>[${maven.version},)</version>
                             </requireMavenVersion>
                             <requireJavaVersion>
-                                <message>You are running an incompatible version of Java. JHipster supports JDK 8 to 13.</message>
-                                <version>[1.8,21)</version>
+                                <message>You are running an incompatible version of Java. Build this project with JDK 17 through 21.</message>
+                                <version>[17,22)</version>
                             </requireJavaVersion>
                         </rules>
                     </configuration>
@@ -1158,6 +1172,60 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>github-jdl-studio</id>
+            <activation>
+                <file>
+                    <missing>src/main/resources/static/jdl-studio/index.html</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.github.download-maven-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>2.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>download-jdl-studio-gh-pages</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>https://codeload.github.com/jhipster/jdl-studio/zip/refs/heads/gh-pages</url>
+                                    <outputFileName>jdl-studio-gh-pages.zip</outputFileName>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${project.build.directory}/jdl-studio-gh</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-jdl-studio-into-classes</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/classes/static/jdl-studio</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}/jdl-studio-gh/jdl-studio-gh-pages</directory>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

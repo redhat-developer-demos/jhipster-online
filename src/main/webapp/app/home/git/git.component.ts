@@ -30,6 +30,7 @@ export class GitComponent implements OnInit {
 
   githubConfigured = false;
   gitlabConfigured = false;
+  giteaConfigured = false;
 
   constructor(private gitConfigurationService: GitConfigurationService) {
     this.gitConfig = this.gitConfigurationService.gitConfig;
@@ -38,18 +39,31 @@ export class GitComponent implements OnInit {
   ngOnInit(): void {
     this.gitlabConfigured = this.gitConfig.gitlabConfigured ?? false;
     this.githubConfigured = this.gitConfig.githubConfigured ?? false;
+    this.giteaConfigured = this.gitConfig.giteaConfigured ?? false;
     this.gitConfigurationService.sharedData.subscribe((gitConfig: GitConfigurationModel) => {
       this.gitConfig = gitConfig;
       this.gitlabConfigured = gitConfig.gitlabConfigured ?? false;
       this.githubConfigured = gitConfig.githubConfigured ?? false;
+      this.giteaConfigured = gitConfig.giteaConfigured ?? false;
     });
 
     this.gitConfig.availableGitProviders.forEach((provider: any) => {
       this.gitConfigurationService.gitProviderService.getCompanies(provider.toLowerCase()).subscribe(companies => {
         if (companies.length === 0) {
-          this.gitConfigurationService.gitProviderService.refreshGitProvider(provider);
+          this.gitConfigurationService.gitProviderService.refreshGitProvider(provider.toLowerCase());
         }
       });
     });
+  }
+
+  giteaAuthorizeHref(): string {
+    const host = (this.gitConfig.giteaHost || '').replace(/\/+$/, '');
+    if (!host) {
+      return '#';
+    }
+    const id = encodeURIComponent(this.gitConfig.giteaClientId || '');
+    const ru = encodeURIComponent(this.gitConfig.giteaRedirectUri || '');
+    const scope = encodeURIComponent('read:user write:repository');
+    return `${host}/login/oauth/authorize?client_id=${id}&redirect_uri=${ru}&response_type=code&scope=${scope}`;
   }
 }

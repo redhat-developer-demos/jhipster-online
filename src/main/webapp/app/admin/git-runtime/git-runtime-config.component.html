@@ -1,0 +1,154 @@
+<div>
+  <h2>Git provider (runtime)</h2>
+  <p class="text-muted">
+    Overrides stored in the database when OAuth is not provided via application properties. Client secrets are never shown; set a new
+    value only when you want to replace the current secret.
+  </p>
+
+  <div class="card border-secondary mb-4">
+    <div class="card-header">OAuth setup (external docs)</div>
+    <div class="card-body small">
+      <p class="mb-2">
+        Register the <strong>authorization callback URL</strong> on each provider exactly as your users reach this server (HTTPS), for
+        example <code>https://&lt;your-jhipster-online-host&gt;/api/github/callback</code> and
+        <code>https://&lt;your-jhipster-online-host&gt;/api/gitlab/callback</code> (Gitea:
+        <code>https://&lt;your-jhipster-online-host&gt;/api/gitea/callback</code>). The GitLab <strong>Redirect URI</strong> field below
+        must match what you register on GitLab.
+      </p>
+      <h6 class="mt-3">GitHub</h6>
+      <ul class="mb-2">
+        <li>
+          <a href="https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app" target="_blank" rel="noopener noreferrer"
+            >Creating a GitHub OAuth App</a
+          >
+          ·
+          <a href="https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps" target="_blank" rel="noopener noreferrer"
+            >OAuth scopes</a
+          >
+          ·
+          <a href="https://github.com/settings/developers" target="_blank" rel="noopener noreferrer">Developer Settings (github.com)</a>
+        </li>
+        <li>
+          <strong>Scopes requested by JHipster Online</strong> (authorization link uses):
+          <code>user</code> (profile), <code>repo</code> (create/push repositories), <code>workflow</code> (update GitHub Actions workflow
+          files). These are the effective minimum for generators and CI features that touch repos and workflows.
+        </li>
+      </ul>
+      <h6 class="mt-3">GitLab</h6>
+      <ul class="mb-2">
+        <li>
+          <a href="https://docs.gitlab.com/ee/integration/oauth_provider.html" target="_blank" rel="noopener noreferrer"
+            >GitLab OAuth 2.0 provider / user-owned applications</a
+          >
+          ·
+          <a href="https://gitlab.com/-/user_settings/applications" target="_blank" rel="noopener noreferrer">Applications (gitlab.com)</a>
+        </li>
+        <li>
+          Create a <strong>confidential</strong> application. Enable at least <strong><code>read_user</code></strong> and
+          <strong><code>api</code></strong> (GitLab Java API for projects and merge requests). If your policy forbids full
+          <code>api</code>, use your admin guide to grant the narrowest scopes that still allow repository creation and merge requests from
+          the API.
+        </li>
+      </ul>
+      <h6 class="mt-3">Gitea</h6>
+      <ul class="mb-0">
+        <li>
+          <a href="https://docs.gitea.com/usage/oauth2-provider" target="_blank" rel="noopener noreferrer">Gitea OAuth2 provider</a>
+          — register the same callback pattern under <code>/api/gitea/callback</code>; scopes depend on your Gitea version (typically
+          <code>read:user</code> and repository write scopes for generating apps).
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div *ngIf="loadError" class="alert alert-danger">{{ loadError }}</div>
+  <div *ngIf="!loaded && !loadError" class="alert alert-info">Loading…</div>
+
+  <form *ngIf="loaded && !loadError" (ngSubmit)="save()" #f="ngForm">
+    <h4 class="mt-3">GitHub</h4>
+    <div class="mb-3">
+      <label class="form-label" for="ghHost">Host</label>
+      <input id="ghHost" class="form-control" name="ghHost" [(ngModel)]="view.githubHost" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="ghId">Client ID</label>
+      <input id="ghId" class="form-control" name="ghId" [(ngModel)]="view.githubClientId" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="ghSecret">Client secret</label>
+      <input
+        id="ghSecret"
+        type="password"
+        class="form-control"
+        name="ghSecret"
+        [(ngModel)]="githubClientSecret"
+        autocomplete="new-password"
+        [placeholder]="view.githubClientSecretSet ? '(unchanged — enter new value to replace)' : '(required if not set elsewhere)'"
+      />
+    </div>
+
+    <h4 class="mt-4">GitLab</h4>
+    <div class="mb-3">
+      <label class="form-label" for="glHost">Host</label>
+      <input id="glHost" class="form-control" name="glHost" [(ngModel)]="view.gitlabHost" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="glId">Client ID</label>
+      <input id="glId" class="form-control" name="glId" [(ngModel)]="view.gitlabClientId" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="glRedirect">Redirect URI</label>
+      <input id="glRedirect" class="form-control" name="glRedirect" [(ngModel)]="view.gitlabRedirectUri" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="glSecret">Client secret</label>
+      <input
+        id="glSecret"
+        type="password"
+        class="form-control"
+        name="glSecret"
+        [(ngModel)]="gitlabClientSecret"
+        autocomplete="new-password"
+        [placeholder]="view.gitlabClientSecretSet ? '(unchanged — enter new value to replace)' : '(required if not set elsewhere)'"
+      />
+    </div>
+
+    <h4 class="mt-4">Gitea</h4>
+    <div class="mb-3">
+      <label class="form-label" for="gtHost">Instance URL (base)</label>
+      <input
+        id="gtHost"
+        class="form-control"
+        name="gtHost"
+        [(ngModel)]="view.giteaHost"
+        placeholder="https://gitea.example.com"
+      />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="gtId">Client ID</label>
+      <input id="gtId" class="form-control" name="gtId" [(ngModel)]="view.giteaClientId" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="gtRedirect">Redirect URI</label>
+      <input id="gtRedirect" class="form-control" name="gtRedirect" [(ngModel)]="view.giteaRedirectUri" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="gtSecret">Client secret</label>
+      <input
+        id="gtSecret"
+        type="password"
+        class="form-control"
+        name="gtSecret"
+        [(ngModel)]="giteaClientSecret"
+        autocomplete="new-password"
+        [placeholder]="view.giteaClientSecretSet ? '(unchanged — enter new value to replace)' : '(required if not set elsewhere)'"
+      />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="button" class="btn btn-outline-secondary ms-2" (click)="reload()">Reload</button>
+
+    <div *ngIf="saveMessage" class="alert alert-success mt-3">{{ saveMessage }}</div>
+    <div *ngIf="saveError" class="alert alert-danger mt-3">{{ saveError }}</div>
+  </form>
+</div>

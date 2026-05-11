@@ -27,6 +27,11 @@ export class GitConfigurationModel {
     public gitlabClientId?: string,
     public gitlabHost?: string,
     public githubConfigured?: boolean,
-    public gitlabConfigured?: boolean
+    public gitlabConfigured?: boolean,
+    public giteaHost?: string,
+    public giteaRedirectUri?: string,
+    public giteaClientId?: string,
+    public giteaAvailable?: boolean,
+    public giteaConfigured?: boolean
   ) {}
 }

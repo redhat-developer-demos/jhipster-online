@@ -1,0 +1,147 @@
+# =============================================================================
+# Preset: OpenShift Route + Gateway API HTTPRoute + Kuadrant AuthPolicy
+# =============================================================================
+# Goals:
+# - Expose the app (edge TLS Route) and optionally front it with a Gateway API
+#   HTTPRoute (required for Kuadrant policies).
+# - Map Kuadrant authentication to the same *shape* as a typical JHipster app:
+#     • Stateless JWT (Bearer) issued by Keycloak / OIDC → validate at edge with jwt.issuerUrl
+#     • Anonymous paths aligned with common permitAll() routes (login, register,
+#       activate, password reset, health, OpenAPI, OAuth2 redirects, /api/auth-info).
+#
+# Before applying:
+# 1) Install Kuadrant + a Gateway implementation supported in your cluster (Istio,
+#    Envoy Gateway, etc.) and know the Gateway name/namespace for parentRefs.
+# 2) Set helm values.yaml → integrations.keycloak.issuerUri to your realm issuer, e.g.
+#      https://<keycloak-route-host>/realms/jhipster
+#    (same issuer as jhipster.security.oauth2 in the generated app). If you leave it
+#    empty, remove the `jh-oidc-bearer` block below before applying, or Kuadrant may
+#    reject an empty issuerUrl.
+# 3) For JHipster apps that use *only* self-contained JWT (no OIDC discovery at
+#    the gateway), leave jwt disabled and rely on app-side Spring Security only:
+#    remove or comment the `jh-oidc-bearer` authentication block.
+# 4) Tune hostnames and parentRefs; remove the HTTPRoute + AuthPolicy if you only
+#    need a classic OpenShift Route without gateway auth.
+# 5) RateLimitPolicy (below) is a conservative default for /api traffic; tune limits
+#    for your cluster and SLOs.
+# =============================================================================
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: '{{ .Values.app.name }}-edge'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: '{{ .Values.app.name }}'
+spec:
+  to:
+    kind: Service
+    name: '{{ .Values.app.name }}'
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+# Gateway API v1 — attach to your cluster Gateway (Kuadrant enforces policies on HTTPRoute/Gateway).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: '{{ .Values.app.name }}-http'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: '{{ .Values.app.name }}'
+spec:
+  parentRefs:
+    # TODO: set to the Gateway that fronts this namespace (example placeholders).
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: PLACEHOLDER_GATEWAY_NAME
+      namespace: PLACEHOLDER_GATEWAY_NAMESPACE
+      sectionName: https
+  hostnames:
+    # TODO: match your public DNS / wildcard apps domain
+    - '{{ .Values.app.name }}.apps.example.com'
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: '{{ .Values.app.name }}'
+          port: 8080
+---
+# Kuadrant — apiVersion may be kuadrant.io/v1 or kuadrant.io/v1beta2 depending on operator; adjust if needed.
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: '{{ .Values.app.name }}-jh-auth'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: '{{ .Values.app.name }}'
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: '{{ .Values.app.name }}-http'
+  rules:
+    authentication:
+      # Anonymous paths — mirrors typical JHipster SecurityFilterChain permitAll:
+      #   /api/authenticate, /api/register, /api/activate, reset-password init/finish,
+      #   management health/info/prometheus, OpenAPI (v2/v3), Swagger UI, OAuth2 login entrypoints.
+      jh-anonymous:
+        anonymous: {}
+        when:
+          - predicate: >-
+              (request.path == "/api/authenticate" && request.method == "POST")
+              || (request.path == "/api/register" && request.method == "POST")
+              || (request.path == "/api/activate" && request.method == "GET")
+              || request.path == "/api/account/reset-password/init"
+              || request.path == "/api/account/reset-password/finish"
+              || request.path == "/management/health" || request.path == "/management/health/"
+              || request.path == "/management/info"
+              || request.path == "/management/prometheus"
+              || request.path.matches("^/v2/api-docs.*")
+              || request.path.matches("^/v3/api-docs.*")
+              || request.path.matches("^/swagger-ui.*")
+              || request.path.matches("^/swagger-resources.*")
+              || request.path.matches("^/oauth2/.*")
+              || request.path.matches("^/login/oauth2/.*")
+              || request.path == "/api/auth-info"
+      # Bearer JWT from OIDC (Keycloak) — same validation style as Spring OAuth2 resource server / JHipster OIDC.
+      jh-oidc-bearer:
+        jwt:
+          issuerUrl: '{{ .Values.integrations.keycloak.issuerUri }}'
+        credentials:
+          authorizationHeader:
+            prefix: Bearer
+---
+# Kuadrant rate limits — global counter per HTTPRoute (tune for Developer Sandbox / prod).
+apiVersion: kuadrant.io/v1
+kind: RateLimitPolicy
+metadata:
+  name: '{{ .Values.app.name }}-jh-rl'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: '{{ .Values.app.name }}'
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: '{{ .Values.app.name }}-http'
+  limits:
+    jh-global-per-route:
+      rates:
+        - limit: 600
+          window: 1m
+    jh-api-stricter:
+      when:
+        - predicate: request.path.startsWith("/api/")
+      rates:
+        - limit: 120
+          window: 1m

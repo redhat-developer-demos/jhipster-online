@@ -66,6 +66,8 @@ export class CallbackComponent implements OnInit {
                 this.gitConfigurationService.gitConfig.githubConfigured = true;
               } else if (this.provider === 'gitlab') {
                 this.gitConfigurationService.gitConfig.gitlabConfigured = true;
+              } else if (this.provider === 'gitea') {
+                this.gitConfigurationService.gitConfig.giteaConfigured = true;
               }
             }
           },

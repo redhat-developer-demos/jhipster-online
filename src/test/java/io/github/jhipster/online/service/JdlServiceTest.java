@@ -67,6 +67,9 @@ class JdlServiceTest {
     private GitlabService gitlabService;
 
     @Mock
+    private GiteaService giteaService;
+
+    @Mock
     private JdlRepository jdlRepository;
 
     @Autowired
@@ -77,7 +80,16 @@ class JdlServiceTest {
     @BeforeEach
     void shouldConstructJHipsterService() {
         jdlService =
-            new JdlService(logsService, gitService, jHipsterService, githubService, gitlabService, jdlRepository, applicationProperties);
+            new JdlService(
+                logsService,
+                gitService,
+                jHipsterService,
+                githubService,
+                gitlabService,
+                giteaService,
+                jdlRepository,
+                applicationProperties
+            );
     }
 
     @Test

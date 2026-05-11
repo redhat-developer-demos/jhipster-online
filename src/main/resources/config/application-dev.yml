@@ -125,6 +125,27 @@ application:
   yq-cmd:
     cmd: yq
     timeout: 120
+  # Optional: JDL AI — Developer Sandbox shared models (namespace sandbox-shared-models).
+  # Enable with: APPLICATION_JDL_AI_ENABLED=true, APPLICATION_JDL_AI_API_KEY=<oc whoami -t>, APPLICATION_JDL_AI_INSECURE_TLS=true
+  # Default model: APPLICATION_JDL_AI_DEFAULT_MODEL_ID=granite-31-8b | nemotron-nano-9b-v2 | qwen3-8b
+  # jdl-ai:
+  #   enabled: true
+  #   insecure-tls: true
+  #   default-model-id: granite-31-8b
+  #   api-key: ${JDL_AI_API_KEY:}
+  #   models:
+  #     - id: granite-31-8b
+  #       label: IBM Granite 3.1 8B
+  #       model: isvc-granite-31-8b-fp8
+  #       api-url: https://isvc-granite-31-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions
+  #     - id: nemotron-nano-9b-v2
+  #       label: NVIDIA Nemotron Nano 9B v2
+  #       model: isvc-nemotron-nano-9b-v2-fp8
+  #       api-url: https://isvc-nemotron-nano-9b-v2-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions
+  #     - id: qwen3-8b
+  #       label: Qwen3 8B
+  #       model: isvc-qwen3-8b-fp8
+  #       api-url: https://isvc-qwen3-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions
 
 openshift:
   devspace:
@@ -164,6 +185,11 @@ openshift:
 #        client-secret: XXX
 #    gitlab:
 #        host: https://gitlab.com
+#        client-id: XXX
+#        client-secret: XXX
+#        redirect-uri: XXX
+#    gitea:
+#        host: https://gitea.com
 #        client-id: XXX
 #        client-secret: XXX
 #        redirect-uri: XXX

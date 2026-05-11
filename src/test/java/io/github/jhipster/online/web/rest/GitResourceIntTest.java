@@ -25,7 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.jhipster.online.JhonlineApp;
-import io.github.jhipster.online.config.ApplicationProperties;
+import io.github.jhipster.online.service.GitProviderCredentialsService;
+import io.github.jhipster.online.service.GiteaService;
 import io.github.jhipster.online.service.GithubService;
 import io.github.jhipster.online.service.GitlabService;
 import io.github.jhipster.online.service.UserService;
@@ -33,7 +34,6 @@ import io.github.jhipster.online.web.rest.errors.ExceptionTranslator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,9 +59,6 @@ class GitResourceIntTest {
     @Autowired
     private ExceptionTranslator exceptionTranslator;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ApplicationProperties mockApplicationProperties;
-
     @Mock
     private UserService mockUserService;
 
@@ -71,13 +68,25 @@ class GitResourceIntTest {
     @Mock
     private GitlabService mockGitlabService;
 
+    @Mock
+    private GiteaService mockGiteaService;
+
+    @Mock
+    private GitProviderCredentialsService mockGitProviderCredentialsService;
+
     private MockMvc restMvc;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        GitResource gitResource = new GitResource(mockApplicationProperties, mockUserService, mockGithubService, mockGitlabService);
+        GitResource gitResource = new GitResource(
+            mockUserService,
+            mockGithubService,
+            mockGitlabService,
+            mockGiteaService,
+            mockGitProviderCredentialsService
+        );
 
         this.restMvc =
             MockMvcBuilders
@@ -97,6 +106,15 @@ class GitResourceIntTest {
         when(mockGitlabService.getHost()).thenReturn("http//gitlab.com");
         when(mockGitlabService.getRedirectUri()).thenReturn("http//localhost:9000/api/callback/github");
         when(mockGitlabService.isEnabled()).thenReturn(true);
+
+        when(mockGithubService.isConfigured()).thenReturn(false);
+        when(mockGitlabService.isConfigured()).thenReturn(true);
+
+        when(mockGiteaService.getHost()).thenReturn("https://gitea.example.com");
+        when(mockGiteaService.getRedirectUri()).thenReturn("http://localhost:8080/api/gitea/callback");
+        when(mockGiteaService.getClientId()).thenReturn("gitea-id");
+        when(mockGiteaService.isEnabled()).thenReturn(false);
+        when(mockGiteaService.isConfigured()).thenReturn(false);
 
         restMvc
             .perform(get("/api/git/config", "TestProvider").accept(MediaType.APPLICATION_JSON))

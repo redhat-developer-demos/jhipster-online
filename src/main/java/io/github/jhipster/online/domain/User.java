@@ -133,6 +133,18 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private String gitlabEmail;
 
     @JsonIgnore
+    @Column(name = "gitea_oauth_token")
+    private String giteaOAuthToken;
+
+    @JsonIgnore
+    @Column(name = "gitea_user")
+    private String giteaUser;
+
+    @JsonIgnore
+    @Column(name = "gitea_email")
+    private String giteaEmail;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<GitCompany> gitCompanies;
@@ -307,6 +319,30 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setGitlabEmail(String gitlabEmail) {
         this.gitlabEmail = gitlabEmail;
+    }
+
+    public String getGiteaOAuthToken() {
+        return giteaOAuthToken;
+    }
+
+    public void setGiteaOAuthToken(String giteaOAuthToken) {
+        this.giteaOAuthToken = giteaOAuthToken;
+    }
+
+    public String getGiteaUser() {
+        return giteaUser;
+    }
+
+    public void setGiteaUser(String giteaUser) {
+        this.giteaUser = giteaUser;
+    }
+
+    public String getGiteaEmail() {
+        return giteaEmail;
+    }
+
+    public void setGiteaEmail(String giteaEmail) {
+        this.giteaEmail = giteaEmail;
     }
 
     public Set<GitCompany> getGitCompanies() {

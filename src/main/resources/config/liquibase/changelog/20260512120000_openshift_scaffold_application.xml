@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20260512120000-1" author="jhipster-online">
+        <createTable tableName="openshift_scaffold_application">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="jhi_user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="git_provider" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="git_company" type="varchar(191)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repository_name" type="varchar(191)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="framework" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="git_repo_url" type="varchar(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint
+            tableName="openshift_scaffold_application"
+            columnNames="jhi_user_id, git_company, repository_name"
+            constraintName="ux_os_scaffold_user_git_repo"/>
+        <addForeignKeyConstraint
+            baseTableName="openshift_scaffold_application"
+            baseColumnNames="jhi_user_id"
+            constraintName="fk_os_scaffold_user"
+            referencedTableName="jhi_user"
+            referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

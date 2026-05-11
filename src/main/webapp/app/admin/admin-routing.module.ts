@@ -54,6 +54,10 @@ import { RouterModule } from '@angular/router';
       {
         path: 'metrics',
         loadChildren: () => import('./metrics/metrics.module').then(m => m.MetricsModule)
+      },
+      {
+        path: 'git-runtime',
+        loadChildren: () => import('./git-runtime/git-runtime.module').then(m => m.GitRuntimeModule)
       }
       /* jhipster-needle-add-admin-route - JHipster will add admin routes here */
     ])

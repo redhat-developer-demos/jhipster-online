@@ -1,4 +1,5 @@
-# Populated at generation time; image.namespace is replaced on deploy from the target OpenShift project.
+# image.namespace is __TARGET_NAMESPACE__ in Git on purpose: JHipster Online replaces it in-cluster when you
+# deploy with method "fabric8", or injects it via Argo CD helm parameters when you deploy with "argocd".
 app:
   name: __REPO_NAME__
 framework: __FRAMEWORK__
@@ -14,3 +15,20 @@ replicas:
   mariadb: 1
 deploy:
   method: fabric8
+tekton:
+  defaultBranch: main
+# Toggle wiring in helm/templates/deployment.yaml (Spring / Quarkus) for optional extras from
+# src/main/kubernetes/jh-online-kubernetes-extras.yaml (Kafka, Redis, Keycloak issuer URI).
+integrations:
+  kafka:
+    enabled: false
+  redis:
+    enabled: false
+  keycloak:
+    enabled: false
+    # Example: https://<route-host>/realms/jhipster
+    issuerUri: ''
+  # Hot Rod / remote cache: map env vars in deployment yourself (Spring/Quarkus property names vary by stack).
+  infinispan:
+    enabled: false
+    serverList: ''

@@ -41,6 +41,16 @@ public class GitConfigurationDTO {
 
     private boolean gitlabConfigured;
 
+    private String giteaHost;
+
+    private String giteaRedirectUri;
+
+    private String giteaClientId;
+
+    private boolean giteaAvailable;
+
+    private boolean giteaConfigured;
+
     public GitConfigurationDTO(
         String githubHost,
         String githubClientId,
@@ -50,7 +60,12 @@ public class GitConfigurationDTO {
         String gitlabClientId,
         boolean gitlabAvailable,
         boolean githubConfigured,
-        boolean gitlabConfigured
+        boolean gitlabConfigured,
+        String giteaHost,
+        String giteaRedirectUri,
+        String giteaClientId,
+        boolean giteaAvailable,
+        boolean giteaConfigured
     ) {
         this.githubHost = githubHost;
         this.githubClientId = githubClientId;
@@ -61,6 +76,11 @@ public class GitConfigurationDTO {
         this.gitlabAvailable = gitlabAvailable;
         this.githubConfigured = githubConfigured;
         this.gitlabConfigured = gitlabConfigured;
+        this.giteaHost = giteaHost;
+        this.giteaRedirectUri = giteaRedirectUri;
+        this.giteaClientId = giteaClientId;
+        this.giteaAvailable = giteaAvailable;
+        this.giteaConfigured = giteaConfigured;
     }
 
     public String getGithubHost() {
@@ -135,6 +155,46 @@ public class GitConfigurationDTO {
         this.githubConfigured = githubConfigured;
     }
 
+    public String getGiteaHost() {
+        return giteaHost;
+    }
+
+    public void setGiteaHost(String giteaHost) {
+        this.giteaHost = giteaHost;
+    }
+
+    public String getGiteaRedirectUri() {
+        return giteaRedirectUri;
+    }
+
+    public void setGiteaRedirectUri(String giteaRedirectUri) {
+        this.giteaRedirectUri = giteaRedirectUri;
+    }
+
+    public String getGiteaClientId() {
+        return giteaClientId;
+    }
+
+    public void setGiteaClientId(String giteaClientId) {
+        this.giteaClientId = giteaClientId;
+    }
+
+    public boolean isGiteaAvailable() {
+        return giteaAvailable;
+    }
+
+    public void setGiteaAvailable(boolean giteaAvailable) {
+        this.giteaAvailable = giteaAvailable;
+    }
+
+    public boolean isGiteaConfigured() {
+        return giteaConfigured;
+    }
+
+    public void setGiteaConfigured(boolean giteaConfigured) {
+        this.giteaConfigured = giteaConfigured;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -146,11 +206,16 @@ public class GitConfigurationDTO {
         if (gitlabAvailable != that.gitlabAvailable) return false;
         if (githubConfigured != that.githubConfigured) return false;
         if (gitlabConfigured != that.gitlabConfigured) return false;
+        if (giteaAvailable != that.giteaAvailable) return false;
+        if (giteaConfigured != that.giteaConfigured) return false;
         if (!Objects.equals(githubHost, that.githubHost)) return false;
         if (!Objects.equals(githubClientId, that.githubClientId)) return false;
         if (!Objects.equals(gitlabHost, that.gitlabHost)) return false;
         if (!Objects.equals(gitlabRedirectUri, that.gitlabRedirectUri)) return false;
-        return Objects.equals(gitlabClientId, that.gitlabClientId);
+        if (!Objects.equals(gitlabClientId, that.gitlabClientId)) return false;
+        if (!Objects.equals(giteaHost, that.giteaHost)) return false;
+        if (!Objects.equals(giteaRedirectUri, that.giteaRedirectUri)) return false;
+        return Objects.equals(giteaClientId, that.giteaClientId);
     }
 
     @Override
@@ -164,6 +229,11 @@ public class GitConfigurationDTO {
         result = 31 * result + (gitlabAvailable ? 1 : 0);
         result = 31 * result + (githubConfigured ? 1 : 0);
         result = 31 * result + (gitlabConfigured ? 1 : 0);
+        result = 31 * result + (giteaHost != null ? giteaHost.hashCode() : 0);
+        result = 31 * result + (giteaRedirectUri != null ? giteaRedirectUri.hashCode() : 0);
+        result = 31 * result + (giteaClientId != null ? giteaClientId.hashCode() : 0);
+        result = 31 * result + (giteaAvailable ? 1 : 0);
+        result = 31 * result + (giteaConfigured ? 1 : 0);
         return result;
     }
 
@@ -194,6 +264,19 @@ public class GitConfigurationDTO {
             githubConfigured +
             ", gitlabConfigured=" +
             gitlabConfigured +
+            ", giteaHost='" +
+            giteaHost +
+            '\'' +
+            ", giteaRedirectUri='" +
+            giteaRedirectUri +
+            '\'' +
+            ", giteaClientId='" +
+            giteaClientId +
+            '\'' +
+            ", giteaAvailable=" +
+            giteaAvailable +
+            ", giteaConfigured=" +
+            giteaConfigured +
             '}'
         );
     }

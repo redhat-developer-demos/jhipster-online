@@ -1,0 +1,47 @@
+<div *ngIf="assistantEnabled" class="card mb-4 border-secondary">
+  <div class="card-header d-flex flex-wrap align-items-center gap-2">
+    <strong>AI-assisted JDL draft</strong>
+    <span class="text-muted small">Uses an OpenAI-compatible model endpoint configured for this server (e.g. on OpenShift).</span>
+    <span *ngIf="ragEnabled" class="badge bg-secondary ms-1">RAG</span>
+  </div>
+  <div class="card-body">
+    <p *ngIf="helpText" class="small text-muted">{{ helpText }}</p>
+    <div class="mb-2" *ngIf="models.length > 0">
+      <label class="form-label" for="jdlAiModel">Model</label>
+      <select id="jdlAiModel" class="form-select form-select-sm" name="jdlAiModel" [(ngModel)]="selectedModelId">
+        <option *ngFor="let m of models" [value]="m.id">{{ m.label }}</option>
+      </select>
+    </div>
+    <label class="form-label" for="jdlAiPrompt">Describe what you want to build</label>
+    <div class="mb-2 d-flex flex-wrap align-items-center gap-1" *ngIf="samplePrompts.length > 0">
+      <span class="text-muted small me-1">Quick prompts:</span>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-secondary"
+        *ngFor="let s of samplePrompts"
+        (click)="useSamplePrompt(s)"
+        [attr.title]="s.text"
+      >
+        {{ s.label }}
+      </button>
+    </div>
+    <textarea
+      id="jdlAiPrompt"
+      class="form-control mb-2"
+      rows="4"
+      [(ngModel)]="prompt"
+      name="jdlAiPrompt"
+      placeholder="Example: A small library with Book and Author entities, many-to-many between them, and a Loan entity linking a User to a Book with borrow and return dates."
+    ></textarea>
+    <button type="button" class="btn btn-primary me-2" (click)="generate()" [disabled]="loading || !canGenerate()">
+      <span *ngIf="!loading">Generate draft</span>
+      <span *ngIf="loading">Generating…</span>
+    </button>
+    <a href="jdl-studio/" class="btn btn-outline-secondary">Open JDL Studio</a>
+    <div class="mt-3" *ngIf="generatedJdl">
+      <label class="form-label">Draft JDL — review and fix before using in production</label>
+      <textarea class="form-control font-monospace small mb-2" rows="12" readonly [value]="generatedJdl"></textarea>
+      <button type="button" class="btn btn-sm btn-secondary" (click)="copy()">Copy JDL</button>
+    </div>
+  </div>
+</div>

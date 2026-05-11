@@ -24,13 +24,12 @@ Navbar
 }
 
 /* ==========================================================================
-Logo styles
+Logo — official mark from https://github.com/jhipster/jhipster-artwork (JHipster CMJN.svg)
 ========================================================================== */
-.logo-img {
+.jh-navbar-logo {
   height: 32px;
-  width: 32px;
-  display: inline-block;
-  vertical-align: middle;
-  background: url('../../../content/images/logo-jhipster.png') no-repeat center center;
-  background-size: contain;
+  width: auto;
+  max-width: min(200px, 42vw);
+  object-fit: contain;
+  flex-shrink: 0;
 }

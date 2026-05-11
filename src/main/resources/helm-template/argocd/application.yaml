@@ -15,6 +15,11 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+      # values.yaml in Git keeps __TARGET_NAMESPACE__ until deploy; Argo must override image.namespace
+      # so internal registry paths resolve (same token replaced in OpenShiftDeploymentService.argoCDDeploy).
+      parameters:
+        - name: image.namespace
+          value: __TARGET_NAMESPACE__
   destination:
     server: https://kubernetes.default.svc
     namespace: __TARGET_NAMESPACE__

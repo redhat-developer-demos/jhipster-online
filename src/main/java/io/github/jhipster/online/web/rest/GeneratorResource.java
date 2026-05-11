@@ -51,6 +51,8 @@ public class GeneratorResource {
 
     private final GitlabService gitlabService;
 
+    private final GiteaService giteaService;
+
     private final UserService userService;
 
     private final LogsService logsService;
@@ -59,12 +61,14 @@ public class GeneratorResource {
         GeneratorService generatorService,
         GithubService githubService,
         GitlabService gitlabService,
+        GiteaService giteaService,
         UserService userService,
         LogsService logsService
     ) {
         this.generatorService = generatorService;
         this.githubService = githubService;
         this.gitlabService = gitlabService;
+        this.giteaService = giteaService;
         this.userService = userService;
         this.logsService = logsService;
     }
@@ -93,6 +97,8 @@ public class GeneratorResource {
                 this.githubService.createGitProviderRepository(user, applicationId, applicationConfiguration, gitCompany, repositoryName);
             } else if (provider.equals(GitProvider.GITLAB)) {
                 this.gitlabService.createGitProviderRepository(user, applicationId, applicationConfiguration, gitCompany, repositoryName);
+            } else if (provider.equals(GitProvider.GITEA)) {
+                this.giteaService.createGitProviderRepository(user, applicationId, applicationConfiguration, gitCompany, repositoryName);
             }
         } catch (Exception e) {
             log.error("Error generating application", e);
