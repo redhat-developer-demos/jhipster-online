@@ -52,7 +52,7 @@ spec:
       from:
         kind: DockerImage
 #        name: 'image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster-online-builder:latest'
-        name: 'quay.io/maximilianopizarro/jhipster-online:quarkus'
+        name: 'quay.io/maximilianopizarro/jhipster-online:2.40.0-quarkus'
       incremental: true
   postCommit: {}
   source:

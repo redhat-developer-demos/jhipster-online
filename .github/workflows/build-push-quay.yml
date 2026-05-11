@@ -55,9 +55,7 @@ jobs:
           file: Dockerfile.spring-boot
           push: true
           tags: |
-            ${{ env.QUAY_REPO }}:spring-boot
             ${{ env.QUAY_REPO }}:${{ steps.version.outputs.version }}-spring-boot
-            ${{ env.QUAY_REPO }}:latest
           labels: |
             org.opencontainers.image.title=JHipster Online Builder (Spring Boot)
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
@@ -100,7 +98,6 @@ jobs:
           file: Dockerfile.quarkus
           push: true
           tags: |
-            ${{ env.QUAY_REPO }}:quarkus
             ${{ env.QUAY_REPO }}:${{ steps.version.outputs.version }}-quarkus
           labels: |
             org.opencontainers.image.title=JHipster Online Builder (Quarkus)
