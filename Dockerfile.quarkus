@@ -24,7 +24,7 @@ RUN microdnf install -y dnf && \
 WORKDIR /build
 COPY . .
 RUN yarn install --frozen-lockfile --ignore-scripts && \
-    mvn -ntp package -Pprod -Dmaven.test.skip=true
+    mvn -ntp package -Pprod -Dmaven.test.skip=true -DskipTests
 
 # --- Runtime ---
 FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5

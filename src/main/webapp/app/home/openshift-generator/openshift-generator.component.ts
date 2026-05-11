@@ -86,12 +86,12 @@ export class OpenshiftGeneratorComponent implements OnInit {
 
   scaffoldLoadError = '';
 
+  constructor(private http: HttpClient) {}
+
   /** Passed to generator log modal — runs after async push + generation succeed. */
   generationFinishedHandler = (): void => {
     this.loadScaffoldApps();
   };
-
-  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.openshiftJHipsterModel.devDatabaseType = 'h2Memory';
