@@ -71,8 +71,6 @@ components:
           name: JAVA_OPTS
         - value: $(JAVA_OPTS)
           name: MAVEN_OPTS
-        - value: '/home/tooling/.sdkman/candidates/java/11.0.15-tem'
-          name: JAVA_HOME
   - name: m2
     volume:
       size: 512Mi
