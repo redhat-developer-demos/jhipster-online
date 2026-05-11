@@ -28,6 +28,7 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
   - [Operator](#openshift-operator)
 - [Building for Production](#building-for-production-on-red-hat-devspaces)
 - [Configuration](#specific-configuration)
+  - [Optional JDL AI assistant (OpenShift / Sandbox models)](#optional-jdl-ai-assistant-openshift--sandbox-models)
 - [New Features in v2.40.0](#new-features-in-v2400)
 - [Help and Contribution](#help-and-contribution-to-the-project)
 
@@ -159,7 +160,15 @@ helm repo add jhipster-online https://maximilianopizarro.github.io/jhipster-onli
 #### Install Chart with parameters
 
 ```bash
-helm install jhipster-online jhipster-online/jhipster-online --version 0.1.0
+helm install jhipster-online jhipster-online/jhipster-online --version 1.0.4
+```
+
+For **Developer Sandbox** from a local clone of the chart repo, use the overlay (enables in-cluster deploy + `edit` RoleBinding for the pod ServiceAccount):
+
+```bash
+helm upgrade --install jhipster-online /path/to/jhipster-online-helm-chart -n <your-dev-namespace> \
+  -f values.yaml -f values-openshift-sandbox.example.yaml \
+  --set-string env.APPLICATION_JDL_AI_API_KEY="$(oc whoami -t)"
 ```
 
 #### Uninstall Chart
@@ -239,6 +248,17 @@ This release merges all upstream changes including:
 
 The OpenShift generator now includes a namespace selector. When "Deploy to OpenShift" is enabled, the application template and Tekton pipeline are applied directly to the selected namespace via Fabric8 OpenShift client.
 
+### Helm chart: multiple apps per namespace
+
+Generated `helm/` charts scope Tekton PVCs, `Task` definitions, and the workspace PVC per application name so more than one JHipster app can be deployed in the same OpenShift namespace without name collisions. Tekton triggers (EventListener, Route) are included for optional pipeline runs.
+
+### Optional JDL AI assistant with RAG
+
+The **Design Entities** screen can show an **AI-assisted JDL draft** panel when `application.jdl-ai.enabled=true` and `application.jdl-ai.api-url` point to an **OpenAI-compatible** `POST .../v1/chat/completions` endpoint (for example a model served from your OpenShift / Developer Sandbox project).
+
+- **RAG**: the server loads curated JDL reference chunks from `src/main/resources/jdl-ai/rag-chunks.json` and injects the most relevant excerpts into the system prompt so the model stays closer to grammar documented at [JHipster JDL](https://www.jhipster.tech/jdl/) and editable in [JDL Studio](https://start.jhipster.tech/jdl-studio/).
+- Tune with `application.jdl-ai.rag-enabled`, `rag-top-k`, and `rag-max-chars`.
+
 ### Deployed Applications Dashboard
 
 A new "Deployed Applications" section in the sidebar lists all JHipster applications deployed in a given namespace, showing status, replicas, route URLs, and actions (delete).
@@ -292,6 +312,47 @@ JHipster Online uses JWT to secure the application. For a production application
   in your application's folder on your production server (which is our configuration on the official [JHipster Online website](https://start.jhipster.tech/)).
 - The application is only available through HTTPS. You can configure it using Spring Boot (please read the comments in the `application-prod.yml` file), or
   using an Apache 2 HTTP server with Let's Encrypt on front of your application (which is our configuration on the official [JHipster Online website](https://start.jhipster.tech/)).
+
+### Optional JDL AI assistant (OpenShift / Sandbox models)
+
+The **Design Entities** page can show an **AI-assisted JDL draft** card when the backend is configured with `application.jdl-ai`:
+
+| Key                          | Purpose                                                                                                                                                                                                                                                                                                                             |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`                    | Turn the feature on.                                                                                                                                                                                                                                                                                                                |
+| `api-url`                    | Full URL to an **OpenAI-compatible** `POST .../v1/chat/completions` endpoint (for example a model route in [Developer Sandbox](https://developers.redhat.com/developer-sandbox) or Red Hat OpenShift AI).                                                                                                                           |
+| `api-key`                    | Optional `Bearer` token if the endpoint requires it. Prefer a Secret / env var, not Git.                                                                                                                                                                                                                                            |
+| `model`                      | Model id sent in the JSON body (depends on your serving stack; set explicitly for local/vLLM gateways).                                                                                                                                                                                                                             |
+| `rag-enabled`                | When `true` (default), the server runs **lexical RAG** over bundled chunks in `src/main/resources/jdl-ai/rag-chunks.json` and injects the best-matching excerpts into the system prompt so output stays closer to [JHipster JDL](https://www.jhipster.tech/jdl/) and [JDL Studio](https://start.jhipster.tech/jdl-studio/) grammar. |
+| `rag-top-k`, `rag-max-chars` | How many chunks and how much text to inject.                                                                                                                                                                                                                                                                                        |
+
+Example YAML fragment:
+
+```yaml
+application:
+  jdl-ai:
+    enabled: true
+    api-url: https://your-model-route.apps.sandbox.x86.openshift.com/v1/chat/completions
+    api-key: ${JDL_AI_API_KEY:}
+    model: <model-name-required-by-your-server>
+    rag-enabled: true
+    rag-top-k: 6
+    rag-max-chars: 14000
+    help-text: Drafts are suggestions — always review in JDL Studio before applying.
+```
+
+Equivalent environment variables (Spring relaxed binding) for an OpenShift `Deployment`:
+
+```bash
+oc set env deployment/jhipster-online \
+  APPLICATION_JDL_AI_ENABLED=true \
+  APPLICATION_JDL_AI_API_URL='https://.../v1/chat/completions' \
+  APPLICATION_JDL_AI_MODEL='your-model-id' \
+  APPLICATION_JDL_AI_RAG_ENABLED=true
+# Optional: mount API key from a Secret instead of plain env.
+```
+
+After building the WAR (`./mvnw -Pprod clean package -DskipTests`), push the image or use the existing binary build flow from [Building for Production on Red Hat DevSpaces](#building-for-production-on-red-hat-devspaces) (`oc start-build jh-online --from-file=target/jhonline-2.40.0.war`), then apply `oc set env` to the running deployment so the pod picks up the model URL for your sandbox.
 
 ### Mail
 
@@ -387,7 +448,16 @@ docker compose -f src/main/docker/app.yml up -d
 
 When running on OpenShift with Fabric8 integration enabled (`openshift.deployment.enabled: true`), the application requires specific RBAC permissions. See [`src/main/kubernetes/rbac.yaml`](src/main/kubernetes/rbac.yaml) for the full ClusterRole definition.
 
-On Red Hat Developer Sandbox, the pre-existing `edit` role covers most required permissions without additional setup.
+**Important:** Your **user** may already have the `edit` role on the project, but **pods** use a **ServiceAccount** (often `default`). That account does **not** inherit your permissions. If deploy fails with `cannot get resource "secrets" ... forbidden` for `system:serviceaccount:<namespace>:default`, grant the workload account access to the namespace, for example:
+
+```bash
+# Replace NAMESPACE with your project (e.g. maximilianopizarro5-dev)
+oc policy add-role-to-user edit "system:serviceaccount:NAMESPACE:default" -n NAMESPACE
+```
+
+Alternatively, create a dedicated ServiceAccount for JHipster Online, bind `edit` (or the `jhipster-online-deployer` ClusterRole via RoleBinding as in `rbac.yaml`), and set `serviceAccountName` on the Deployment to that account.
+
+On Red Hat Developer Sandbox you may not be allowed to create `ClusterRole` objects; the `oc policy add-role-to-user edit ...` approach uses the built-in `edit` RoleBinding and is usually permitted.
 
 ## Help and Contribution to the Project
 
