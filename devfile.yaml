@@ -1,7 +1,7 @@
 schemaVersion: 2.2.2
 metadata:
   name: jhipster-online
-  version: 2.33.1
+  version: 2.40.0
   description: Stack with the JHipster Online on DevSpaces Red Hat OpenShift
   displayName: JHipster Online
   icon: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/jhipster-icon.png
@@ -23,7 +23,7 @@ projects:
 components:
   - name: tools
     container:
-      image: 'quay.io/devfile/jhipster-online@sha256:1f284df66c8ef209ea2cd1a10516e9ba424508a11341eead650e88027858d3ee'
+      image: 'quay.io/devfile/jhipster-online:2.40.0'
       mountSources: true
       cpuLimit: '4'
       cpuRequest: '1'

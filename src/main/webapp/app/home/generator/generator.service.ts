@@ -54,4 +54,28 @@ export class GeneratorService {
   getGenerationData(applicationId: string): Observable<string> {
     return this.http.get('api/generate-application/' + applicationId, { responseType: 'text' });
   }
+
+  getNamespaces(): Observable<string[]> {
+    return this.http.get<string[]>('api/openshift/namespaces');
+  }
+
+  deployToOpenShift(namespace: string, templateUrl: string, params: any): Observable<any> {
+    return this.http.post('api/openshift/deploy', { namespace, templateUrl, ...params });
+  }
+
+  triggerPipeline(namespace: string, gitRepo: string, appName: string, appJarVersion: string): Observable<any> {
+    return this.http.post('api/openshift/pipeline', { namespace, gitRepo, appName, appJarVersion });
+  }
+
+  getDeployedApplications(namespace: string): Observable<any[]> {
+    return this.http.get<any[]>('api/openshift/applications?namespace=' + namespace);
+  }
+
+  deleteDeployedApplication(namespace: string, name: string): Observable<void> {
+    return this.http.delete<void>('api/openshift/applications/' + name + '?namespace=' + namespace);
+  }
+
+  checkPermissions(namespace: string): Observable<any> {
+    return this.http.get('api/openshift/permissions?namespace=' + namespace);
+  }
 }

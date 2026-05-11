@@ -23,6 +23,7 @@ import { UserRouteAccessService } from 'app/core/auth/user-route-access-service'
 import { GENERATOR_ROUTE } from 'app/home/generator/generator.route';
 import { AZURE_ROUTE } from 'app/home/azure-generator/azure-generator.route';
 import { OPENSHIFT_ROUTE } from 'app/home/openshift-generator/openshift-generator.route';
+import { DEPLOYED_APPS_ROUTE } from 'app/home/deployed-apps/deployed-apps.route';
 import { GIT_ROUTE } from 'app/home/git/git.route';
 import { WELCOME_ROUTE } from 'app/home/welcome/welcome.route';
 import { GITHUB_CALLBACK_ROUTE } from 'app/home/git/callback/callback.route';
@@ -42,6 +43,7 @@ export const HOME_ROUTE: Route = {
     GENERATOR_ROUTE,
     AZURE_ROUTE,
     OPENSHIFT_ROUTE,
+    DEPLOYED_APPS_ROUTE,
     WELCOME_ROUTE,
     GIT_ROUTE,
     GITHUB_CALLBACK_ROUTE,

@@ -18,6 +18,7 @@
  */
 
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { GeneratorConfigurationModel } from '../generator/generator.configuration.model';
 import { JHipsterConfigurationModel } from '../generator/jhipster.configuration.model';
 
@@ -55,11 +56,55 @@ export class OpenshiftGeneratorComponent implements OnInit {
   };
   openshiftJHipsterModel: JHipsterConfigurationModel = new JHipsterConfigurationModel();
 
+  namespace = '';
+  namespaces: string[] = [];
+  deployToCluster = false;
+  deployStatus = '';
+
+  constructor(private http: HttpClient) {}
+
   ngOnInit(): void {
     this.openshiftJHipsterModel.devDatabaseType = 'h2Memory';
     this.openshiftJHipsterModel.prodDatabaseType = 'mariadb';
     this.openshiftJHipsterModel.cacheProvider = 'no';
     this.openshiftJHipsterModel.clientFramework = 'vue';
     this.openshiftJHipsterModel.withAdminUi = true;
+    this.loadNamespaces();
+  }
+
+  loadNamespaces(): void {
+    this.http.get<string[]>('api/openshift/namespaces').subscribe(
+      (data: string[]) => {
+        this.namespaces = data;
+        if (data.length > 0 && !this.namespace) {
+          this.namespace = data[0];
+        }
+      },
+      () => {
+        this.namespaces = [];
+      }
+    );
+  }
+
+  onDeployToCluster(): void {
+    if (!this.deployToCluster || !this.namespace) {
+      return;
+    }
+    this.deployStatus = 'Deploying to namespace ' + this.namespace + '...';
+    this.http
+      .post<any>('api/openshift/deploy', {
+        namespace: this.namespace,
+        templateUrl:
+          'https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/template.yaml',
+        NAMESPACE: this.namespace
+      })
+      .subscribe(
+        (result: any) => {
+          this.deployStatus = 'Deployed ' + result.resourceCount + ' resources to ' + this.namespace;
+        },
+        (error: any) => {
+          this.deployStatus = 'Deploy failed: ' + (error.error?.error || error.message);
+        }
+      );
   }
 }

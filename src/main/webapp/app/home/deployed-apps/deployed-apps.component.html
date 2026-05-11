@@ -1,0 +1,56 @@
+<div>
+  <h2>Deployed Applications</h2>
+  <div class="form-group row mb-3">
+    <label for="ns-select" class="col-sm-2 col-form-label">Namespace</label>
+    <div class="col-sm-4">
+      <select class="form-control" id="ns-select" [(ngModel)]="namespace" (change)="loadApplications()" *ngIf="namespaces.length > 0">
+        <option *ngFor="let ns of namespaces" [value]="ns">{{ ns }}</option>
+      </select>
+      <div class="input-group" *ngIf="namespaces.length === 0">
+        <input type="text" class="form-control" [(ngModel)]="namespace" placeholder="Enter namespace">
+        <button class="btn btn-outline-secondary" (click)="loadApplications()">Load</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger" role="alert">{{ error }}</div>
+  <div *ngIf="loading" class="text-center"><p>Loading...</p></div>
+
+  <div *ngIf="!loading && applications.length === 0 && namespace" class="alert alert-info">
+    No JHipster applications found in namespace <b>{{ namespace }}</b>.
+  </div>
+
+  <table class="table table-striped" *ngIf="applications.length > 0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Namespace</th>
+        <th>Status</th>
+        <th>Replicas</th>
+        <th>Created</th>
+        <th>Route</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let app of applications">
+        <td>{{ app.name }}</td>
+        <td>{{ app.namespace }}</td>
+        <td>
+          <span class="badge" [ngClass]="{'badge-success': app.status === 'Ready', 'badge-warning': app.status !== 'Ready'}">
+            {{ app.status }}
+          </span>
+        </td>
+        <td>{{ app.readyReplicas || 0 }}/{{ app.replicas }}</td>
+        <td>{{ app.creationTimestamp }}</td>
+        <td>
+          <a *ngIf="app.routeUrl" [href]="app.routeUrl" target="_blank">{{ app.routeUrl }}</a>
+          <span *ngIf="!app.routeUrl">-</span>
+        </td>
+        <td>
+          <button class="btn btn-danger btn-sm" (click)="deleteApp(app.name)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

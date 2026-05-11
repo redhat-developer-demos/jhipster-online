@@ -1,0 +1,64 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: jhipster-online-deployer
+rules:
+  - apiGroups: ["project.openshift.io"]
+    resources: ["projects"]
+    verbs: ["list", "get"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["list", "get"]
+  - apiGroups: ["template.openshift.io"]
+    resources: ["templates"]
+    verbs: ["get", "list", "create"]
+  - apiGroups: ["template.openshift.io"]
+    resources: ["templateinstances"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["services", "secrets", "persistentvolumeclaims", "configmaps"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps.openshift.io"]
+    resources: ["deploymentconfigs"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["route.openshift.io"]
+    resources: ["routes"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["image.openshift.io"]
+    resources: ["imagestreams", "imagestreamtags"]
+    verbs: ["get", "list", "create", "update", "patch"]
+  - apiGroups: ["build.openshift.io"]
+    resources: ["buildconfigs", "builds"]
+    verbs: ["get", "list", "create", "update", "patch"]
+  - apiGroups: ["build.openshift.io"]
+    resources: ["buildconfigs/instantiate", "builds/log"]
+    verbs: ["create", "get"]
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelines", "tasks", "pipelineruns", "taskruns"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns/status", "taskruns/status"]
+    verbs: ["get"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "events"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jhipster-online-deployer
+  namespace: NAMESPACE
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: NAMESPACE
+roleRef:
+  kind: ClusterRole
+  name: jhipster-online-deployer
+  apiGroup: rbac.authorization.k8s.io

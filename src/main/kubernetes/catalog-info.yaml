@@ -2,18 +2,18 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: 'jhipster'
-  description: 'JHipster Example for Red Hat Developer Hub'
+  description: 'JHipster Online for Red Hat Developer Hub'
   annotations:
-    github.com/project-slug: maximilianopizarro/jhipster-quarkus-test
+    github.com/project-slug: OWNER/REPO_NAME
     backstage.io/techdocs-ref: dir:.
-    backstage.io/kubernetes-namespace: maximilianopizarro5-dev
+    backstage.io/kubernetes-namespace: NAMESPACE
     backstage.io/kubernetes-id: jhipster
     janus-idp.io/tekton: jhipster
     backstage.io/kubernetes-label-selector: 'app=jhipster'
   links:
     - title: Documentation
-      url: https://github.com/maximilianoPizarro/jhipster-quarkus-test/blob/main/README.md
-    - url: https://workspaces.openshift.com/#https://github.com/maximilianoPizarro/jhipster-quarkus-test/tree/main?storageType=ephemeral
+      url: https://github.com/redhat-developer-demos/jhipster-online/blob/main/README.md
+    - url: https://workspaces.openshift.com/#https://github.com/redhat-developer-demos/jhipster-online/tree/main?storageType=ephemeral
       title: OpenShift Dev Spaces (VS Code)
       icon: web
   tags:
@@ -22,4 +22,4 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
-  owner: 'group:default/maximilianopizarro'
+  owner: 'group:default/OWNER'

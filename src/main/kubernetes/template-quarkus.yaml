@@ -85,7 +85,7 @@ metadata:
     alpha.image.policy.openshift.io/resolve-names: '*'
     app.openshift.io/route-disabled: 'false'
     app.openshift.io/vcs-ref: ''
-    app.openshift.io/vcs-uri: 'https://github.com/maximilianoPizarro/jhipster-devspace'
+    app.openshift.io/vcs-uri: 'https://github.com/redhat-developer-demos/jhipster-online'
   name: jhipster
   labels:
     app: jhipster
@@ -109,7 +109,7 @@ spec:
     spec:
       containers:
         - name: jhipster
-          image: image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster
+          image: image-registry.openshift-image-registry.svc:5000/NAMESPACE/jhipster
           env:
             - name: QUARKUS_PROFILE
               value: prod,api-docs
@@ -128,7 +128,7 @@ spec:
             - name: QUARKUS_HTTP_CORS
               value: 'true'
           #  - name: QUARKUS_HTTP_CORS_ORIGINS
-          #    value: 'https://jhipster-maximilianopizarro5-dev.apps.rm2.thpm.p1.openshiftapps.com'
+          #    value: 'https://jhipster-NAMESPACE.apps.your-cluster.example.com'
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File

@@ -37,6 +37,7 @@ import { YourGeneratorsComponent } from 'app/home/your-generators/your-generator
 import { DataDeletionDialogComponent } from 'app/home/your-generators/data-deletion-dialog.component';
 import { AzureGeneratorComponent } from './azure-generator/azure-generator.component';
 import { OpenshiftGeneratorComponent } from './openshift-generator/openshift-generator.component';
+import { DeployedAppsComponent } from './deployed-apps/deployed-apps.component';
 
 @NgModule({
   imports: [JhonlineSharedModule, RouterModule.forRoot([HOME_ROUTE], { relativeLinkResolution: 'legacy' })],
@@ -46,6 +47,7 @@ import { OpenshiftGeneratorComponent } from './openshift-generator/openshift-gen
     GeneratorOutputDialogComponent,
     AzureGeneratorComponent,
     OpenshiftGeneratorComponent,
+    DeployedAppsComponent,
     WelcomeComponent,
     GitComponent,
     CallbackComponent,

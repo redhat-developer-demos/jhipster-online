@@ -85,7 +85,7 @@ metadata:
     alpha.image.policy.openshift.io/resolve-names: '*'
     app.openshift.io/route-disabled: 'false'
     app.openshift.io/vcs-ref: ''
-    app.openshift.io/vcs-uri: 'https://github.com/maximilianoPizarro/jhipster-devspace'
+    app.openshift.io/vcs-uri: 'https://github.com/redhat-developer-demos/jhipster-online'
   name: jhipster
   labels:
     app: jhipster
@@ -109,7 +109,7 @@ spec:
     spec:
       containers:
         - name: jhipster
-          image: image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster
+          image: image-registry.openshift-image-registry.svc:5000/NAMESPACE/jhipster
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,api-docs

@@ -7,7 +7,7 @@ metadata:
 spec:
   params:
     - name: IMAGE_NAME
-      value: 'image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster'
+      value: 'image-registry.openshift-image-registry.svc:5000/NAMESPACE/jhipster'
     - name: PATH_CONTEXT
       value: /
     - name: MAVEN_IMAGE
@@ -17,7 +17,7 @@ spec:
     - name: APP_NAME
       value: jhipster
     - name: GIT_REPO
-      value: 'https://github.com/maximilianoPizarro/jhipster-devspace'
+      value: 'https://github.com/OWNER/REPO_NAME'
     - name: GIT_BRANCH
       value: main
   pipelineRef:

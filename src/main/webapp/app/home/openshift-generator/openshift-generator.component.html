@@ -23,6 +23,33 @@
             </p>
           </div>
       </div>
+      <div class="col-md-12">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">OpenShift Deployment</h5>
+            <div class="form-group">
+              <label for="namespace">Target Namespace</label>
+              <select class="form-control" id="namespace" [(ngModel)]="namespace" *ngIf="namespaces.length > 0">
+                <option *ngFor="let ns of namespaces" [value]="ns">{{ ns }}</option>
+              </select>
+              <input type="text" class="form-control" id="namespace-manual" [(ngModel)]="namespace"
+                     placeholder="Enter namespace" *ngIf="namespaces.length === 0">
+            </div>
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" id="deployToCluster" [(ngModel)]="deployToCluster">
+              <label class="form-check-label" for="deployToCluster">
+                Deploy to OpenShift after generation
+              </label>
+            </div>
+            <div *ngIf="deployToCluster" class="mt-2">
+              <button class="btn btn-primary btn-sm" (click)="onDeployToCluster()">Deploy Now</button>
+            </div>
+            <div *ngIf="deployStatus" class="alert alert-info mt-2" role="alert">
+              {{ deployStatus }}
+            </div>
+          </div>
+        </div>
+      </div>
   </div>
   <ng-container generator-footer>
     <h4>More details</h4>
