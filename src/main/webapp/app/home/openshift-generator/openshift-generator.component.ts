@@ -91,6 +91,10 @@ export class OpenshiftGeneratorComponent implements OnInit {
   /** Passed to generator log modal — runs after async push + generation succeed. */
   generationFinishedHandler = (): void => {
     this.loadScaffoldApps();
+    if (this.deployToCluster && this.namespace?.trim()) {
+      // Run after the current turn so generator form state is stable, then clone+apply from Git.
+      setTimeout(() => this.onDeployToCluster(), 0);
+    }
   };
 
   ngOnInit(): void {

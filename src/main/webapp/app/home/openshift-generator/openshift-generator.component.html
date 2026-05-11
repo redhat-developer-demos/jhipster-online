@@ -112,7 +112,7 @@
             <div class="form-check mt-2">
               <input class="form-check-input" type="checkbox" id="deployToCluster" [(ngModel)]="deployToCluster">
               <label class="form-check-label" for="deployToCluster">
-                Deploy to OpenShift (after the application is pushed to Git)
+                Deploy to OpenShift when generation finishes (after the app is pushed to Git). You can still use Deploy below to retry.
               </label>
             </div>
             <div *ngIf="deployToCluster" class="mt-3">
@@ -133,7 +133,7 @@
                 The generated repository includes a <code>helm/</code> chart and <code>argocd/application.yaml</code>.
                 Push the repository first; Fabric8 renders templates server-side, Argo CD uses Helm in-cluster.
               </p>
-              <button class="btn btn-primary btn-sm" type="button" (click)="onDeployToCluster()">Deploy</button>
+              <button class="btn btn-primary btn-sm" type="button" (click)="onDeployToCluster()">Deploy now</button>
             </div>
             <div *ngIf="deployStatus" class="alert alert-info mt-2" role="alert">
               {{ deployStatus }}
