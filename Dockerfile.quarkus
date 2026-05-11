@@ -6,7 +6,7 @@ RUN microdnf install -y unzip
 
 WORKDIR /usr/share/maven
 RUN rm -rf /usr/share/maven/* /usr/bin/mvn
-RUN curl -L -o apache-maven-3.9.15-bin.zip https://archive.apache.org/dist/maven/maven-3/3.9.15/binaries/apache-maven-3.9.15-bin.zip && \
+RUN curl -L -o apache-maven-3.9.15-bin.zip https://dlcdn.apache.org/maven/maven-3/3.9.15/binaries/apache-maven-3.9.15-bin.zip && \
     unzip apache-maven-3.9.15-bin.zip "apache-maven-3.9.15/*" -d "/usr/share/maven" && \
     ln -s /usr/share/maven/apache-maven-3.9.15/bin/mvn /usr/bin/mvn && \
     rm -rf apache-maven-3.9.15-bin.zip
@@ -16,10 +16,16 @@ ENV MAVEN_OPTS="-Xmx3489m"
 ENV M2_HOME=/usr/share/maven/apache-maven-3.9.15
 ENV PATH=$PATH:/usr/share/maven/apache-maven-3.9.15/bin
 
-RUN microdnf install -y dnf && \
-    dnf -y module install nodejs:22/common && \
+ENV NODE_VERSION=22.19.0
+ENV PATH="/usr/local/bin:${PATH}"
+RUN microdnf install -y tar xz gzip curl git && \
+    ARCH=$(uname -m) && \
+    case "$ARCH" in x86_64) NODE_ARCH=x64 ;; aarch64) NODE_ARCH=arm64 ;; ppc64le) NODE_ARCH=ppc64le ;; s390x) NODE_ARCH=s390x ;; *) echo "unsupported arch: $ARCH"; exit 1 ;; esac && \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" -o /tmp/node.tar.xz && \
+    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 && \
+    rm -f /tmp/node.tar.xz && \
     npm install -g yarn && \
-    dnf -y install git
+    microdnf clean all
 
 WORKDIR /build
 COPY . .
@@ -31,13 +37,16 @@ FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef98
 
 USER root
 
-RUN microdnf install -y dnf && \
-    dnf -y module install nodejs:22/common && \
-    npm install -g yarn && \
-    dnf -y install git && \
-    npm install -g generator-jhipster@9.0.0 && \
-    npm install -g generator-jhipster-quarkus@3.6.0 && \
-    dnf clean all && microdnf clean all
+ENV NODE_VERSION=22.19.0
+ENV PATH="/usr/local/bin:${PATH}"
+RUN microdnf install -y tar xz gzip curl git && \
+    ARCH=$(uname -m) && \
+    case "$ARCH" in x86_64) NODE_ARCH=x64 ;; aarch64) NODE_ARCH=arm64 ;; ppc64le) NODE_ARCH=ppc64le ;; s390x) NODE_ARCH=s390x ;; *) echo "unsupported arch: $ARCH"; exit 1 ;; esac && \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" -o /tmp/node.tar.xz && \
+    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 && \
+    rm -f /tmp/node.tar.xz && \
+    npm install -g yarn generator-jhipster@9.0.0 generator-jhipster-quarkus@3.6.0 && \
+    microdnf clean all
 
 COPY --from=builder /build/target/jhonline-*.war /deployments/
 
