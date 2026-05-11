@@ -180,9 +180,12 @@ public class OpenShiftDeploymentService {
     private void applyYamlDocuments(String namespace, String rendered, List<String> applied) {
         InputStream is = new ByteArrayInputStream(rendered.getBytes(StandardCharsets.UTF_8));
         try {
-            List<HasMetadata> resources = openShiftClient.load(is).get();
+            List<HasMetadata> resources = filterParsedResources(openShiftClient.load(is).get());
+            if (resources.isEmpty()) {
+                return;
+            }
             openShiftClient.resourceList(resources).inNamespace(namespace).createOrReplace();
-            applied.addAll(resources.stream().map(r -> r.getKind() + "/" + r.getMetadata().getName()).collect(Collectors.toList()));
+            applied.addAll(resources.stream().map(OpenShiftDeploymentService::resourceRef).collect(Collectors.toList()));
         } catch (KubernetesClientException e) {
             log.error("Failed to apply rendered YAML: {}", e.getMessage());
             throw new OpenShiftPermissionException("Deployment failed: " + e.getMessage(), e);
@@ -193,6 +196,37 @@ public class OpenShiftDeploymentService {
                 // no-op
             }
         }
+    }
+
+    /**
+     * Fabric8's multi-document YAML loader can return {@code null} entries for empty documents between {@code ---}
+     * separators; {@code resourceList} then throws NPE inside the client.
+     */
+    private static List<HasMetadata> filterParsedResources(List<HasMetadata> raw) {
+        if (raw == null || raw.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return raw
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(r -> r.getMetadata() != null)
+            .filter(r -> StringUtils.isNotBlank(r.getMetadata().getName()) || StringUtils.isNotBlank(r.getMetadata().getGenerateName()))
+            .collect(Collectors.toList());
+    }
+
+    private static String resourceRef(HasMetadata r) {
+        String kind = r.getKind() != null ? r.getKind() : "?";
+        var meta = r.getMetadata();
+        if (meta == null) {
+            return kind + "/?";
+        }
+        if (StringUtils.isNotBlank(meta.getName())) {
+            return kind + "/" + meta.getName();
+        }
+        if (StringUtils.isNotBlank(meta.getGenerateName())) {
+            return kind + "/" + meta.getGenerateName() + "*";
+        }
+        return kind + "/?";
     }
 
     /**
@@ -218,7 +252,7 @@ public class OpenShiftDeploymentService {
 
             InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
             try {
-                List<HasMetadata> resources = openShiftClient.load(is).get();
+                List<HasMetadata> resources = filterParsedResources(openShiftClient.load(is).get());
                 for (HasMetadata r : resources) {
                     String ns = r.getMetadata().getNamespace() != null ? r.getMetadata().getNamespace() : argoNs;
                     openShiftClient.resource(r).inNamespace(ns).createOrReplace();
