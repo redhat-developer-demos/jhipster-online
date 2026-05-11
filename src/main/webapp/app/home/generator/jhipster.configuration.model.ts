@@ -51,6 +51,7 @@ export class JHipsterConfigurationModel {
   public withAdminUi = true;
   public skipCommitHook = true;
   public blueprints: BlueprintModel[] = [];
+  public iaCTools = ['bicep', 'terraform'];
 
   constructor(data?: Partial<JHipsterConfigurationModel>) {
     if (data) {

@@ -42,10 +42,11 @@ The Dev Spaces workspace image includes the following pre-installed generators:
 
 | Generator | Version | Description |
 |-----------|---------|-------------|
-| `generator-jhipster` | 8.10.0 | Core JHipster generator (Spring Boot 3.4.4) |
+| `generator-jhipster` | 9.0.0 | Core JHipster generator (generates JHipster 9 projects) |
 | `generator-jhipster-quarkus` | 3.6.0 | Quarkus blueprint |
 | `generator-jhipster-micronaut` | 3.9.0 | Micronaut blueprint |
 | `generator-jhipster-dotnetcore` | 4.5.0 | .NET Core blueprint |
+| `generator-jhipster-azure-container-apps` | latest | Azure Container Apps blueprint |
 
 ## Quick Start Guide
 
@@ -217,6 +218,16 @@ oc start-build jhipster-online-builder
 ```
 
 ## New Features in v2.40.0
+
+### Synced with Upstream jhipster/jhipster-online v2.40.0
+
+This release merges all upstream changes including:
+- **JHipster 9.0.0 CLI**: Generated projects now use JHipster 9 (Spring Boot 3.4+, Java 21)
+- **Redesigned UI/UX**: Modernized forms, welcome page, and sidebar navigation
+- **Bootstrap 5**: Frontend upgraded from Bootstrap 4.5 to 5.0
+- **FontAwesome 6.x**: Icons updated to latest version
+- **IaC Tools support**: Generator form now includes Terraform and Bicep options
+- **Security updates**: follow-redirects 1.16.0, node-forge 1.4.0, webpack 5.104.1
 
 ### Namespace-Aware OpenShift Deployment
 

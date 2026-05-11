@@ -5,7 +5,7 @@ This document describes the solution architecture of JHipster Online, designed f
 ## Project Overview
 
 - **Purpose**: Web application for generating JHipster applications without local installation
-- **Origin**: Fork of [jhipster/jhipster-online](https://github.com/jhipster/jhipster-online), adapted for the Red Hat OpenShift ecosystem
+- **Origin**: Fork of [jhipster/jhipster-online](https://github.com/jhipster/jhipster-online) v2.40.0, synced with upstream and adapted for the Red Hat OpenShift ecosystem
 - **License**: Apache 2.0
 - **Repository**: [redhat-developer-demos/jhipster-online](https://github.com/redhat-developer-demos/jhipster-online)
 
@@ -18,8 +18,8 @@ This document describes the solution architecture of JHipster Online, designed f
 | JHipster Framework | jhipster-dependencies BOM | 7.9.3 |
 | ORM | Hibernate | 5.6.10.Final |
 | Database Migration | Liquibase | 4.15.0 |
-| Frontend | Angular | 12.x |
-| Frontend Language | TypeScript | 4.x |
+| Frontend | Angular | 14.x |
+| Frontend Language | TypeScript | 4.8 |
 | Package Manager | Yarn | 1.22.19 |
 | Build Tool | Maven | WAR packaging |
 | Node | Node.js | 16.20.2 |
