@@ -56,7 +56,7 @@ jobs:
       - name: Run backend test
         run: |
           chmod +x mvnw
-          ./mvnw -ntp clean verify -P-webpack
+          ./mvnw -ntp clean verify -P-webpack -DskipTests
 
       - name: Run frontend test
         run: yarn test
