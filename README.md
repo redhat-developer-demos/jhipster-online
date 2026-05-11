@@ -33,25 +33,25 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
 
 ## Compatibility Matrix
 
-| Platform | Version | Status |
-|----------|---------|--------|
-| Red Hat OpenShift Dev Spaces | 3.27+ | Supported (devfile v2.2.2) |
-| OpenShift Helm Chart | [v0.1.0](https://artifacthub.io/packages/helm/jhipster-online/jhipster-online) | Supported |
-| OpenShift Operator | [v0.1.0](https://github.com/maximilianoPizarro/jhipster-online-operator) | Supported |
-| Kubernetes (vanilla) | 1.25+ | Partial (no OpenShift Routes/Templates) |
-| Docker Compose | - | Supported (local dev) |
+| Platform                     | Version                                                                        | Status                                  |
+| ---------------------------- | ------------------------------------------------------------------------------ | --------------------------------------- |
+| Red Hat OpenShift Dev Spaces | 3.27+                                                                          | Supported (devfile v2.2.2)              |
+| OpenShift Helm Chart         | [v0.1.0](https://artifacthub.io/packages/helm/jhipster-online/jhipster-online) | Supported                               |
+| OpenShift Operator           | [v0.1.0](https://github.com/maximilianoPizarro/jhipster-online-operator)       | Supported                               |
+| Kubernetes (vanilla)         | 1.25+                                                                          | Partial (no OpenShift Routes/Templates) |
+| Docker Compose               | -                                                                              | Supported (local dev)                   |
 
 ## Available Generators
 
 The Dev Spaces workspace image includes the following pre-installed generators:
 
-| Generator | Version | Description |
-|-----------|---------|-------------|
-| `generator-jhipster` | 9.0.0 | Core JHipster generator (generates JHipster 9 projects) |
-| `generator-jhipster-quarkus` | 3.6.0 | Quarkus blueprint |
-| `generator-jhipster-micronaut` | 3.9.0 | Micronaut blueprint |
-| `generator-jhipster-dotnetcore` | 4.5.0 | .NET Core blueprint |
-| `generator-jhipster-azure-container-apps` | latest | Azure Container Apps blueprint |
+| Generator                                 | Version | Description                                             |
+| ----------------------------------------- | ------- | ------------------------------------------------------- |
+| `generator-jhipster`                      | 9.0.0   | Core JHipster generator (generates JHipster 9 projects) |
+| `generator-jhipster-quarkus`              | 3.6.0   | Quarkus blueprint                                       |
+| `generator-jhipster-micronaut`            | 3.9.0   | Micronaut blueprint                                     |
+| `generator-jhipster-dotnetcore`           | 4.5.0   | .NET Core blueprint                                     |
+| `generator-jhipster-azure-container-apps` | latest  | Azure Container Apps blueprint                          |
 
 ## Quick Start Guide
 
@@ -227,6 +227,7 @@ oc start-build jhipster-online-builder
 ### Synced with Upstream jhipster/jhipster-online v2.40.0
 
 This release merges all upstream changes including:
+
 - **JHipster 9.0.0 CLI**: Generated projects now use JHipster 9 (Spring Boot 3.4+, Java 21)
 - **Redesigned UI/UX**: Modernized forms, welcome page, and sidebar navigation
 - **Bootstrap 5**: Frontend upgraded from Bootstrap 4.5 to 5.0

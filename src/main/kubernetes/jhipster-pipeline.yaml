@@ -15,12 +15,12 @@ kind: Task
 metadata:
   name: maven
   labels:
-    app.kubernetes.io/version: "0.4"
+    app.kubernetes.io/version: '0.4'
   annotations:
-    tekton.dev/pipelines.minVersion: "0.50.0"
+    tekton.dev/pipelines.minVersion: '0.50.0'
     tekton.dev/categories: Build Tools
     tekton.dev/tags: build-tool
-    tekton.dev/platforms: "linux/amd64,linux/s390x,linux/ppc64le"
+    tekton.dev/platforms: 'linux/amd64,linux/s390x,linux/ppc64le'
 spec:
   description: >-
     This Task can be used to run a Maven build. It uses a workspace to store m2 local repo.
@@ -44,49 +44,49 @@ spec:
       description: maven goals to run
       type: array
       default:
-        - "package"
+        - 'package'
     - name: MAVEN_MIRROR_URL
       description: The Maven repository mirror url
       type: string
-      default: ""
+      default: ''
     - name: SERVER_USER
       description: The username for the server
       type: string
-      default: ""
+      default: ''
     - name: SERVER_PASSWORD
       description: The password for the server
       type: string
-      default: ""
+      default: ''
     - name: PROXY_USER
       description: The username for the proxy server
       type: string
-      default: ""
+      default: ''
     - name: PROXY_PASSWORD
       description: The password for the proxy server
       type: string
-      default: ""
+      default: ''
     - name: PROXY_PORT
       description: Port number for the proxy server
       type: string
-      default: ""
+      default: ''
     - name: PROXY_HOST
       description: Proxy server Host
       type: string
-      default: ""
+      default: ''
     - name: PROXY_NON_PROXY_HOSTS
       description: Non proxy server host
       type: string
-      default: ""
+      default: ''
     - name: PROXY_PROTOCOL
       description: Protocol for the proxy ie http or https
       type: string
-      default: "http"
+      default: 'http'
     - name: CONTEXT_DIR
       type: string
       description: >-
         The context directory within the repository for sources on
         which we want to execute maven goals.
-      default: "."
+      default: '.'
   results:
     - description: Maven project group id
       name: group-id
@@ -168,7 +168,7 @@ spec:
     - name: mvn-goals
       image: $(params.MAVEN_IMAGE)
       workingDir: $(workspaces.source.path)/$(params.CONTEXT_DIR)
-      args: ["$(params.GOALS[*])"]
+      args: ['$(params.GOALS[*])']
       script: |
         #!/usr/bin/env bash
 
@@ -181,19 +181,20 @@ spec:
         VERSION=$(/usr/bin/mvn -s $(workspaces.maven-settings.path)/settings.xml '-Dmaven.repo.local=$(workspaces.maven-local-repo.path)/.m2' -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
         echo -n $VERSION | tee $(results.version.path)
 ---
+
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: openshift-client
   labels:
-    app.kubernetes.io/version: "0.2"
+    app.kubernetes.io/version: '0.2'
   annotations:
     tekton.dev/categories: Openshift
-    tekton.dev/pipelines.minVersion: "0.17.0"
+    tekton.dev/pipelines.minVersion: '0.17.0'
     tekton.dev/tags: cli
-    tekton.dev/displayName: "openshift client"
-    tekton.dev/platforms: "linux/amd64"
+    tekton.dev/displayName: 'openshift client'
+    tekton.dev/platforms: 'linux/amd64'
 spec:
   workspaces:
     - name: manifest-dir
@@ -216,11 +217,11 @@ spec:
     - name: SCRIPT
       description: The OpenShift CLI arguments to run
       type: string
-      default: "oc help"
+      default: 'oc help'
     - name: VERSION
       description: The OpenShift Version to use
       type: string
-      default: "4.7"
+      default: '4.7'
   steps:
     - name: oc
       image: quay.io/openshift/origin-cli:$(params.VERSION)
@@ -241,14 +242,14 @@ kind: Task
 metadata:
   name: git-clone
   labels:
-    app.kubernetes.io/version: "0.9"
+    app.kubernetes.io/version: '0.9'
   annotations:
-    tekton.dev/pipelines.minVersion: "0.38.0"
+    tekton.dev/pipelines.minVersion: '0.38.0'
     tekton.dev/categories: Git
     tekton.dev/tags: git
-    tekton.dev/displayName: "git clone"
-    tekton.dev/platforms: "linux/amd64,linux/s390x,linux/ppc64le,linux/arm64"
-    tekton.dev/deprecated: "true"
+    tekton.dev/displayName: 'git clone'
+    tekton.dev/platforms: 'linux/amd64,linux/s390x,linux/ppc64le,linux/arm64'
+    tekton.dev/deprecated: 'true'
 spec:
   description: >-
     These Tasks are Git tasks to work with repositories used by other tasks
@@ -290,63 +291,63 @@ spec:
     - name: revision
       description: Revision to checkout. (branch, tag, sha, ref, etc...)
       type: string
-      default: ""
+      default: ''
     - name: refspec
       description: Refspec to fetch before checking out revision.
-      default: ""
+      default: ''
     - name: submodules
       description: Initialize and fetch git submodules.
       type: string
-      default: "true"
+      default: 'true'
     - name: depth
       description: Perform a shallow clone, fetching only the most recent N commits.
       type: string
-      default: "1"
+      default: '1'
     - name: sslVerify
       description: Set the `http.sslVerify` global git config. Setting this to `false` is not advised unless you are sure that you trust your git remote.
       type: string
-      default: "true"
+      default: 'true'
     - name: crtFileName
       description: file name of mounted crt using ssl-ca-directory workspace. default value is ca-bundle.crt.
       type: string
-      default: "ca-bundle.crt"
+      default: 'ca-bundle.crt'
     - name: subdirectory
       description: Subdirectory inside the `output` Workspace to clone the repo into.
       type: string
-      default: ""
+      default: ''
     - name: sparseCheckoutDirectories
       description: Define the directory patterns to match or exclude when performing a sparse checkout.
       type: string
-      default: ""
+      default: ''
     - name: deleteExisting
       description: Clean out the contents of the destination directory if it already exists before cloning.
       type: string
-      default: "true"
+      default: 'true'
     - name: httpProxy
       description: HTTP proxy server for non-SSL requests.
       type: string
-      default: ""
+      default: ''
     - name: httpsProxy
       description: HTTPS proxy server for SSL requests.
       type: string
-      default: ""
+      default: ''
     - name: noProxy
       description: Opt out of proxying HTTP/HTTPS requests.
       type: string
-      default: ""
+      default: ''
     - name: verbose
       description: Log the commands that are executed during `git-clone`'s operation.
       type: string
-      default: "true"
+      default: 'true'
     - name: gitInitImage
       description: The image providing the git-init binary that this Task runs.
       type: string
-      default: "ghcr.io/tektoncd/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2"
+      default: 'ghcr.io/tektoncd/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2'
     - name: userHome
       description: |
         Absolute path to the user's home directory.
       type: string
-      default: "/home/git"
+      default: '/home/git'
   results:
     - name: commit
       description: The precise commit SHA that was fetched by this Task.
@@ -356,54 +357,54 @@ spec:
       description: The epoch timestamp of the commit that was fetched by this Task.
   steps:
     - name: clone
-      image: "$(params.gitInitImage)"
+      image: '$(params.gitInitImage)'
       env:
-      - name: HOME
-        value: "$(params.userHome)"
-      - name: PARAM_URL
-        value: $(params.url)
-      - name: PARAM_REVISION
-        value: $(params.revision)
-      - name: PARAM_REFSPEC
-        value: $(params.refspec)
-      - name: PARAM_SUBMODULES
-        value: $(params.submodules)
-      - name: PARAM_DEPTH
-        value: $(params.depth)
-      - name: PARAM_SSL_VERIFY
-        value: $(params.sslVerify)
-      - name: PARAM_CRT_FILENAME
-        value: $(params.crtFileName)
-      - name: PARAM_SUBDIRECTORY
-        value: $(params.subdirectory)
-      - name: PARAM_DELETE_EXISTING
-        value: $(params.deleteExisting)
-      - name: PARAM_HTTP_PROXY
-        value: $(params.httpProxy)
-      - name: PARAM_HTTPS_PROXY
-        value: $(params.httpsProxy)
-      - name: PARAM_NO_PROXY
-        value: $(params.noProxy)
-      - name: PARAM_VERBOSE
-        value: $(params.verbose)
-      - name: PARAM_SPARSE_CHECKOUT_DIRECTORIES
-        value: $(params.sparseCheckoutDirectories)
-      - name: PARAM_USER_HOME
-        value: $(params.userHome)
-      - name: WORKSPACE_OUTPUT_PATH
-        value: $(workspaces.output.path)
-      - name: WORKSPACE_SSH_DIRECTORY_BOUND
-        value: $(workspaces.ssh-directory.bound)
-      - name: WORKSPACE_SSH_DIRECTORY_PATH
-        value: $(workspaces.ssh-directory.path)
-      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND
-        value: $(workspaces.basic-auth.bound)
-      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_PATH
-        value: $(workspaces.basic-auth.path)
-      - name: WORKSPACE_SSL_CA_DIRECTORY_BOUND
-        value: $(workspaces.ssl-ca-directory.bound)
-      - name: WORKSPACE_SSL_CA_DIRECTORY_PATH
-        value: $(workspaces.ssl-ca-directory.path)
+        - name: HOME
+          value: '$(params.userHome)'
+        - name: PARAM_URL
+          value: $(params.url)
+        - name: PARAM_REVISION
+          value: $(params.revision)
+        - name: PARAM_REFSPEC
+          value: $(params.refspec)
+        - name: PARAM_SUBMODULES
+          value: $(params.submodules)
+        - name: PARAM_DEPTH
+          value: $(params.depth)
+        - name: PARAM_SSL_VERIFY
+          value: $(params.sslVerify)
+        - name: PARAM_CRT_FILENAME
+          value: $(params.crtFileName)
+        - name: PARAM_SUBDIRECTORY
+          value: $(params.subdirectory)
+        - name: PARAM_DELETE_EXISTING
+          value: $(params.deleteExisting)
+        - name: PARAM_HTTP_PROXY
+          value: $(params.httpProxy)
+        - name: PARAM_HTTPS_PROXY
+          value: $(params.httpsProxy)
+        - name: PARAM_NO_PROXY
+          value: $(params.noProxy)
+        - name: PARAM_VERBOSE
+          value: $(params.verbose)
+        - name: PARAM_SPARSE_CHECKOUT_DIRECTORIES
+          value: $(params.sparseCheckoutDirectories)
+        - name: PARAM_USER_HOME
+          value: $(params.userHome)
+        - name: WORKSPACE_OUTPUT_PATH
+          value: $(workspaces.output.path)
+        - name: WORKSPACE_SSH_DIRECTORY_BOUND
+          value: $(workspaces.ssh-directory.bound)
+        - name: WORKSPACE_SSH_DIRECTORY_PATH
+          value: $(workspaces.ssh-directory.path)
+        - name: WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND
+          value: $(workspaces.basic-auth.bound)
+        - name: WORKSPACE_BASIC_AUTH_DIRECTORY_PATH
+          value: $(workspaces.basic-auth.path)
+        - name: WORKSPACE_SSL_CA_DIRECTORY_BOUND
+          value: $(workspaces.ssl-ca-directory.bound)
+        - name: WORKSPACE_SSL_CA_DIRECTORY_PATH
+          value: $(workspaces.ssl-ca-directory.path)
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
@@ -591,7 +592,7 @@ spec:
         - name: maven-settings
           workspace: workspace
         - name: maven-local-repo
-          workspace: workspace 
+          workspace: workspace
     - name: git-clone
       params:
         - name: url

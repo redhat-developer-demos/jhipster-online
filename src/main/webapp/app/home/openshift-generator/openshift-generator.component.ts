@@ -94,8 +94,7 @@ export class OpenshiftGeneratorComponent implements OnInit {
     this.http
       .post<any>('api/openshift/deploy', {
         namespace: this.namespace,
-        templateUrl:
-          'https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/template.yaml',
+        templateUrl: 'https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/template.yaml',
         NAMESPACE: this.namespace
       })
       .subscribe(

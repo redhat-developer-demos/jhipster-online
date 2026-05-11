@@ -2,11 +2,11 @@ apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
   name: jhipster-online-builder
----  
+---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
-  name: jhipster-online-builder  
+  name: jhipster-online-builder
 ---
 kind: BuildConfig
 apiVersion: build.openshift.io/v1
@@ -51,7 +51,7 @@ spec:
     sourceStrategy:
       from:
         kind: DockerImage
-#        name: 'image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster-online-builder:latest'
+        #        name: 'image-registry.openshift-image-registry.svc:5000/maximilianopizarro5-dev/jhipster-online-builder:latest'
         name: 'quay.io/maximilianopizarro/jhipster-online:2.40.0-quarkus'
       incremental: true
   postCommit: {}

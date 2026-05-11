@@ -11,21 +11,21 @@ This document describes the solution architecture of JHipster Online, designed f
 
 ## Technology Stack
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Backend Runtime | Java | 11 |
-| Backend Framework | Spring Boot | 2.7.3 |
-| JHipster Framework | jhipster-dependencies BOM | 7.9.3 |
-| ORM | Hibernate | 5.6.10.Final |
-| Database Migration | Liquibase | 4.15.0 |
-| Frontend | Angular | 14.x |
-| Frontend Language | TypeScript | 4.8 |
-| Package Manager | Yarn | 1.22.19 |
-| Build Tool | Maven | WAR packaging |
-| Node | Node.js | 16.20.2 |
-| Database | MySQL / MariaDB | MariaDB 10.3 on OpenShift |
-| Authentication | JWT | Stateless |
-| OpenShift Client | Fabric8 openshift-client | 6.13.4 |
+| Layer              | Technology                | Version                   |
+| ------------------ | ------------------------- | ------------------------- |
+| Backend Runtime    | Java                      | 11                        |
+| Backend Framework  | Spring Boot               | 2.7.3                     |
+| JHipster Framework | jhipster-dependencies BOM | 7.9.3                     |
+| ORM                | Hibernate                 | 5.6.10.Final              |
+| Database Migration | Liquibase                 | 4.15.0                    |
+| Frontend           | Angular                   | 14.x                      |
+| Frontend Language  | TypeScript                | 4.8                       |
+| Package Manager    | Yarn                      | 1.22.19                   |
+| Build Tool         | Maven                     | WAR packaging             |
+| Node               | Node.js                   | 16.20.2                   |
+| Database           | MySQL / MariaDB           | MariaDB 10.3 on OpenShift |
+| Authentication     | JWT                       | Stateless                 |
+| OpenShift Client   | Fabric8 openshift-client  | 6.13.4                    |
 
 ## Component Architecture
 
@@ -81,12 +81,12 @@ graph TD
 
 ## Container Image Strategy
 
-| Image | Purpose | Registry |
-|-------|---------|----------|
-| `Dockerfile` | Dev Spaces workspace image with all generators pre-installed | `quay.io/devfile/jhipster-online` |
-| `Dockerfile.app` | Runtime image for the jhipster-online WAR | Docker Hub |
-| `jh-online-builder.yaml` | OpenShift BuildConfig for S2I binary builds | Internal OpenShift registry |
-| Builder base | UBI8 OpenJDK 17 + Maven 3.9.4 + Node 20 | `registry.redhat.io/ubi8/openjdk-17` |
+| Image                    | Purpose                                                      | Registry                             |
+| ------------------------ | ------------------------------------------------------------ | ------------------------------------ |
+| `Dockerfile`             | Dev Spaces workspace image with all generators pre-installed | `quay.io/devfile/jhipster-online`    |
+| `Dockerfile.app`         | Runtime image for the jhipster-online WAR                    | Docker Hub                           |
+| `jh-online-builder.yaml` | OpenShift BuildConfig for S2I binary builds                  | Internal OpenShift registry          |
+| Builder base             | UBI8 OpenJDK 17 + Maven 3.9.4 + Node 20                      | `registry.redhat.io/ubi8/openjdk-17` |
 
 ## Deployment Topology
 
@@ -131,20 +131,20 @@ graph LR
 
 ## Key Directories
 
-| Directory | Purpose |
-|-----------|---------|
-| `src/main/java/io/github/jhipster/online/` | Backend Java source (Spring Boot) |
-| `src/main/java/.../service/` | Business logic (GeneratorService, OpenShiftDeploymentService, etc.) |
-| `src/main/java/.../web/rest/` | REST controllers |
-| `src/main/java/.../config/` | Spring configuration (Security, Liquibase, OpenShift client, etc.) |
-| `src/main/webapp/app/` | Angular frontend |
-| `src/main/webapp/app/home/` | Home module with all generator components |
-| `src/main/webapp/app/home/openshift-generator/` | OpenShift-specific generator with namespace selector |
-| `src/main/webapp/app/home/deployed-apps/` | Deployed applications dashboard |
-| `src/main/resources/config/` | Spring profiles (dev/prod) and Liquibase migrations |
-| `src/main/resources/config/liquibase/` | Database migration changelogs |
-| `src/main/kubernetes/` | OpenShift manifests (templates, pipelines, devfiles, RBAC) |
-| `src/main/docker/` | Docker Compose files for local development |
+| Directory                                       | Purpose                                                             |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| `src/main/java/io/github/jhipster/online/`      | Backend Java source (Spring Boot)                                   |
+| `src/main/java/.../service/`                    | Business logic (GeneratorService, OpenShiftDeploymentService, etc.) |
+| `src/main/java/.../web/rest/`                   | REST controllers                                                    |
+| `src/main/java/.../config/`                     | Spring configuration (Security, Liquibase, OpenShift client, etc.)  |
+| `src/main/webapp/app/`                          | Angular frontend                                                    |
+| `src/main/webapp/app/home/`                     | Home module with all generator components                           |
+| `src/main/webapp/app/home/openshift-generator/` | OpenShift-specific generator with namespace selector                |
+| `src/main/webapp/app/home/deployed-apps/`       | Deployed applications dashboard                                     |
+| `src/main/resources/config/`                    | Spring profiles (dev/prod) and Liquibase migrations                 |
+| `src/main/resources/config/liquibase/`          | Database migration changelogs                                       |
+| `src/main/kubernetes/`                          | OpenShift manifests (templates, pipelines, devfiles, RBAC)          |
+| `src/main/docker/`                              | Docker Compose files for local development                          |
 
 ## Generation Flow
 

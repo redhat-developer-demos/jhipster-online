@@ -69,7 +69,10 @@ public class OpenShiftDeploymentService {
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("namespace", namespace);
             result.put("resourceCount", resources.size());
-            result.put("resources", resources.stream().map(r -> r.getKind() + "/" + r.getMetadata().getName()).collect(Collectors.toList()));
+            result.put(
+                "resources",
+                resources.stream().map(r -> r.getKind() + "/" + r.getMetadata().getName()).collect(Collectors.toList())
+            );
             return result;
         } catch (KubernetesClientException e) {
             log.error("Failed to deploy to namespace {}: {}", namespace, e.getMessage());
@@ -122,11 +125,17 @@ public class OpenShiftDeploymentService {
             List<Route> routes = openShiftClient.routes().inNamespace(namespace).list().getItems();
             Map<String, String> routeMap = routes
                 .stream()
-                .collect(Collectors.toMap(r -> r.getMetadata().getName(), r -> {
-                    String host = r.getSpec().getHost();
-                    String tls = r.getSpec().getTls() != null ? "https://" : "http://";
-                    return tls + host;
-                }, (a, b) -> a));
+                .collect(
+                    Collectors.toMap(
+                        r -> r.getMetadata().getName(),
+                        r -> {
+                            String host = r.getSpec().getHost();
+                            String tls = r.getSpec().getTls() != null ? "https://" : "http://";
+                            return tls + host;
+                        },
+                        (a, b) -> a
+                    )
+                );
 
             for (Deployment dep : deployments) {
                 Map<String, Object> app = new LinkedHashMap<>();

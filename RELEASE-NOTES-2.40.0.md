@@ -26,28 +26,29 @@ This release merges all changes from the upstream [jhipster/jhipster-online](htt
 
 ### Generator Versions
 
-| Generator | Previous | New |
-|-----------|----------|-----|
-| `generator-jhipster` | 8.8.0 | 9.0.0 |
-| `generator-jhipster-quarkus` | 3.4.0 | 3.6.0 |
-| `generator-jhipster-micronaut` | 3.6.0 | 3.9.0 |
-| `generator-jhipster-dotnetcore` | 4.2.0 | 4.5.0 |
-| `generator-jhipster-azure-container-apps` | N/A | latest |
+| Generator                                 | Previous | New    |
+| ----------------------------------------- | -------- | ------ |
+| `generator-jhipster`                      | 8.8.0    | 9.0.0  |
+| `generator-jhipster-quarkus`              | 3.4.0    | 3.6.0  |
+| `generator-jhipster-micronaut`            | 3.6.0    | 3.9.0  |
+| `generator-jhipster-dotnetcore`           | 4.2.0    | 4.5.0  |
+| `generator-jhipster-azure-container-apps` | N/A      | latest |
 
 ### Builder Images (NEW - GitHub Actions CI/CD)
 
 Two separate builder images are now published automatically via GitHub Actions to `quay.io/maximilianopizarro/jhipster-online`:
 
-| Image Tag | Dockerfile | Base | Generators |
-|-----------|-----------|------|------------|
-| `:2.40.0-spring-boot` | `Dockerfile.spring-boot` | UBI8 OpenJDK 17 + Maven 3.9.15 + Node 20 | `generator-jhipster@9.0.0` |
-| `:2.40.0-quarkus` | `Dockerfile.quarkus` | UBI8 OpenJDK 17 + Maven 3.9.15 + Node 20 | `generator-jhipster@9.0.0` + `generator-jhipster-quarkus@3.6.0` |
+| Image Tag             | Dockerfile               | Base                                     | Generators                                                      |
+| --------------------- | ------------------------ | ---------------------------------------- | --------------------------------------------------------------- |
+| `:2.40.0-spring-boot` | `Dockerfile.spring-boot` | UBI8 OpenJDK 17 + Maven 3.9.15 + Node 20 | `generator-jhipster@9.0.0`                                      |
+| `:2.40.0-quarkus`     | `Dockerfile.quarkus`     | UBI8 OpenJDK 17 + Maven 3.9.15 + Node 20 | `generator-jhipster@9.0.0` + `generator-jhipster-quarkus@3.6.0` |
 
 **Tagging strategy**: The unversioned tags `:quarkus`, `:spring-boot`, and `:latest` remain pinned to the 2.33.0 release to avoid breaking existing deployments. From v2.40.0 onwards, only versioned tags (`{version}-quarkus`, `{version}-spring-boot`) are published.
 
 The Dev Spaces workspace image is also published: `quay.io/devfile/jhipster-online:2.40.0`
 
 **GitHub Actions workflow** (`.github/workflows/build-push-quay.yml`):
+
 - Triggers on push to `main`, version tags, or manual dispatch
 - Authenticates to `registry.redhat.io` (base image pull) and `quay.io` (image push)
 - Builds 3 images in parallel (spring-boot, quarkus, devspaces)
