@@ -17,14 +17,14 @@ ENV M2_HOME=/usr/share/maven/apache-maven-3.9.15
 ENV PATH=$PATH:/usr/share/maven/apache-maven-3.9.15/bin
 
 RUN microdnf install -y dnf && \
-    dnf -y module install nodejs:22 && \
-    npm install -y -g yarn && \
+    dnf -y module install nodejs:22/common && \
+    npm install -g yarn && \
     dnf -y install git
 
 WORKDIR /build
 COPY . .
 RUN yarn install --frozen-lockfile --ignore-scripts && \
-    mvn -ntp package -Pprod -DskipTests
+    mvn -ntp package -Pprod -Dmaven.test.skip=true
 
 # --- Runtime ---
 FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5
@@ -32,11 +32,11 @@ FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef98
 USER root
 
 RUN microdnf install -y dnf && \
-    dnf -y module install nodejs:22 && \
-    npm install -y -g yarn && \
+    dnf -y module install nodejs:22/common && \
+    npm install -g yarn && \
     dnf -y install git && \
-    npm install -y -g generator-jhipster@9.0.0 && \
-    npm install -y -g generator-jhipster-quarkus@3.6.0 && \
+    npm install -g generator-jhipster@9.0.0 && \
+    npm install -g generator-jhipster-quarkus@3.6.0 && \
     dnf clean all && microdnf clean all
 
 COPY --from=builder /build/target/jhonline-*.war /deployments/
