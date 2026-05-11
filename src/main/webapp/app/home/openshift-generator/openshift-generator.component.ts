@@ -17,8 +17,9 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { GeneratorComponent } from '../generator/generator.component';
 import { GeneratorConfigurationModel } from '../generator/generator.configuration.model';
 import { JHipsterConfigurationModel } from '../generator/jhipster.configuration.model';
 
@@ -27,6 +28,8 @@ import { JHipsterConfigurationModel } from '../generator/jhipster.configuration.
   templateUrl: './openshift-generator.component.html'
 })
 export class OpenshiftGeneratorComponent implements OnInit {
+  @ViewChild('generatorRef') generatorRef?: GeneratorComponent;
+
   openshiftGeneratorConfig: GeneratorConfigurationModel = {
     hideRepositoryName: false,
     hideApplicationType: false,
@@ -60,6 +63,8 @@ export class OpenshiftGeneratorComponent implements OnInit {
   namespaces: string[] = [];
   deployToCluster = false;
   deployStatus = '';
+  deployMethod: 'fabric8' | 'argocd' = 'fabric8';
+  argocdApplicationNamespace = 'openshift-gitops';
 
   constructor(private http: HttpClient) {}
 
@@ -86,20 +91,49 @@ export class OpenshiftGeneratorComponent implements OnInit {
     );
   }
 
+  private resolveGitRepo(): string {
+    const g = this.generatorRef;
+    if (!g?.selectedGitCompany || !g.repositoryName) {
+      return '';
+    }
+    const provider = (g.selectedGitProvider || '').toLowerCase();
+    if (provider.includes('gitlab')) {
+      return `https://gitlab.com/${g.selectedGitCompany}/${g.repositoryName}`;
+    }
+    return `https://github.com/${g.selectedGitCompany}/${g.repositoryName}`;
+  }
+
   onDeployToCluster(): void {
     if (!this.deployToCluster || !this.namespace) {
       return;
     }
-    this.deployStatus = 'Deploying to namespace ' + this.namespace + '...';
+    const gitRepo = this.resolveGitRepo();
+    const appName = this.generatorRef?.repositoryName?.trim();
+    if (!gitRepo || !appName) {
+      this.deployStatus =
+        'Configure Git provider, organization/group, and repository name above, then push your generated repo before deploying.';
+      return;
+    }
+    this.deployStatus = 'Deploying to namespace ' + this.namespace + ' (' + this.deployMethod + ')...';
     this.http
       .post<any>('api/openshift/deploy', {
         namespace: this.namespace,
-        templateUrl: 'https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/template.yaml',
-        NAMESPACE: this.namespace
+        gitRepo,
+        appName,
+        deployMethod: this.deployMethod,
+        argocdApplicationNamespace: this.argocdApplicationNamespace
       })
       .subscribe(
         (result: any) => {
-          this.deployStatus = 'Deployed ' + result.resourceCount + ' resources to ' + this.namespace;
+          if (this.deployMethod === 'argocd') {
+            this.deployStatus =
+              'Argo CD Application ' +
+              (result.application || appName) +
+              ' applied in ' +
+              (result.argocdNamespace || this.argocdApplicationNamespace);
+          } else {
+            this.deployStatus = 'Deployed ' + (result.resources?.length || 0) + ' resources to ' + this.namespace;
+          }
         },
         (error: any) => {
           this.deployStatus = 'Deploy failed: ' + (error.error?.error || error.message);

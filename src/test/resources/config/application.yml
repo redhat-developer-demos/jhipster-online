@@ -122,6 +122,12 @@ application:
     host: https://gitlab.test
 
 openshift:
+  devspace:
+    url-devfile: https://example.com/devfile.yaml
+  backstage:
+    url-backstage: https://example.com/catalog-info.yaml
+  argocd:
+    application-namespace: openshift-gitops
   deployment:
     enabled: false
   tekton:

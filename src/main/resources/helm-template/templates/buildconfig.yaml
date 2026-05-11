@@ -1,0 +1,26 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: '{{ .Values.app.name }}-devspace'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: '{{ .Values.app.name }}'
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: '{{ .Values.app.name }}:latest'
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: DockerImage
+        name: image-registry.openshift-image-registry.svc:5000/openshift/ubi8-openjdk-17:1.12
+      incremental: true
+  source:
+    type: Binary
+    binary: {}
+  runPolicy: Serial

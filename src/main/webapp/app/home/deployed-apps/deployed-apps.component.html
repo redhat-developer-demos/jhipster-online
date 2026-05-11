@@ -25,6 +25,7 @@
       <tr>
         <th>Name</th>
         <th>Namespace</th>
+        <th>Method</th>
         <th>Status</th>
         <th>Replicas</th>
         <th>Created</th>
@@ -36,6 +37,10 @@
       <tr *ngFor="let app of applications">
         <td>{{ app.name }}</td>
         <td>{{ app.namespace }}</td>
+        <td>
+          <span class="badge bg-secondary" *ngIf="app.deployMethod === 'argocd'">Argo CD</span>
+          <span class="badge bg-primary" *ngIf="app.deployMethod !== 'argocd'">Fabric8</span>
+        </td>
         <td>
           <span class="badge" [ngClass]="{'badge-success': app.status === 'Ready', 'badge-warning': app.status !== 'Ready'}">
             {{ app.status }}

@@ -31,6 +31,8 @@ import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +40,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 import org.zeroturnaround.zip.ZipUtil;
@@ -130,6 +133,7 @@ public class GeneratorService {
         log.info("yq script created");
         this.generateYqScript(applicationId, workingDir, applicationConfiguration);
         this.jHipsterService.generateApplication(applicationId, workingDir);
+        this.generateHelmBundle(applicationId, workingDir, applicationConfiguration);
         this.openInDevSpaces(applicationId, workingDir, applicationConfiguration);
         log.info("Application generated");
         return workingDir;
@@ -204,6 +208,108 @@ public class GeneratorService {
         writer.println("yq -Yi " + appJarVersion + " pipeline-run.yaml");
         writer.flush();
         writer.close();
+    }
+
+    private void generateHelmBundle(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
+        this.logsService.addLog(applicationId, "Adding helm/ chart and argocd/ Application manifest");
+        Object document = Configuration.defaultConfiguration().jsonProvider().parse(applicationConfiguration);
+        String gitCompany = JsonPath.read(document, "$.git-company");
+        String repositoryName = JsonPath.read(document, "$.repository-name");
+        String repoSan = sanitizeKubernetesName(repositoryName);
+        String gitRepo = "https://github.com/" + gitCompany + "/" + repositoryName;
+        String framework = resolveFramework(applicationConfiguration);
+
+        copyClasspathResource("helm-template/Chart.yaml", new File(workingDir, "helm/Chart.yaml"));
+        copyClasspathResource("helm-template/values.yaml", new File(workingDir, "helm/values.yaml"));
+        copyClasspathResource("helm-template/templates/pvc-mariadb.yaml", new File(workingDir, "helm/templates/pvc-mariadb.yaml"));
+        copyClasspathResource("helm-template/templates/secret-mariadb.yaml", new File(workingDir, "helm/templates/secret-mariadb.yaml"));
+        copyClasspathResource(
+            "helm-template/templates/deployment-mariadb.yaml",
+            new File(workingDir, "helm/templates/deployment-mariadb.yaml")
+        );
+        copyClasspathResource("helm-template/templates/service-mariadb.yaml", new File(workingDir, "helm/templates/service-mariadb.yaml"));
+        copyClasspathResource("helm-template/templates/imagestream.yaml", new File(workingDir, "helm/templates/imagestream.yaml"));
+        copyClasspathResource("helm-template/templates/buildconfig.yaml", new File(workingDir, "helm/templates/buildconfig.yaml"));
+        copyClasspathResource(
+            "helm-template/templates/deployment-app-spring.yaml",
+            new File(workingDir, "helm/templates/deployment-app-spring.yaml")
+        );
+        copyClasspathResource(
+            "helm-template/templates/deployment-app-quarkus.yaml",
+            new File(workingDir, "helm/templates/deployment-app-quarkus.yaml")
+        );
+        copyClasspathResource("helm-template/templates/service-app.yaml", new File(workingDir, "helm/templates/service-app.yaml"));
+        copyClasspathResource("helm-template/templates/route.yaml", new File(workingDir, "helm/templates/route.yaml"));
+        copyClasspathResource("helm-template/argocd/application.yaml", new File(workingDir, "argocd/application.yaml"));
+
+        Map<String, String> tokenReplacements = new LinkedHashMap<>();
+        tokenReplacements.put("__REPO_NAME__", repoSan);
+        tokenReplacements.put("__FRAMEWORK__", framework);
+        tokenReplacements.put("__GIT_REPO_URL__", gitRepo);
+        tokenReplacements.put("__APP_NAME__", repoSan);
+        tokenReplacements.put("__ARGOCD_APP_NAMESPACE__", "openshift-gitops");
+        replaceTokensInFile(new File(workingDir, "helm/Chart.yaml"), tokenReplacements);
+        replaceTokensInFile(new File(workingDir, "helm/values.yaml"), tokenReplacements);
+        replaceTokensInFile(new File(workingDir, "argocd/application.yaml"), tokenReplacements);
+        replaceTokensInTree(new File(workingDir, "helm/templates"), tokenReplacements);
+
+        selectDeploymentVariant(new File(workingDir, "helm/templates"), framework);
+    }
+
+    private static String sanitizeKubernetesName(String name) {
+        return name.toLowerCase().replace('_', '-');
+    }
+
+    private String resolveFramework(String applicationConfiguration) {
+        if (applicationConfiguration != null && applicationConfiguration.contains("generator-jhipster-quarkus")) {
+            return "quarkus";
+        }
+        if ("jhipster-quarkus".equals(applicationProperties.getJhipsterCmd().getCmd())) {
+            return "quarkus";
+        }
+        return "spring-boot";
+    }
+
+    private void copyClasspathResource(String classpathPath, File destFile) throws IOException {
+        ClassPathResource res = new ClassPathResource(classpathPath);
+        destFile.getParentFile().mkdirs();
+        try (java.io.InputStream in = res.getInputStream()) {
+            FileUtils.copyInputStreamToFile(in, destFile);
+        }
+    }
+
+    private static void replaceTokensInFile(File file, Map<String, String> replacements) throws IOException {
+        String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        for (Map.Entry<String, String> e : replacements.entrySet()) {
+            content = content.replace(e.getKey(), e.getValue());
+        }
+        FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+    }
+
+    private static void replaceTokensInTree(File dir, Map<String, String> replacements) throws IOException {
+        if (!dir.isDirectory()) {
+            return;
+        }
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".yaml") || name.endsWith(".yml"));
+        if (files == null) {
+            return;
+        }
+        for (File f : files) {
+            replaceTokensInFile(f, replacements);
+        }
+    }
+
+    private static void selectDeploymentVariant(File templatesDir, String framework) throws IOException {
+        File spring = new File(templatesDir, "deployment-app-spring.yaml");
+        File quarkus = new File(templatesDir, "deployment-app-quarkus.yaml");
+        File target = new File(templatesDir, "deployment.yaml");
+        if ("quarkus".equals(framework)) {
+            FileUtils.deleteQuietly(spring);
+            FileUtils.moveFile(quarkus, target);
+        } else {
+            FileUtils.deleteQuietly(quarkus);
+            FileUtils.moveFile(spring, target);
+        }
     }
 
     private void openInDevSpaces(String applicationId, File workingDir, String applicationConfiguration) throws IOException {

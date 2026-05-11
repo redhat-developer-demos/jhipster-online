@@ -3,6 +3,7 @@ package io.github.jhipster.online.web.rest;
 import io.github.jhipster.online.security.AuthoritiesConstants;
 import io.github.jhipster.online.service.OpenShiftDeploymentService;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -32,19 +33,35 @@ public class OpenShiftDeploymentResource {
         return ResponseEntity.ok(deploymentService.listNamespaces());
     }
 
+    /**
+     * Body: namespace, gitRepo, appName, deployMethod (fabric8 | argocd), optional argocdApplicationNamespace,
+     * optional valuesOverrides as string map for raw token replacements in values.yaml.
+     */
     @PostMapping("/deploy")
     @Secured(AuthoritiesConstants.USER)
-    public ResponseEntity<Map<String, Object>> deploy(@RequestBody Map<String, String> request) {
-        String namespace = request.get("namespace");
-        String templateUrl = request.get("templateUrl");
-        if (namespace == null || templateUrl == null) {
+    public ResponseEntity<Map<String, Object>> deploy(@RequestBody Map<String, Object> request) {
+        String namespace = stringVal(request.get("namespace"));
+        String gitRepo = stringVal(request.get("gitRepo"));
+        String appName = stringVal(request.get("appName"));
+        String deployMethod = stringVal(request.get("deployMethod"));
+        if (namespace == null || gitRepo == null || appName == null || deployMethod == null) {
             return ResponseEntity.badRequest().build();
         }
+        String argocdNs = stringVal(request.get("argocdApplicationNamespace"));
+        @SuppressWarnings("unchecked")
+        Map<String, String> overrides = request.get("valuesOverrides") instanceof Map
+            ? (Map<String, String>) request.get("valuesOverrides")
+            : null;
+
         try {
-            Map<String, String> params = new java.util.HashMap<>(request);
-            params.remove("templateUrl");
-            params.put("NAMESPACE", namespace);
-            Map<String, Object> result = deploymentService.deployToNamespace(namespace, templateUrl, params);
+            Map<String, Object> result;
+            if ("argocd".equalsIgnoreCase(deployMethod)) {
+                result = deploymentService.argoCDDeploy(namespace, gitRepo, appName, argocdNs);
+            } else if ("fabric8".equalsIgnoreCase(deployMethod)) {
+                result = deploymentService.helmInstall(namespace, gitRepo, appName, overrides != null ? overrides : Collections.emptyMap());
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("error", "deployMethod must be fabric8 or argocd"));
+            }
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (OpenShiftDeploymentService.OpenShiftPermissionException e) {
             log.error("Permission error during deploy: {}", e.getMessage());
@@ -55,24 +72,8 @@ public class OpenShiftDeploymentResource {
         }
     }
 
-    @PostMapping("/pipeline")
-    @Secured(AuthoritiesConstants.USER)
-    public ResponseEntity<Map<String, Object>> triggerPipeline(@RequestBody Map<String, String> request) {
-        String namespace = request.get("namespace");
-        String gitRepo = request.get("gitRepo");
-        String appName = request.getOrDefault("appName", "jhipster");
-        String appJarVersion = request.getOrDefault("appJarVersion", appName + "-0.0.1-SNAPSHOT.jar");
-        if (namespace == null || gitRepo == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        try {
-            Map<String, Object> result = deploymentService.triggerPipeline(namespace, gitRepo, appName, appJarVersion);
-            return ResponseEntity.status(HttpStatus.CREATED).body(result);
-        } catch (OpenShiftDeploymentService.OpenShiftPermissionException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-        }
+    private static String stringVal(Object o) {
+        return o == null ? null : String.valueOf(o);
     }
 
     @GetMapping("/applications")
@@ -83,9 +84,13 @@ public class OpenShiftDeploymentResource {
 
     @DeleteMapping("/applications/{name}")
     @Secured(AuthoritiesConstants.USER)
-    public ResponseEntity<Void> deleteApplication(@PathVariable String name, @RequestParam String namespace) {
+    public ResponseEntity<Void> deleteApplication(
+        @PathVariable String name,
+        @RequestParam String namespace,
+        @RequestParam(required = false) String argocdNamespace
+    ) {
         try {
-            deploymentService.deleteApplication(namespace, name);
+            deploymentService.deleteApplication(namespace, name, argocdNamespace);
             return ResponseEntity.noContent().build();
         } catch (OpenShiftDeploymentService.OpenShiftPermissionException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

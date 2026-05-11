@@ -1,0 +1,16 @@
+# Populated at generation time; image.namespace is replaced on deploy from the target OpenShift project.
+app:
+  name: __REPO_NAME__
+framework: __FRAMEWORK__
+git:
+  repoUrl: __GIT_REPO_URL__
+image:
+  namespace: __TARGET_NAMESPACE__
+  stream: __REPO_NAME__
+route:
+  enabled: true
+replicas:
+  app: 1
+  mariadb: 1
+deploy:
+  method: fabric8

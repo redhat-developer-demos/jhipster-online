@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: { { .Values.app.name } }
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: { { .Values.app.name } }
+    app.kubernetes.io/name: { { .Values.app.name } }
+    app.openshift.io/runtime: java
+  annotations:
+    app.openshift.io/vcs-uri: '{{ .Values.git.repoUrl }}'
+    deploy.jhipster.online/method: '{{ .Values.deploy.method }}'
+spec:
+  replicas: { { .Values.replicas.app } }
+  selector:
+    matchLabels:
+      app: { { .Values.app.name } }
+      deployment: { { .Values.app.name } }
+  template:
+    metadata:
+      labels:
+        app: { { .Values.app.name } }
+        app.kubernetes.io/managed-by: jhipster-online
+        app.kubernetes.io/instance: { { .Values.app.name } }
+        deployment: { { .Values.app.name } }
+        app.openshift.io/runtime: java
+    spec:
+      containers:
+        - name: { { .Values.app.name } }
+          image: image-registry.openshift-image-registry.svc:5000/{{ .Values.image.namespace }}/{{ .Values.image.stream }}:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,api-docs
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              value: YlhrdGMyVmpjbVYwTFhSdmEyVnVMWFJ2TFdOb1lXNW5aUzFwYmkxd2NtOWtkV04wYVc5dUxXRnVaQzEwYnkxclpXVndMV2x1TFdFdGMyVmpkWEpsTFhCc1lXTmwK
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mariadb://mariadb-{{ .Values.app.name }}:3306/jhipsteronline
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-user
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-password

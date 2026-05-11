@@ -91,6 +91,8 @@
         <junit.itReportFolder>${project.testresult.directory}/integrationTest</junit.itReportFolder>
         <!-- jhipster-needle-maven-property -->
         <mysql-socket-factory.version>1.10.0</mysql-socket-factory.version>
+        <!-- Align Fabric8; openshift-client 6.x still pulls legacy kubernetes-client 5.x without this -->
+        <fabric8.version>6.13.4</fabric8.version>
     </properties>
 
     <dependencyManagement>
@@ -365,7 +367,18 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>openshift-client</artifactId>
-            <version>6.13.4</version>
+            <version>${fabric8.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>kubernetes-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+            <version>${fabric8.version}</version>
         </dependency>
         <!-- jhipster-needle-maven-add-dependency -->
     </dependencies>

@@ -1,4 +1,4 @@
-<jhi-generator [config]="openshiftGeneratorConfig" [defaultModel]="openshiftJHipsterModel">
+<jhi-generator #generatorRef [config]="openshiftGeneratorConfig" [defaultModel]="openshiftJHipsterModel">
   <div class="row" generator-header>
       <div class="col-md-12">
         <div class="alert alert-info" role="alert">
@@ -38,11 +38,28 @@
             <div class="form-check mt-2">
               <input class="form-check-input" type="checkbox" id="deployToCluster" [(ngModel)]="deployToCluster">
               <label class="form-check-label" for="deployToCluster">
-                Deploy to OpenShift after generation
+                Deploy to OpenShift (after the application is pushed to Git)
               </label>
             </div>
-            <div *ngIf="deployToCluster" class="mt-2">
-              <button class="btn btn-primary btn-sm" (click)="onDeployToCluster()">Deploy Now</button>
+            <div *ngIf="deployToCluster" class="mt-3">
+              <label class="form-label d-block">Deploy method</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="deployMethod" id="dmFabric8" [(ngModel)]="deployMethod" value="fabric8">
+                <label class="form-check-label" for="dmFabric8">Fabric8 (direct apply of helm/templates)</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="deployMethod" id="dmArgo" [(ngModel)]="deployMethod" value="argocd">
+                <label class="form-check-label" for="dmArgo">Argo CD (apply Application CR; syncs helm/ from Git)</label>
+              </div>
+              <div class="mt-2" *ngIf="deployMethod === 'argocd'">
+                <label for="argoNs" class="form-label">Argo CD instance namespace</label>
+                <input class="form-control" id="argoNs" [(ngModel)]="argocdApplicationNamespace" placeholder="openshift-gitops">
+              </div>
+              <p class="form-text text-muted mt-2">
+                The generated repository includes a <code>helm/</code> chart and <code>argocd/application.yaml</code>.
+                Push the repository first; Fabric8 renders templates server-side, Argo CD uses Helm in-cluster.
+              </p>
+              <button class="btn btn-primary btn-sm" type="button" (click)="onDeployToCluster()">Deploy</button>
             </div>
             <div *ngIf="deployStatus" class="alert alert-info mt-2" role="alert">
               {{ deployStatus }}
@@ -62,7 +79,7 @@
             <b>MariaDB</b> will default to passwordless database connections as it's more secure option.<br>
             The DevSpaces <a href="https://github.com/redhat-developer-demos/jhipster-online/blob/main/src/main/kubernetes/jhipster-devspaces.yaml"><b>devfile.yaml</b></a> will be added.<br>
             The Tekton Pipeline <a href="https://github.com/redhat-developer-demos/jhipster-online/blob/main/src/main/kubernetes/jhipster-pipeline.yaml"><b>jhipster-pipeline.yaml</b></a> will be added.<br>
-            The manifest jhipster <a href="https://github.com/redhat-developer-demos/jhipster-online/blob/main/src/main/kubernetes/template.yaml"><b>template.yaml</b></a> will be apply when Tekton PipelineRun applied.<br>
+            An in-repo <a href="https://github.com/redhat-developer-demos/jhipster-online/tree/main/src/main/resources/helm-template"><b>helm/</b></a> chart and <b>argocd/application.yaml</b> are generated for OpenShift (legacy <code>template.yaml</code> is deprecated).<br>
             Taking a look at the <a href="https://www.youtube.com/watch?v=b7xbcTAGNIQ">Video Demo</a> .<br>   
           </div>
       </div>

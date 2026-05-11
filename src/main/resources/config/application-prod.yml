@@ -159,6 +159,10 @@ openshift:
   tekton:
     url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline.yaml
     url-pipeline-run: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-run.yaml
+  backstage:
+    url-backstage: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/catalog-info.yaml
+  argocd:
+    application-namespace: openshift-gitops
   deployment:
     enabled: true
     default-namespace: ''

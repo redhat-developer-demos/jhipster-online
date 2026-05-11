@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb-{{ .Values.app.name }}
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: { { .Values.app.name } }
+    app.kubernetes.io/name: mariadb-{{ .Values.app.name }}
+    app.openshift.io/runtime: mariadb
+spec:
+  strategy:
+    type: Recreate
+  replicas: { { .Values.replicas.mariadb } }
+  selector:
+    matchLabels:
+      app: mariadb-{{ .Values.app.name }}
+  template:
+    metadata:
+      labels:
+        app: mariadb-{{ .Values.app.name }}
+        app.kubernetes.io/managed-by: jhipster-online
+        app.kubernetes.io/instance: { { .Values.app.name } }
+        deployment: mariadb-{{ .Values.app.name }}
+        app.openshift.io/runtime: mariadb
+    spec:
+      volumes:
+        - name: mariadb-data
+          persistentVolumeClaim:
+            claimName: mariadb-{{ .Values.app.name }}-data
+      containers:
+        - name: mariadb
+          image: image-registry.openshift-image-registry.svc:5000/openshift/mariadb
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-password
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-root-password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-name
+          volumeMounts:
+            - name: mariadb-data
+              mountPath: /var/lib/mysql/data
+          resources:
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-i'
+                - '-c'
+                - MYSQL_PWD="$MYSQL_PASSWORD" mysqladmin -u $MYSQL_USER ping
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-i'
+                - '-c'
+                - MYSQL_PWD="$MYSQL_PASSWORD" mysqladmin -u $MYSQL_USER ping
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+      restartPolicy: Always
