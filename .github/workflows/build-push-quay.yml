@@ -1,4 +1,4 @@
-name: Build and Push Builder Images to Quay.io
+name: Build and Push Runtime Images to Quay.io
 
 on:
   push:
@@ -9,6 +9,9 @@ on:
       - 'Dockerfile.quarkus'
       - 'Dockerfile'
       - '.github/workflows/build-push-quay.yml'
+      - 'pom.xml'
+      - 'src/**'
+      - 'package.json'
     tags:
       - 'v*.*.*'
   workflow_dispatch:
@@ -19,7 +22,7 @@ env:
 
 jobs:
   build-spring-boot:
-    name: Build Spring Boot Builder Image
+    name: Build Spring Boot Runtime Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -57,12 +60,12 @@ jobs:
           tags: |
             ${{ env.QUAY_REPO }}:${{ steps.version.outputs.version }}-spring-boot
           labels: |
-            org.opencontainers.image.title=JHipster Online Builder (Spring Boot)
+            org.opencontainers.image.title=JHipster Online (Spring Boot)
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
             org.opencontainers.image.source=https://github.com/redhat-developer-demos/jhipster-online
 
   build-quarkus:
-    name: Build Quarkus Builder Image
+    name: Build Quarkus Runtime Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -100,7 +103,7 @@ jobs:
           tags: |
             ${{ env.QUAY_REPO }}:${{ steps.version.outputs.version }}-quarkus
           labels: |
-            org.opencontainers.image.title=JHipster Online Builder (Quarkus)
+            org.opencontainers.image.title=JHipster Online (Quarkus)
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
             org.opencontainers.image.source=https://github.com/redhat-developer-demos/jhipster-online
 

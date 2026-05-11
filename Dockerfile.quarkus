@@ -1,13 +1,11 @@
-FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5
+FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5 AS builder
 
 USER root
 
 RUN microdnf install -y unzip
 
 WORKDIR /usr/share/maven
-
 RUN rm -rf /usr/share/maven/* /usr/bin/mvn
-
 RUN curl -L -o apache-maven-3.9.15-bin.zip https://archive.apache.org/dist/maven/maven-3/3.9.15/binaries/apache-maven-3.9.15-bin.zip && \
     unzip apache-maven-3.9.15-bin.zip "apache-maven-3.9.15/*" -d "/usr/share/maven" && \
     ln -s /usr/share/maven/apache-maven-3.9.15/bin/mvn /usr/bin/mvn && \
@@ -15,18 +13,32 @@ RUN curl -L -o apache-maven-3.9.15-bin.zip https://archive.apache.org/dist/maven
 
 ENV MAVEN_VERSION=3.9.15
 ENV MAVEN_OPTS="-Xmx3489m"
-ENV JAVA_TOOL_OPTION="-Xmx3489m"
-ENV M2_HOME=/usr/share/maven/apache-maven-3.9.15/bin
+ENV M2_HOME=/usr/share/maven/apache-maven-3.9.15
 ENV PATH=$PATH:/usr/share/maven/apache-maven-3.9.15/bin
-
-RUN chown 1001:0 ${M2_HOME} && chgrp -R 0 ${M2_HOME} && chmod -R g=u ${M2_HOME}
 
 RUN microdnf install -y dnf && \
     dnf -y module install nodejs:20 && \
     npm install -y -g yarn && \
     dnf -y install git
 
-RUN npm install -y -g generator-jhipster@9.0.0 && \
-    npm install -y -g generator-jhipster-quarkus@3.6.0
+WORKDIR /build
+COPY . .
+RUN yarn install --frozen-lockfile --ignore-scripts && \
+    mvn -ntp package -Pprod -DskipTests
+
+# --- Runtime ---
+FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5
+
+USER root
+
+RUN microdnf install -y dnf && \
+    dnf -y module install nodejs:20 && \
+    npm install -y -g yarn && \
+    dnf -y install git && \
+    npm install -y -g generator-jhipster@9.0.0 && \
+    npm install -y -g generator-jhipster-quarkus@3.6.0 && \
+    dnf clean all && microdnf clean all
+
+COPY --from=builder /build/target/jhonline-*.war /deployments/
 
 USER 1001
