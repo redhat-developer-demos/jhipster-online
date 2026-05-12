@@ -513,7 +513,7 @@ spec:
       description: The npm goals you want to run.
       name: ARGS
       type: array
-    - default: 'docker.io/library/node:18.18.2-alpine'
+    - default: '{{ .Values.builder.image }}'
       description: The node image you want to use.
       name: IMAGE
       type: string
@@ -551,7 +551,7 @@ spec:
       name: PATH_CONTEXT
       type: string
     - default: >-
-        registry.redhat.io/ubi8/openjdk-21:latest
+        {{ .Values.builder.image }}
       name: MAVEN_IMAGE
       type: string
     - default: jhipster-quarkus-test-1.0.0-SNAPSHOT-runner.jar
@@ -571,7 +571,7 @@ spec:
       params:
         - name: MAVEN_IMAGE
           value: >-
-            registry.redhat.io/ubi8/openjdk-21:latest
+            {{ .Values.builder.image }}
         - name: GOALS
           value:
             - package
@@ -659,7 +659,7 @@ spec:
           value:
             - install
         - name: IMAGE
-          value: 'docker.io/library/node:18.18.2-alpine'
+          value: '{{ .Values.builder.image }}'
       runAfter:
         - oc-apply-manifest
       taskRef:

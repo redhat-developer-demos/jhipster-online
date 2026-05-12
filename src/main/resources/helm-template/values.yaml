@@ -17,6 +17,8 @@ deploy:
   method: fabric8
 tekton:
   defaultBranch: main
+builder:
+  image: 'quay.io/maximilianopizarro/jhipster-universal-developer-image:latest'
 # Toggle wiring in helm/templates/deployment.yaml (Spring / Quarkus) for optional extras from
 # src/main/kubernetes/jh-online-kubernetes-extras.yaml (Kafka, Redis, Keycloak issuer URI).
 rbac:
