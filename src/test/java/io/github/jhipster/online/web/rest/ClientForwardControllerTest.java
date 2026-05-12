@@ -55,12 +55,12 @@ class ClientForwardControllerTest {
     @Test
     void getClientEndpoint() throws Exception {
         ResultActions perform = restMockMvc.perform(get("/non-existant-mapping"));
-        perform.andExpect(status().isOk()).andExpect(forwardedUrl("/"));
+        perform.andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
     }
 
     @Test
     void getNestedClientEndpoint() throws Exception {
-        restMockMvc.perform(get("/admin/user-management")).andExpect(status().isOk()).andExpect(forwardedUrl("/"));
+        restMockMvc.perform(get("/admin/user-management")).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
     }
 
     @RestController

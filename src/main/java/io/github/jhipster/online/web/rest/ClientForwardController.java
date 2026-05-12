@@ -30,8 +30,8 @@ public class ClientForwardController {
      *
      * @return forward to client {@code index.html}.
      */
-    @GetMapping(value = { "/", "/{*path}" })
+    @GetMapping(value = "/{*path}")
     public String forward() {
-        return "forward:/";
+        return "forward:/index.html";
     }
 }
