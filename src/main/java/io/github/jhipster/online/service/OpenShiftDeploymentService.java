@@ -397,7 +397,10 @@ public class OpenShiftDeploymentService {
                 app.put("name", name);
                 app.put("namespace", namespace);
                 app.put("replicas", dep.getSpec().getReplicas());
-                app.put("readyReplicas", dep.getStatus() != null ? dep.getStatus().getReadyReplicas() : 0);
+                app.put(
+                    "readyReplicas",
+                    dep.getStatus() != null && dep.getStatus().getReadyReplicas() != null ? dep.getStatus().getReadyReplicas() : 0
+                );
                 app.put("creationTimestamp", dep.getMetadata().getCreationTimestamp());
                 app.put("routeUrl", routeMap.getOrDefault(name, ""));
                 app.put("deployMethod", resolveDeployMethod(dep, name, appCrd));

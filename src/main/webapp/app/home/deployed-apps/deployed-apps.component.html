@@ -53,9 +53,54 @@
           <span *ngIf="!app.routeUrl">-</span>
         </td>
         <td>
-          <button class="btn btn-danger btn-sm" (click)="deleteApp(app.name)">Delete</button>
+          <button class="btn btn-outline-danger btn-sm" (click)="openDeleteModal(app)">
+            <i class="fa fa-trash"></i> Delete
+          </button>
         </td>
       </tr>
     </tbody>
   </table>
+
+  <!-- Delete confirmation modal -->
+  <div class="modal-backdrop fade show" *ngIf="deleteTarget" (click)="cancelDelete()"></div>
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" *ngIf="deleteTarget">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Delete Application</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cancelDelete()"></button>
+        </div>
+        <div class="modal-body">
+          <p>This will permanently delete <strong>{{ deleteTarget.name }}</strong> and all its associated resources
+            (Deployments, Services, Routes, Secrets, PVCs, Tekton Pipelines, BuildConfigs, ImageStreams).</p>
+          <p class="text-danger fw-bold">This action cannot be undone.</p>
+          <hr>
+          <label for="confirm-name" class="form-label">
+            Type <code>{{ deleteTarget.name }}</code> to confirm:
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="confirm-name"
+            [(ngModel)]="deleteConfirmName"
+            [placeholder]="deleteTarget.name"
+            autocomplete="off"
+            (keyup.enter)="confirmDelete()"
+          >
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            [disabled]="deleteConfirmName !== deleteTarget.name || deleting"
+            (click)="confirmDelete()"
+          >
+            <span *ngIf="deleting" class="spinner-border spinner-border-sm me-1" role="status"></span>
+            {{ deleting ? 'Deleting...' : 'Delete Application' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

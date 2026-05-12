@@ -12,6 +12,10 @@ export class DeployedAppsComponent implements OnInit {
   loading = false;
   error = '';
 
+  deleteTarget: any = null;
+  deleteConfirmName = '';
+  deleting = false;
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -47,16 +51,34 @@ export class DeployedAppsComponent implements OnInit {
     );
   }
 
-  deleteApp(name: string): void {
-    if (!confirm('Delete application ' + name + '?')) {
+  openDeleteModal(app: any): void {
+    this.deleteTarget = app;
+    this.deleteConfirmName = '';
+    this.deleting = false;
+  }
+
+  cancelDelete(): void {
+    this.deleteTarget = null;
+    this.deleteConfirmName = '';
+  }
+
+  confirmDelete(): void {
+    if (!this.deleteTarget || this.deleteConfirmName !== this.deleteTarget.name) {
       return;
     }
-    this.http.delete('api/openshift/applications/' + name + '?namespace=' + this.namespace).subscribe(
+    this.deleting = true;
+    this.http.delete('api/openshift/applications/' + this.deleteTarget.name + '?namespace=' + this.namespace).subscribe(
       () => {
+        this.deleteTarget = null;
+        this.deleteConfirmName = '';
+        this.deleting = false;
         this.loadApplications();
       },
       (err: any) => {
         this.error = 'Failed to delete: ' + (err.error?.error || err.message);
+        this.deleteTarget = null;
+        this.deleteConfirmName = '';
+        this.deleting = false;
       }
     );
   }
