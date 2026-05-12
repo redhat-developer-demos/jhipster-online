@@ -26,6 +26,7 @@ public class SanitizeInputs {
     private static final Pattern SANITIZE_REGEX = Pattern.compile("[\n\r\t]");
     private static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[a-zA-Z0-9]*");
     private static final Pattern ALPHANUMERIC_AND_SPACES_REGEX = Pattern.compile("[\\w\\s]*");
+    private static final Pattern JDL_NAME_REGEX = Pattern.compile("[\\w\\s.\\-:,()]+");
 
     private SanitizeInputs() {
         throw new IllegalStateException("Utility class: SanitizeInputs");
@@ -44,5 +45,10 @@ public class SanitizeInputs {
     public static boolean isLettersNumbersAndSpaces(String inputString) {
         if (inputString == null) return false;
         return ALPHANUMERIC_AND_SPACES_REGEX.matcher(inputString).matches();
+    }
+
+    public static boolean isValidJdlName(String inputString) {
+        if (inputString == null || inputString.isEmpty()) return false;
+        return JDL_NAME_REGEX.matcher(inputString).matches();
     }
 }

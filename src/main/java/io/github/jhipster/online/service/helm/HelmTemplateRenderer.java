@@ -20,6 +20,7 @@ public final class HelmTemplateRenderer {
     );
 
     private static final Pattern LEFTOVER_BRACES = Pattern.compile("^[^\\S\\n]*\\{\\{.*?\\}\\}[^\\S\\n]*\\n?", Pattern.MULTILINE);
+    private static final Pattern LEFTOVER_INLINE_BRACES = Pattern.compile("\\{\\{.*?\\}\\}");
 
     private HelmTemplateRenderer() {}
 
@@ -140,6 +141,7 @@ public final class HelmTemplateRenderer {
     }
 
     private static String stripLeftoverDirectives(String text) {
-        return LEFTOVER_BRACES.matcher(text).replaceAll("");
+        String result = LEFTOVER_BRACES.matcher(text).replaceAll("");
+        return LEFTOVER_INLINE_BRACES.matcher(result).replaceAll("");
     }
 }

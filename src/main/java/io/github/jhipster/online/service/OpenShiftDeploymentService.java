@@ -124,12 +124,17 @@ public class OpenShiftDeploymentService {
                 "imagestream.yaml",
                 "buildconfig.yaml",
                 "tekton-pipeline.yaml",
+                "tekton-pipeline-spring.yaml",
+                "tekton-pipeline-quarkus.yaml",
                 "tekton-triggers.yaml",
                 "deployment.yaml",
+                "deployment-app-spring.yaml",
+                "deployment-app-quarkus.yaml",
                 "service-app.yaml",
                 "route.yaml"
             );
 
+            Set<String> processed = new LinkedHashSet<>();
             List<String> applied = new ArrayList<>();
             for (String fname : ordered) {
                 Path p = templatesDir.resolve(fname);
@@ -137,8 +142,27 @@ public class OpenShiftDeploymentService {
                     log.debug("Skipping missing template {}", fname);
                     continue;
                 }
+                processed.add(fname);
                 String rendered = HelmTemplateRenderer.render(Files.readString(p, StandardCharsets.UTF_8), flat);
                 applyYamlDocuments(namespace, rendered, applied);
+            }
+
+            try (var listing = Files.list(templatesDir)) {
+                listing
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.getFileName().toString().endsWith(".yaml") || p.getFileName().toString().endsWith(".yml"))
+                    .filter(p -> !processed.contains(p.getFileName().toString()))
+                    .sorted()
+                    .forEach(
+                        p -> {
+                            try {
+                                String rendered = HelmTemplateRenderer.render(Files.readString(p, StandardCharsets.UTF_8), flat);
+                                applyYamlDocuments(namespace, rendered, applied);
+                            } catch (IOException e) {
+                                log.warn("Could not read template {}: {}", p.getFileName(), e.getMessage());
+                            }
+                        }
+                    );
             }
 
             Map<String, Object> result = new LinkedHashMap<>();
