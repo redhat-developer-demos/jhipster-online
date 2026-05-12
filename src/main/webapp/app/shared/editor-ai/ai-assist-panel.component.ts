@@ -13,12 +13,6 @@ export class AiAssistPanelComponent implements OnInit {
   /** Current editor document (kept in sync by parent). */
   @Input() documentContent = '';
 
-  /** Optional: return selected text from the editor (e.g. CodeMirror selection). */
-  @Input() getSelection: () => string = () => '';
-
-  /** Zero-based line index of the cursor (for completion). */
-  @Input() getCursorLine: () => number = () => 0;
-
   @Output() insertText = new EventEmitter<string>();
 
   @Output() replaceDocument = new EventEmitter<string>();
@@ -34,6 +28,12 @@ export class AiAssistPanelComponent implements OnInit {
   fixErrors = '';
 
   constructor(private editorAiService: EditorAiService, private alertService: JhiAlertService) {}
+
+  /** Optional: return selected text from the editor (e.g. CodeMirror selection). */
+  @Input() getSelection: () => string = () => '';
+
+  /** Zero-based line index of the cursor (for completion). */
+  @Input() getCursorLine: () => number = () => 0;
 
   ngOnInit(): void {
     this.editorAiService.getConfig().subscribe(
