@@ -21,6 +21,9 @@ jobs:
       - name: Install mermaid-cli
         run: npm install --no-save @mermaid-js/mermaid-cli@11.4.0 puppeteer
 
+      - name: Create Puppeteer config
+        run: echo '{"args":["--no-sandbox","--disable-setuid-sandbox"]}' > /tmp/puppeteer-config.json
+
       - name: Validate Mermaid blocks in ARCHITECTURE.md
         run: |
           node <<'NODE'
@@ -39,7 +42,7 @@ jobs:
             const outPath = `/tmp/arch-mermaid-${i}.svg`;
             fs.writeFileSync(inPath, m[1].trimEnd() + '\n');
             execSync(
-              `npx mmdc -i ${inPath} -o ${outPath}`,
+              `npx mmdc -p /tmp/puppeteer-config.json -i ${inPath} -o ${outPath}`,
               { stdio: 'inherit' }
             );
           }
