@@ -28,7 +28,10 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
   - [Operator](#openshift-operator)
 - [Building for Production](#building-for-production-on-red-hat-devspaces)
 - [Configuration](#specific-configuration)
-  - [Optional JDL AI assistant (OpenShift / Sandbox models)](#optional-jdl-ai-assistant-openshift--sandbox-models)
+  - [GitHub configuration](#github-configuration)
+  - [GitLab configuration](#gitlab-configuration)
+  - [Gitea configuration](#gitea-configuration)
+  - [JDL AI assistant (models, RAG, embeddings)](#jdl-ai-assistant-models-rag-embeddings)
 - [New Features in v2.40.0](#new-features-in-v2400)
 - [Help and Contribution](#help-and-contribution-to-the-project)
 
@@ -212,7 +215,7 @@ oc apply -f src/main/kubernetes/jh-online-builder.yaml
 #### Binary build from DevSpaces to OpenShift
 
 ```
-oc start-build jh-online --from-file=target/jhonline-2.40.0.war
+oc start-build jh-online --from-file=target/jhonline-2.40.1-SNAPSHOT.war
 ```
 
 #### Update image from OpenShift Web console
@@ -225,7 +228,7 @@ image-registry.openshift-image-registry.svc:5000/<NAMESPACE>/jhipster-online-bui
 
 #### JHipster Universal Developer Image (optional)
 
-Red Hat OpenJDK17 with plugins required for runtime moment.
+Red Hat OpenJDK 21 with plugins required for runtime moment.
 
 ```
 oc start-build jhipster-online-builder
@@ -313,20 +316,60 @@ JHipster Online uses JWT to secure the application. For a production application
 - The application is only available through HTTPS. You can configure it using Spring Boot (please read the comments in the `application-prod.yml` file), or
   using an Apache 2 HTTP server with Let's Encrypt on front of your application (which is our configuration on the official [JHipster Online website](https://start.jhipster.tech/)).
 
-### Optional JDL AI assistant (OpenShift / Sandbox models)
+### JDL AI assistant (models, RAG, embeddings)
 
-The **Design Entities** page can show an **AI-assisted JDL draft** card when the backend is configured with `application.jdl-ai`:
+The **Design Entities** page shows an **AI-assisted JDL draft** panel when `application.jdl-ai.enabled=true` and at least one completions URL is configured. The assistant calls any **OpenAI-compatible** `POST .../v1/chat/completions` endpoint (vLLM, OpenShift AI / KServe, Ollama, OpenAI, etc.).
 
-| Key                          | Purpose                                                                                                                                                                                                                                                                                                                             |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `enabled`                    | Turn the feature on.                                                                                                                                                                                                                                                                                                                |
-| `api-url`                    | Full URL to an **OpenAI-compatible** `POST .../v1/chat/completions` endpoint (for example a model route in [Developer Sandbox](https://developers.redhat.com/developer-sandbox) or Red Hat OpenShift AI).                                                                                                                           |
-| `api-key`                    | Optional `Bearer` token if the endpoint requires it. Prefer a Secret / env var, not Git.                                                                                                                                                                                                                                            |
-| `model`                      | Model id sent in the JSON body (depends on your serving stack; set explicitly for local/vLLM gateways).                                                                                                                                                                                                                             |
-| `rag-enabled`                | When `true` (default), the server runs **lexical RAG** over bundled chunks in `src/main/resources/jdl-ai/rag-chunks.json` and injects the best-matching excerpts into the system prompt so output stays closer to [JHipster JDL](https://www.jhipster.tech/jdl/) and [JDL Studio](https://start.jhipster.tech/jdl-studio/) grammar. |
-| `rag-top-k`, `rag-max-chars` | How many chunks and how much text to inject.                                                                                                                                                                                                                                                                                        |
+#### Configuration properties
 
-Example YAML fragment:
+| Key                    | Default                  | Purpose                                                                                                                                  |
+| ---------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`              | `false`                  | Feature gate. The assistant is available only when `true` **and** a completions URL exists (global `api-url` or any `models[].api-url`). |
+| `api-url`              | —                        | Global OpenAI-compatible completions URL. Used when `models[]` is empty or as fallback.                                                  |
+| `api-key`              | —                        | Optional `Authorization: Bearer …` token for chat **and** embeddings. Prefer a Secret / env var, not Git.                                |
+| `model`                | —                        | Model id sent in JSON body (single-model mode).                                                                                          |
+| `default-model-id`     | —                        | Default picker selection when `models[]` is non-empty.                                                                                   |
+| `models[]`             | —                        | List of per-model options (see below).                                                                                                   |
+| `insecure-tls`         | `false`                  | Trust-all TLS for upstream HTTP (sandbox-style gateways with self-signed certs).                                                         |
+| `connect-timeout-ms`   | `15000`                  | HTTP connect timeout to the completions / embeddings endpoint.                                                                           |
+| `read-timeout-ms`      | `120000`                 | HTTP read timeout.                                                                                                                       |
+| `help-text`            | —                        | Shown in the UI below the assistant card.                                                                                                |
+| `rag-enabled`          | `true`                   | **Lexical RAG**: keyword/token overlap over bundled chunks in `src/main/resources/jdl-ai/rag-chunks.json`.                               |
+| `rag-top-k`            | `6`                      | How many chunks to inject into the system prompt.                                                                                        |
+| `rag-max-chars`        | `14000`                  | Maximum character budget for RAG context.                                                                                                |
+| `rag-semantic-enabled` | `false`                  | **Semantic RAG**: use embedding vectors + cosine similarity to rank chunks (falls back to lexical on failure).                           |
+| `embeddings-url`       | —                        | OpenAI-compatible `POST .../v1/embeddings` endpoint. Required when semantic RAG is enabled.                                              |
+| `embeddings-model`     | `text-embedding-3-small` | Model id sent in the embeddings JSON body.                                                                                               |
+
+#### Multi-model configuration
+
+When `models[]` is provided, the UI shows a model picker dropdown. Each entry can override the global `api-url` to point at a different serving endpoint:
+
+```yaml
+application:
+  jdl-ai:
+    enabled: true
+    api-key: ${APPLICATION_JDL_AI_API_KEY:}
+    default-model-id: granite-31-8b
+    models:
+      - id: granite-31-8b
+        label: 'IBM Granite 3.1 8B'
+        model: granite-31-8b-instruct
+        api-url: https://granite-predictor.apps.example.com/v1/chat/completions
+      - id: qwen3-8b
+        label: 'Qwen3 8B'
+        model: qwen3-8b
+        api-url: https://qwen-predictor.apps.example.com/v1/chat/completions
+      - id: nemotron-nano
+        label: 'Nemotron Nano 9B'
+        model: nemotron-nano-9b-v2
+    rag-enabled: true
+    rag-semantic-enabled: true
+    embeddings-url: https://embeddings-predictor.apps.example.com/v1/embeddings
+    embeddings-model: text-embedding-3-small
+```
+
+#### Single-model configuration (simple)
 
 ```yaml
 application:
@@ -334,25 +377,37 @@ application:
     enabled: true
     api-url: https://your-model-route.apps.sandbox.x86.openshift.com/v1/chat/completions
     api-key: ${JDL_AI_API_KEY:}
-    model: <model-name-required-by-your-server>
+    model: granite-31-8b-instruct
     rag-enabled: true
     rag-top-k: 6
     rag-max-chars: 14000
     help-text: Drafts are suggestions — always review in JDL Studio before applying.
 ```
 
-Equivalent environment variables (Spring relaxed binding) for an OpenShift `Deployment`:
+#### Environment variables for OpenShift deployment
 
 ```bash
 oc set env deployment/jhipster-online \
   APPLICATION_JDL_AI_ENABLED=true \
-  APPLICATION_JDL_AI_API_URL='https://.../v1/chat/completions' \
-  APPLICATION_JDL_AI_MODEL='your-model-id' \
-  APPLICATION_JDL_AI_RAG_ENABLED=true
-# Optional: mount API key from a Secret instead of plain env.
+  APPLICATION_JDL_AI_DEFAULT_MODEL_ID=granite-31-8b \
+  APPLICATION_JDL_AI_API_KEY="$(oc whoami -t)" \
+  APPLICATION_JDL_AI_RAG_SEMANTIC_ENABLED=true \
+  APPLICATION_JDL_AI_EMBEDDINGS_URL='https://embeddings-predictor.apps.example.com/v1/embeddings' \
+  APPLICATION_JDL_AI_EMBEDDINGS_MODEL=text-embedding-3-small \
+  APPLICATION_JDL_AI_INSECURE_TLS=true \
+  APPLICATION_JDL_AI_HELP_TEXT='Drafts are suggestions — always review in JDL Studio.'
 ```
 
-After building the WAR (`./mvnw -Pprod clean package -DskipTests`), push the image or use the existing binary build flow from [Building for Production on Red Hat DevSpaces](#building-for-production-on-red-hat-devspaces) (`oc start-build jh-online --from-file=target/jhonline-2.40.0.war`), then apply `oc set env` to the running deployment so the pod picks up the model URL for your sandbox.
+#### Health indicator
+
+The actuator endpoint `/management/health` includes a `jdlAi` component that reports whether a completions URL is configured. Useful for Kubernetes readiness probes or monitoring dashboards.
+
+#### REST endpoints
+
+| Method | Path                   | Description                                                                                                          |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/jdl-ai/config`   | Returns enabled state, help text, RAG flag, default model id, and available models.                                  |
+| `POST` | `/api/jdl-ai/generate` | Body: `{ "prompt": "...", "modelId": "..." }`. Returns generated JDL or 502 (upstream error) / 503 (not configured). |
 
 ### Mail
 
@@ -428,6 +483,31 @@ application:
         client-secret: XXX
         redirect-uri: XXX
 ```
+
+### Gitea configuration
+
+Gitea is configured using the `application.gitea` keys in the `application-*.yml` configuration files.
+
+JHipster Online can work with the public Gitea instance at [https://gitea.com](https://gitea.com) or any self-hosted Gitea server.
+
+Register an **OAuth2 application** in your Gitea instance under **Site Administration > Applications** (or **User Settings > Applications** for user-level apps):
+
+- **Application name**: `jhipster`
+- **Redirect URI**: `https://your-jhipster-online-url/api/gitea/callback`
+- **Scopes**: `read:user`, `write:repository`
+
+```yaml
+application:
+  gitea:
+    host: https://gitea.com
+    client-id: XXX
+    client-secret: XXX
+    redirect-uri: https://your-jhipster-online-url/api/gitea/callback
+```
+
+Gitea supports the same features as GitHub/GitLab: OAuth login, organization/repo sync, repository creation, push via JGit, and pull request creation for JDL updates and CI/CD flows.
+
+The host, client-id, client-secret, and redirect-uri can also be configured at runtime by admins through the **Administration > Git Runtime Config** page without restarting the application.
 
 ### Using Docker
 

@@ -11,21 +11,21 @@ This document describes the solution architecture of JHipster Online, designed f
 
 ## Technology Stack
 
-| Layer              | Technology                | Version                                |
-| ------------------ | ------------------------- | -------------------------------------- |
-| Backend Runtime    | Java                      | 17 (LTS; JDK 21+ supported for builds) |
-| Backend Framework  | Spring Boot               | 3.4.5                                  |
-| JHipster Framework | jhipster-dependencies BOM | 8.11.0                                 |
-| ORM                | Hibernate                 | 6.6.x                                  |
-| Database Migration | Liquibase                 | 4.29.x                                 |
-| Frontend           | Angular                   | 14.x                                   |
-| Frontend Language  | TypeScript                | 4.8                                    |
-| Package Manager    | npm                       | 10.x                                   |
-| Build Tool         | Maven                     | WAR packaging                          |
-| Node               | Node.js                   | 22.x (see package.json engines)        |
-| Database           | MySQL / MariaDB           | MariaDB 10.3 on OpenShift              |
-| Authentication     | JWT                       | Stateless                              |
-| OpenShift Client   | Fabric8 openshift-client  | 6.13.4                                 |
+| Layer              | Technology                | Version                         |
+| ------------------ | ------------------------- | ------------------------------- |
+| Backend Runtime    | Java                      | 21 (LTS)                        |
+| Backend Framework  | Spring Boot               | 3.4.5                           |
+| JHipster Framework | jhipster-dependencies BOM | 8.11.0                          |
+| ORM                | Hibernate                 | 6.6.x                           |
+| Database Migration | Liquibase                 | 4.29.x                          |
+| Frontend           | Angular                   | 14.x                            |
+| Frontend Language  | TypeScript                | 4.8                             |
+| Package Manager    | npm                       | 10.x                            |
+| Build Tool         | Maven                     | WAR packaging                   |
+| Node               | Node.js                   | 22.x (see package.json engines) |
+| Database           | MySQL / MariaDB           | MariaDB 10.3 on OpenShift       |
+| Authentication     | JWT                       | Stateless                       |
+| OpenShift Client   | Fabric8 openshift-client  | 6.13.4                          |
 
 ## Component Architecture
 
@@ -50,6 +50,7 @@ graph TD
     subgraph external [External Services]
         GH[GitHub API]
         GL[GitLab API]
+        GT[Gitea API]
         DB[(MariaDB)]
         CLI[JHipster CLI]
     end
@@ -73,6 +74,7 @@ graph TD
     JHSvc --> CLI
     GitSvc --> GH
     GitSvc --> GL
+    GitSvc --> GT
     GenSvc --> DB
     OsSvc --> F8
     F8 --> Tekton
@@ -81,12 +83,13 @@ graph TD
 
 ## Container Image Strategy
 
-| Image                    | Purpose                                                      | Registry                             |
-| ------------------------ | ------------------------------------------------------------ | ------------------------------------ |
-| `Dockerfile`             | Dev Spaces workspace image with all generators pre-installed | `quay.io/devfile/jhipster-online`    |
-| `Dockerfile.app`         | Runtime image for the jhipster-online WAR                    | Docker Hub                           |
-| `jh-online-builder.yaml` | OpenShift BuildConfig for S2I binary builds                  | Internal OpenShift registry          |
-| Builder base             | UBI8 OpenJDK 21 + Maven 3.9.15 + Node 22 (npm)               | `registry.redhat.io/ubi8/openjdk-21` |
+| Image                    | Purpose                                                      | Registry                                                  |
+| ------------------------ | ------------------------------------------------------------ | --------------------------------------------------------- |
+| `Dockerfile`             | Dev Spaces workspace image with all generators pre-installed | `quay.io/devfile/jhipster-online`                         |
+| `Dockerfile.spring-boot` | Multi-stage runtime image (Spring Boot WAR)                  | `ghcr.io/redhat-developer-demos/jhipster-online`, Quay.io |
+| `Dockerfile.quarkus`     | Multi-stage runtime image (Quarkus WAR)                      | Quay.io                                                   |
+| `jh-online-builder.yaml` | OpenShift BuildConfig for S2I binary builds                  | Internal OpenShift registry                               |
+| Builder base             | UBI8 OpenJDK 21 + Maven 3.9.15 + Node 22 (npm)               | `registry.redhat.io/ubi8/openjdk-21`                      |
 
 ## Deployment Topology
 
@@ -160,7 +163,7 @@ graph LR
    - Generates `yq-script` for pipeline parameter patching
    - Calls `JHipsterService.generateApplication()` which executes the `jhipster` CLI
    - Appends "Open in Dev Spaces" badge to README.md
-5. `GitService` pushes the generated project to GitHub/GitLab
+5. `GitService` pushes the generated project to GitHub/GitLab/Gitea
 
 ## OpenShift Deployment Flow (v2.40.1)
 
@@ -194,6 +197,22 @@ See `src/main/kubernetes/rbac.yaml` for the full ClusterRole definition. Key per
 - **Monitoring**: Pods, pods/log, events
 
 Pods use a **ServiceAccount** (`jhipster-online-deployer` when `rbac.yaml` is applied, or the dedicated SA from generated Helm `rbac-deployer.yaml`); they do not inherit your user’s `edit` role. Grant `edit` to that ServiceAccount in the project only as a **Developer Sandbox fallback** (see README “RBAC Requirements”) or apply the RoleBinding in `rbac.yaml` after replacing `NAMESPACE`.
+
+## Git Provider Support
+
+JHipster Online integrates with three Git providers through a unified `GitProviderService` interface:
+
+| Provider | Service class   | OAuth token exchange                    | API style |
+| -------- | --------------- | --------------------------------------- | --------- |
+| GitHub   | `GitHubService` | Form POST to `login/oauth/access_token` | REST v3   |
+| GitLab   | `GitLabService` | POST to `/oauth/token`                  | REST v4   |
+| Gitea    | `GiteaService`  | JSON POST to `login/oauth/access_token` | REST v1   |
+
+All three providers support: OAuth login, organization/repo sync, repository creation, push via JGit (`UsernamePasswordCredentialsProvider("oauth2", token)`), and pull request creation for JDL updates and CI/CD flows.
+
+The `GitProviderCredentialsService` resolves credentials from the DB table `git_provider_runtime_config` first (admin-configurable at runtime via **Administration > Git Runtime Config**), falling back to `application-*.yml` properties.
+
+Frontend OAuth URLs follow the pattern `{host}/login/oauth/authorize?client_id=…&redirect_uri=…&response_type=code` (GitHub/Gitea) or `{host}/oauth/authorize?…` (GitLab). The callback endpoint `GET /api/{provider}/callback` is permitted without authentication in `SecurityConfiguration`.
 
 ## JDL AI assistant and RAG
 
