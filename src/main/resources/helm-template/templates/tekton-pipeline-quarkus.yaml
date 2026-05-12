@@ -571,7 +571,7 @@ spec:
       params:
         - name: MAVEN_IMAGE
           value: >-
-            quay.io/maximilianopizarro/jhipster-universal-developer-image:2.40.0
+            registry.redhat.io/ubi8/openjdk-21:latest
         - name: GOALS
           value:
             - package
