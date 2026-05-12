@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { JhiAlert, JhiAlertService } from 'ng-jhipster';
 
-import { EditorAiConfig, EditorAiModelOption, EditorAiService } from './editor-ai.service';
+import { EditorAiModelOption, EditorAiService } from './editor-ai.service';
 
 @Component({
   selector: 'jhi-ai-assist-panel',
@@ -30,6 +30,8 @@ export class AiAssistPanelComponent implements OnInit {
   generatePrompt = '';
   resultText = '';
   loading = false;
+  explainPaste = '';
+  fixErrors = '';
 
   constructor(private editorAiService: EditorAiService, private alertService: JhiAlertService) {}
 
@@ -98,9 +100,6 @@ export class AiAssistPanelComponent implements OnInit {
     this.explainFragment(sel);
   }
 
-  /** Optional pasted fragment when nothing is selected in CodeMirror. */
-  explainPaste = '';
-
   explainPasted(): void {
     const t = this.explainPaste.trim();
     if (!t) {
@@ -108,18 +107,6 @@ export class AiAssistPanelComponent implements OnInit {
       return;
     }
     this.explainFragment(t);
-  }
-
-  private explainFragment(text: string): void {
-    this.resultText = '';
-    this.loading = true;
-    this.editorAiService.explain(text, this.language, this.selectedModelId).subscribe(
-      res => {
-        this.resultText = res.text ?? '';
-        this.loading = false;
-      },
-      err => this.handleError(err)
-    );
   }
 
   fixDocument(): void {
@@ -138,8 +125,6 @@ export class AiAssistPanelComponent implements OnInit {
       err => this.handleError(err)
     );
   }
-
-  fixErrors = '';
 
   generateFromPrompt(): void {
     const p = this.generatePrompt.trim();
@@ -179,6 +164,18 @@ export class AiAssistPanelComponent implements OnInit {
     navigator.clipboard.writeText(this.resultText).then(
       () => this.alertService.success('Copied', null),
       () => this.alertService.error('Copy failed', null)
+    );
+  }
+
+  private explainFragment(text: string): void {
+    this.resultText = '';
+    this.loading = true;
+    this.editorAiService.explain(text, this.language, this.selectedModelId).subscribe(
+      res => {
+        this.resultText = res.text ?? '';
+        this.loading = false;
+      },
+      err => this.handleError(err)
     );
   }
 
