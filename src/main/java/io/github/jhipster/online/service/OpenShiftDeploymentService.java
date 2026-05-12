@@ -210,19 +210,16 @@ public class OpenShiftDeploymentService {
     private void applyYamlDocuments(String namespace, String rendered, List<String> applied) {
         InputStream is = new ByteArrayInputStream(rendered.getBytes(StandardCharsets.UTF_8));
         try {
-            List<HasMetadata> resources = flattenParsedKubernetesResources(openShiftClient.load(is).get());
+            List<HasMetadata> resources = flattenParsedKubernetesResources(openShiftClient.load(is).items());
             if (resources.isEmpty()) {
                 return;
             }
-            // Apply one resource at a time: resourceList() builds a KubernetesList and can NPE on null items
-            // (empty docs between ---, or null entries inside a List document) even after top-level filtering.
             for (HasMetadata r : resources) {
                 try {
                     openShiftClient.resource(r).inNamespace(namespace).createOrReplace();
                     applied.add(resourceRef(r));
                 } catch (KubernetesClientException e) {
-                    log.error("Failed to apply {}: {}", resourceRef(r), e.getMessage());
-                    throw new OpenShiftPermissionException("Deployment failed: " + e.getMessage(), e);
+                    log.warn("Skipping {}: {}", resourceRef(r), e.getMessage());
                 }
             }
         } finally {
