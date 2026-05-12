@@ -18,6 +18,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install mermaid-cli
+        run: npm install --no-save @mermaid-js/mermaid-cli@11.4.0 puppeteer
+
       - name: Validate Mermaid blocks in ARCHITECTURE.md
         run: |
           node <<'NODE'
@@ -36,7 +39,7 @@ jobs:
             const outPath = `/tmp/arch-mermaid-${i}.svg`;
             fs.writeFileSync(inPath, m[1].trimEnd() + '\n');
             execSync(
-              `npx --yes @mermaid-js/mermaid-cli@11.4.0 -i ${inPath} -o ${outPath}`,
+              `npx mmdc -i ${inPath} -o ${outPath}`,
               { stdio: 'inherit' }
             );
           }
