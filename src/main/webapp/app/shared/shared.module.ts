@@ -22,6 +22,7 @@ import { AlertComponent } from './alert/alert.component';
 import { AlertErrorComponent } from './alert/alert-error.component';
 import { LoginModalComponent } from './login/login.component';
 import { JhiGitProviderAlertComponent, JhiGitProviderComponent } from './git-provider/git-provider.component';
+import { AiAssistPanelComponent } from './editor-ai/ai-assist-panel.component';
 import { HasAnyAuthorityDirective } from './auth/has-any-authority.directive';
 import { RouterModule } from '@angular/router';
 
@@ -33,7 +34,8 @@ import { RouterModule } from '@angular/router';
     LoginModalComponent,
     HasAnyAuthorityDirective,
     JhiGitProviderComponent,
-    JhiGitProviderAlertComponent
+    JhiGitProviderAlertComponent,
+    AiAssistPanelComponent
   ],
   exports: [
     JhonlineSharedLibsModule,
@@ -42,7 +44,8 @@ import { RouterModule } from '@angular/router';
     LoginModalComponent,
     HasAnyAuthorityDirective,
     JhiGitProviderComponent,
-    JhiGitProviderAlertComponent
+    JhiGitProviderAlertComponent,
+    AiAssistPanelComponent
   ]
 })
 export class JhonlineSharedModule {}

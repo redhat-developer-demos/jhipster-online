@@ -109,6 +109,8 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/gitlab/callback").permitAll()
                 .requestMatchers("/api/gitea/callback").permitAll()
                 .requestMatchers("/jdl-studio/**").permitAll()
+                // Same as other /api/** routes: authenticated users (used by Helm admin AI panel and JDL refine tools).
+                .requestMatchers("/api/editor-ai/**").authenticated()
                 .requestMatchers("/api/**").authenticated()
                 .requestMatchers("/management/health").permitAll()
                 .requestMatchers("/management/info").permitAll()

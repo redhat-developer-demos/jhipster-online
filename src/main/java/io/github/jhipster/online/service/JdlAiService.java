@@ -87,7 +87,33 @@ public class JdlAiService {
         String trimmedPrompt = userPrompt.trim();
         String ragContext = jdlRagService.buildContext(trimmedPrompt, cfg);
         String systemContent = buildSystemContent(ragContext);
+        return invokeChatCompletions(cfg, target, model, systemContent, trimmedPrompt);
+    }
 
+    /**
+     * OpenAI-style chat completion with explicit system and user messages (no JDL RAG). Used by {@link EditorAiService}.
+     */
+    public String chatCompletion(String systemContent, String userContent, String requestedModelId) throws Exception {
+        ApplicationProperties.JdlAi cfg = applicationProperties.getJdlAi();
+        if (!isAssistantAvailable()) {
+            throw new IllegalStateException("JDL AI assistant is not configured");
+        }
+        ResolvedTarget target = resolveTarget(cfg, requestedModelId);
+        if (StringUtils.isBlank(target.url())) {
+            throw new IllegalStateException("No chat completions URL resolved for JDL AI");
+        }
+        String model = StringUtils.isNotBlank(target.model()) ? target.model() : "gpt-3.5-turbo";
+        return invokeChatCompletions(cfg, target, model, systemContent, userContent.trim());
+    }
+
+    private String invokeChatCompletions(
+        ApplicationProperties.JdlAi cfg,
+        ResolvedTarget target,
+        String model,
+        String systemContent,
+        String userContent
+    )
+        throws Exception {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("model", model);
         root.put("temperature", 0.2);
@@ -98,7 +124,7 @@ public class JdlAiService {
         sys.put("content", systemContent);
         ObjectNode user = messages.addObject();
         user.put("role", "user");
-        user.put("content", trimmedPrompt);
+        user.put("content", userContent);
 
         String jsonBody = objectMapper.writeValueAsString(root);
 

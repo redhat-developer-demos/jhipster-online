@@ -22,7 +22,23 @@
     </div>
     <div class="col-md-9">
       <div *ngIf="selectedPath" class="mb-2"><strong>{{ selectedPath }}</strong></div>
-      <jhi-yaml-editor *ngIf="selectedPath" [value]="content" (valueChange)="content = $event"></jhi-yaml-editor>
+      <jhi-yaml-editor
+        #yamlRef
+        *ngIf="selectedPath"
+        [value]="content"
+        (valueChange)="content = $event"
+        (aiShortcut)="onAiShortcut($event)"
+      ></jhi-yaml-editor>
+      <jhi-ai-assist-panel
+        #aiRef
+        *ngIf="selectedPath"
+        [language]="'yaml'"
+        [documentContent]="content"
+        [getSelection]="getYamlSelection.bind(this)"
+        [getCursorLine]="getYamlCursorLine.bind(this)"
+        (insertText)="onInsertAiText($event)"
+        (replaceDocument)="onReplaceAllAi($event)"
+      ></jhi-ai-assist-panel>
       <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
         <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!selectedPath">Save</button>
         <button type="button" class="btn btn-outline-secondary" (click)="resetFromClasspath()">Reset from classpath</button>

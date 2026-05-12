@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 
+import { EditorAiService } from 'app/shared/editor-ai/editor-ai.service';
 import { JdlMetadataService } from './jdl-metadata.service';
 import { JdlAiModelOption, JdlAiService } from './jdl-ai.service';
 
@@ -51,8 +52,16 @@ export class JdlAiAssistantComponent implements OnInit {
   loading = false;
   openingStudio = false;
 
+  /** Refine pasted JDL (explain / fix) via editor-ai API. */
+  refineExplainPaste = '';
+  refineFixPaste = '';
+  refineFixErrors = '';
+  refineResult = '';
+  loadingRefine = false;
+
   constructor(
     private jdlAiService: JdlAiService,
+    private editorAiService: EditorAiService,
     private jdlMetadataService: JdlMetadataService,
     private alertService: JhiAlertService,
     private eventManager: JhiEventManager
@@ -150,5 +159,56 @@ export class JdlAiAssistantComponent implements OnInit {
         this.alertService.error('Could not save the draft to open in JDL Studio. Try Copy JDL and paste manually.', null);
       }
     });
+  }
+
+  explainRefinePaste(): void {
+    const t = this.refineExplainPaste.trim();
+    if (!t) {
+      this.alertService.error('Paste JDL to explain.', null);
+      return;
+    }
+    this.loadingRefine = true;
+    this.refineResult = '';
+    this.editorAiService.explain(t, 'jdl', this.selectedModelId).subscribe(
+      res => {
+        this.refineResult = res.text ?? '';
+        this.loadingRefine = false;
+      },
+      err => this.handleRefineError(err)
+    );
+  }
+
+  fixRefinePaste(): void {
+    const t = this.refineFixPaste.trim();
+    if (!t) {
+      this.alertService.error('Paste JDL to fix.', null);
+      return;
+    }
+    this.loadingRefine = true;
+    this.refineResult = '';
+    this.editorAiService.fix(t, 'jdl', this.refineFixErrors.trim() || undefined, this.selectedModelId).subscribe(
+      res => {
+        this.refineResult = res.text ?? '';
+        this.loadingRefine = false;
+      },
+      err => this.handleRefineError(err)
+    );
+  }
+
+  copyRefineResult(): void {
+    if (!this.refineResult) {
+      return;
+    }
+    navigator.clipboard.writeText(this.refineResult).then(
+      () => this.alertService.success('Copied', null),
+      () => this.alertService.error('Copy failed', null)
+    );
+  }
+
+  private handleRefineError(err: { error?: { detail?: string; message?: string } }): void {
+    const body = err.error;
+    const fromServer = body?.detail || body?.message;
+    this.alertService.error(fromServer || 'Refine request failed.', null);
+    this.loadingRefine = false;
   }
 }

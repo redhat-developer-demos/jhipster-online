@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+
+import { AiAssistPanelComponent } from 'app/shared/editor-ai/ai-assist-panel.component';
+import { YamlEditorComponent } from './yaml-editor.component';
 
 @Component({
   selector: 'jhi-helm-template-editor',
@@ -12,6 +15,9 @@ export class HelmTemplateEditorComponent implements OnInit {
   loadError = '';
   saveMessage = '';
   saveError = '';
+
+  @ViewChild('yamlRef') yamlEditor?: YamlEditorComponent;
+  @ViewChild('aiRef') aiPanel?: AiAssistPanelComponent;
 
   constructor(private http: HttpClient) {}
 
@@ -96,5 +102,25 @@ export class HelmTemplateEditorComponent implements OnInit {
         }
       }
     );
+  }
+
+  getYamlSelection(): string {
+    return this.yamlEditor?.getSelectedText() ?? '';
+  }
+
+  getYamlCursorLine(): number {
+    return this.yamlEditor?.getCursorLine() ?? 0;
+  }
+
+  onAiShortcut(ev: { content: string; line: number; ch: number }): void {
+    this.aiPanel?.runCompleteFromShortcut(ev.content, ev.line);
+  }
+
+  onInsertAiText(text: string): void {
+    this.yamlEditor?.insertTextAtCursor(text);
+  }
+
+  onReplaceAllAi(text: string): void {
+    this.content = text;
   }
 }

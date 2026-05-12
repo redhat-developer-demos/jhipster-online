@@ -53,5 +53,27 @@
       <textarea class="form-control font-monospace small mb-2" rows="12" readonly [value]="generatedJdl"></textarea>
       <button type="button" class="btn btn-sm btn-secondary" (click)="copy()">Copy JDL</button>
     </div>
+
+    <hr class="my-4" />
+    <h6 class="text-muted">Refine existing JDL (same models; no RAG)</h6>
+    <p class="small text-muted">JDL Studio is a separate app; paste JDL here to explain or fix it before opening in Studio.</p>
+    <div class="mb-3">
+      <label class="form-label small">Explain — paste JDL fragment</label>
+      <textarea class="form-control form-control-sm font-monospace" rows="4" [(ngModel)]="refineExplainPaste" name="refineExplainPaste"></textarea>
+      <button type="button" class="btn btn-sm btn-outline-primary mt-1" (click)="explainRefinePaste()" [disabled]="loadingRefine">Explain</button>
+    </div>
+    <div class="mb-3">
+      <label class="form-label small">Fix — paste full JDL</label>
+      <textarea class="form-control form-control-sm font-monospace" rows="4" [(ngModel)]="refineFixPaste" name="refineFixPaste"></textarea>
+      <label class="form-label small mt-2">Optional errors (e.g. from build)</label>
+      <textarea class="form-control form-control-sm font-monospace" rows="2" [(ngModel)]="refineFixErrors" name="refineFixErrors"></textarea>
+      <button type="button" class="btn btn-sm btn-outline-warning mt-1" (click)="fixRefinePaste()" [disabled]="loadingRefine">Fix</button>
+    </div>
+    <div *ngIf="refineResult" class="mt-2">
+      <label class="form-label small">Result</label>
+      <textarea class="form-control font-monospace small" rows="8" readonly [value]="refineResult"></textarea>
+      <button type="button" class="btn btn-sm btn-secondary mt-1" (click)="copyRefineResult()">Copy result</button>
+    </div>
+    <div *ngIf="loadingRefine" class="text-muted small mt-2">Working…</div>
   </div>
 </div>

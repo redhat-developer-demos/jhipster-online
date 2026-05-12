@@ -1,0 +1,46 @@
+<div *ngIf="assistantEnabled" class="card mt-3 border-info">
+  <div class="card-header">
+    <strong>AI assist</strong>
+    <span class="text-muted small ms-2">Uses the same models as JDL AI (when configured).</span>
+  </div>
+  <div class="card-body">
+    <p *ngIf="helpText" class="small text-muted">{{ helpText }}</p>
+    <div class="mb-2" *ngIf="models.length > 0">
+      <label class="form-label" for="editorAiModel">Model</label>
+      <select id="editorAiModel" class="form-select form-select-sm" name="editorAiModel" [(ngModel)]="selectedModelId">
+        <option *ngFor="let m of models" [value]="m.id">{{ m.label }}</option>
+      </select>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mb-2">
+      <button type="button" class="btn btn-sm btn-outline-primary" (click)="completeAtCursor()" [disabled]="loading">
+        Complete at cursor
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-primary" (click)="explainSelection()" [disabled]="loading">Explain selection</button>
+      <button type="button" class="btn btn-sm btn-outline-warning" (click)="fixDocument()" [disabled]="loading">Fix document</button>
+    </div>
+    <div class="mb-2">
+      <label class="form-label small">Optional build / parse errors (for Fix)</label>
+      <textarea class="form-control form-control-sm font-monospace" rows="2" [(ngModel)]="fixErrors" name="fixErrors"></textarea>
+    </div>
+    <div class="mb-2">
+      <label class="form-label small">Explain pasted fragment (if nothing selected in editor)</label>
+      <textarea class="form-control form-control-sm font-monospace" rows="2" [(ngModel)]="explainPaste" name="explainPaste"></textarea>
+      <button type="button" class="btn btn-sm btn-outline-secondary mt-1" (click)="explainPasted()" [disabled]="loading">Explain pasted</button>
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Generate from prompt</label>
+      <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="generatePrompt" name="generatePrompt"></textarea>
+      <button type="button" class="btn btn-sm btn-primary mt-1" (click)="generateFromPrompt()" [disabled]="loading">Generate</button>
+    </div>
+    <div *ngIf="resultText" class="mt-2">
+      <label class="form-label small">Result</label>
+      <textarea class="form-control font-monospace small" rows="8" readonly [value]="resultText"></textarea>
+      <div class="mt-2 d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-sm btn-success" (click)="insertResult()">Insert at cursor</button>
+        <button type="button" class="btn btn-sm btn-outline-success" (click)="applyReplaceAll()">Replace entire document</button>
+        <button type="button" class="btn btn-sm btn-secondary" (click)="copyResult()">Copy</button>
+      </div>
+    </div>
+    <div *ngIf="loading" class="text-muted small mt-2">Working…</div>
+  </div>
+</div>

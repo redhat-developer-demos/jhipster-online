@@ -13,6 +13,12 @@ import {
 import * as CodeMirror from 'codemirror';
 import 'codemirror/mode/yaml/yaml';
 
+export interface YamlEditorAiShortcutPayload {
+  content: string;
+  line: number;
+  ch: number;
+}
+
 @Component({
   selector: 'jhi-yaml-editor',
   template: '<textarea #ta class="jhi-yaml-editor-ta"></textarea>',
@@ -34,12 +40,24 @@ export class YamlEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
 
   @Output() valueChange = new EventEmitter<string>();
 
+  @Output() aiShortcut = new EventEmitter<YamlEditorAiShortcutPayload>();
+
   private cm: CodeMirror.Editor | undefined;
 
   ngAfterViewInit(): void {
     this.cm = CodeMirror.fromTextArea(this.ta.nativeElement, {
       lineNumbers: true,
-      mode: 'yaml'
+      mode: 'yaml',
+      extraKeys: {
+        'Ctrl-Shift-A': () => {
+          const editor = this.cm;
+          if (!editor) {
+            return;
+          }
+          const cur = editor.getCursor();
+          this.aiShortcut.emit({ content: editor.getValue(), line: cur.line, ch: cur.ch });
+        }
+      }
     });
     this.cm.setSize(null, '420px');
     this.cm.setValue(this.value ?? '');
@@ -56,6 +74,22 @@ export class YamlEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
         this.cm.setValue(next);
       }
     }
+  }
+
+  getSelectedText(): string {
+    return this.cm?.getSelection() ?? '';
+  }
+
+  getCursorLine(): number {
+    return this.cm?.getCursor().line ?? 0;
+  }
+
+  insertTextAtCursor(text: string): void {
+    if (!this.cm) {
+      return;
+    }
+    this.cm.replaceSelection(text, 'end');
+    this.valueChange.emit(this.cm.getValue());
   }
 
   ngOnDestroy(): void {
