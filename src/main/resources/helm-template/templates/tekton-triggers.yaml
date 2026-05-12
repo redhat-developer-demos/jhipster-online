@@ -1,5 +1,5 @@
-# Tekton Triggers: HTTP POST to EventListener creates a PipelineRun (repo/branch from chart values).
-# Any POST to the Route triggers a run; secure with network policy / OAuth proxy in production.
+# Tekton Triggers: webhook POST from GitHub/GitLab/Gitea to EventListener triggers a PipelineRun.
+# The CEL interceptor normalizes the payload across providers to extract repo URL and branch.
 ---
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
@@ -11,9 +11,9 @@ metadata:
 spec:
   params:
     - name: gitrepository
-      value: '{{ .Values.git.repoUrl }}'
+      value: $(extensions.git_url)
     - name: gitrevision
-      value: '{{ .Values.tekton.defaultBranch }}'
+      value: $(extensions.git_branch)
 ---
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
@@ -25,7 +25,9 @@ metadata:
 spec:
   params:
     - name: gitrepository
+      default: '{{ .Values.git.repoUrl }}'
     - name: gitrevision
+      default: '{{ .Values.tekton.defaultBranch }}'
   resourcetemplates:
     - apiVersion: tekton.dev/v1
       kind: PipelineRun
@@ -43,10 +45,20 @@ spec:
             value: $(tt.params.gitrepository)
           - name: GIT_BRANCH
             value: $(tt.params.gitrevision)
+          - name: MAVEN_IMAGE
+            value: '{{ .Values.builder.image }}'
+          - name: APP_JAR_VERSION
+            value: '{{ .Values.tekton.appJarVersion }}'
+          - name: APP_NAME
+            value: '{{ .Values.app.name }}'
+          - name: PATH_CONTEXT
+            value: '{{ .Values.tekton.pathContext }}'
+          - name: IMAGE_NAME
+            value: 'image-registry.openshift-image-registry.svc:5000/{{ .Values.image.namespace }}/{{ .Values.app.name }}'
         taskRunTemplate:
           serviceAccountName: pipeline
         timeouts:
-          pipeline: 1h0m0s
+          pipeline: '{{ .Values.tekton.timeout }}'
         workspaces:
           - name: workspace
             persistentVolumeClaim:
@@ -63,6 +75,21 @@ spec:
   serviceAccountName: pipeline
   triggers:
     - name: webhook-run
+      interceptors:
+        - ref:
+            name: 'cel'
+          params:
+            - name: 'overlays'
+              value:
+                - key: git_url
+                  expression: >-
+                    has(body.repository.clone_url) ? body.repository.clone_url :
+                    (has(body.project) && has(body.project.git_http_url) ? body.project.git_http_url :
+                    '{{ .Values.git.repoUrl }}')
+                - key: git_branch
+                  expression: >-
+                    has(body.ref) ? body.ref.split('/')[size(body.ref.split('/')) - 1] :
+                    '{{ .Values.tekton.defaultBranch }}'
       bindings:
         - ref: '{{ .Values.app.name }}-webhook-binding'
       template:

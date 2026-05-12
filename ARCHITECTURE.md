@@ -88,7 +88,7 @@ graph TD
 | `Dockerfile`             | Dev Spaces workspace image with all generators pre-installed | `quay.io/devfile/jhipster-online`                         |
 | `Dockerfile.spring-boot` | Multi-stage runtime image (Spring Boot WAR)                  | `ghcr.io/redhat-developer-demos/jhipster-online`, Quay.io |
 | `Dockerfile.quarkus`     | Multi-stage runtime image (Quarkus WAR)                      | Quay.io                                                   |
-| `jh-online-builder.yaml` | OpenShift BuildConfig for S2I binary builds                  | Internal OpenShift registry                               |
+| `Dockerfile.builder`     | Multi-stage build for WAR + runtime layers                   | Used with CI / `oc` image builds                          |
 | Builder base             | UBI8 OpenJDK 21 + Maven 3.9.15 + Node 22 (npm)               | `registry.redhat.io/ubi8/openjdk-21`                      |
 
 ## Deployment Topology
@@ -134,20 +134,20 @@ graph LR
 
 ## Key Directories
 
-| Directory                                       | Purpose                                                             |
-| ----------------------------------------------- | ------------------------------------------------------------------- |
-| `src/main/java/io/github/jhipster/online/`      | Backend Java source (Spring Boot)                                   |
-| `src/main/java/.../service/`                    | Business logic (GeneratorService, OpenShiftDeploymentService, etc.) |
-| `src/main/java/.../web/rest/`                   | REST controllers                                                    |
-| `src/main/java/.../config/`                     | Spring configuration (Security, Liquibase, OpenShift client, etc.)  |
-| `src/main/webapp/app/`                          | Angular frontend                                                    |
-| `src/main/webapp/app/home/`                     | Home module with all generator components                           |
-| `src/main/webapp/app/home/openshift-generator/` | OpenShift-specific generator with namespace selector                |
-| `src/main/webapp/app/home/deployed-apps/`       | Deployed applications dashboard                                     |
-| `src/main/resources/config/`                    | Spring profiles (dev/prod) and Liquibase migrations                 |
-| `src/main/resources/config/liquibase/`          | Database migration changelogs                                       |
-| `src/main/kubernetes/`                          | OpenShift manifests (templates, pipelines, devfiles, RBAC)          |
-| `src/main/docker/`                              | Docker Compose files for local development                          |
+| Directory                                       | Purpose                                                                                 |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `src/main/java/io/github/jhipster/online/`      | Backend Java source (Spring Boot)                                                       |
+| `src/main/java/.../service/`                    | Business logic (GeneratorService, OpenShiftDeploymentService, etc.)                     |
+| `src/main/java/.../web/rest/`                   | REST controllers                                                                        |
+| `src/main/java/.../config/`                     | Spring configuration (Security, Liquibase, OpenShift client, etc.)                      |
+| `src/main/webapp/app/`                          | Angular frontend                                                                        |
+| `src/main/webapp/app/home/`                     | Home module with all generator components                                               |
+| `src/main/webapp/app/home/openshift-generator/` | OpenShift-specific generator with namespace selector                                    |
+| `src/main/webapp/app/home/deployed-apps/`       | Deployed applications dashboard                                                         |
+| `src/main/resources/config/`                    | Spring profiles (dev/prod) and Liquibase migrations                                     |
+| `src/main/resources/config/liquibase/`          | Database migration changelogs                                                           |
+| `src/main/kubernetes/`                          | Backstage descriptor for this repo (`catalog-info.yaml`) and cluster RBAC (`rbac.yaml`) |
+| `src/main/docker/`                              | Docker Compose files for local development                                              |
 
 ## Generation Flow
 
@@ -157,11 +157,10 @@ graph LR
 4. `GeneratorService.generateApplication()`:
    - Creates working directory under `tmp/jhipster/applications/{id}`
    - Writes `.yo-rc.json`
-   - Downloads `devfile.yaml` from configured URL
-   - Downloads `pipeline.yaml` and `pipeline-run.yaml`
-   - Downloads `catalog-info.yaml` (Backstage)
-   - Generates `yq-script` for pipeline parameter patching
+   - Copies `devfile.yaml` and `catalog-info.yaml` from `repo-root-template/` on the classpath and replaces tokens (`__REPO_NAME__`, `__GIT_REPO_URL__`, etc.)
+   - Copies optional MariaDB manifest from `kubernetes-snippets/preset-mariadb-standalone.yaml` to `src/main/kubernetes/preset-mariadb-standalone.yaml`
    - Calls `JHipsterService.generateApplication()` which executes the `jhipster` CLI
+   - Writes optional extras and Helm chart from `helm-template/` (Tekton pipelines live under `helm/templates/`, not at repo root)
    - Appends "Open in Dev Spaces" badge to README.md
 5. `GitService` pushes the generated project to GitHub/GitLab/Gitea
 
@@ -171,11 +170,9 @@ graph LR
 2. Frontend calls `POST /api/openshift/deploy`
 3. `OpenShiftDeploymentResource` delegates to `OpenShiftDeploymentService`
 4. `OpenShiftDeploymentService`:
-   - Downloads template YAML from configured URL
-   - Replaces `NAMESPACE` placeholder with user-provided value
-   - Loads resources via Fabric8 `openShiftClient.load()`
-   - Applies resources to namespace via `createOrReplace()`
-5. Pipeline trigger: similar flow with `pipeline.yaml` and `pipeline-run.yaml`
+   - Loads Helm / OpenShift manifests from the generated project (or Git) and applies them via Fabric8 `openShiftClient`
+   - Replaces namespace and other placeholders as needed for the target project
+5. Tekton: pipeline definitions ship in the generated `helm/templates/` chart; triggers can start `PipelineRun` resources in-cluster (no root `pipeline.yaml` / `pipeline-run.yaml` in the Git repo)
 
 ## Liquibase Migration Notes
 

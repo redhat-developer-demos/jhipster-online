@@ -143,18 +143,6 @@ application:
   #       api-url: https://isvc-qwen3-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions
 
 openshift:
-  devspace:
-    url-devfile: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-devspaces.yaml
-  tekton:
-    #Spring Boot
-    url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline.yaml
-
-    #Quarkus
-    #url-pipeline: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-quarkus.yaml
-
-    url-pipeline-run: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/jhipster-pipeline-run.yaml
-  backstage:
-    url-backstage: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/src/main/kubernetes/catalog-info.yaml
   argocd:
     application-namespace: openshift-gitops
   deployment:

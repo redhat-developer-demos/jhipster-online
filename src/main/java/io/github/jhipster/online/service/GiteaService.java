@@ -317,6 +317,31 @@ public class GiteaService implements GitProviderService {
     }
 
     @Override
+    public void createWebhook(User user, String owner, String repositoryName, String webhookUrl) throws IOException {
+        log.info("Creating Gitea webhook on {} / {} -> {}", owner, repositoryName, webhookUrl);
+        ObjectNode config = objectMapper.createObjectNode();
+        config.put("url", webhookUrl);
+        config.put("content_type", "json");
+
+        ObjectNode hookBody = objectMapper.createObjectNode();
+        hookBody.put("type", "gitea");
+        hookBody.put("active", true);
+        hookBody.set("config", config);
+        hookBody.set("events", objectMapper.createArrayNode().add("push"));
+
+        String url = apiBase() + "/repos/" + urlEncode(owner) + "/" + urlEncode(repositoryName) + "/hooks";
+        HttpRequest req = HttpRequest
+            .newBuilder(URI.create(url))
+            .header("Accept", MediaType.APPLICATION_JSON_VALUE)
+            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Authorization", "token " + user.getGiteaOAuthToken())
+            .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(hookBody), StandardCharsets.UTF_8))
+            .build();
+        sendJson(req);
+        log.info("Gitea webhook created successfully");
+    }
+
+    @Override
     public boolean isConfigured() {
         return SecurityUtils
             .getCurrentUserLogin()

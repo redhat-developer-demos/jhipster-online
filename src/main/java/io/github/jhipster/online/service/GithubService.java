@@ -203,6 +203,24 @@ public class GithubService implements GitProviderService {
     }
 
     @Override
+    public void createWebhook(User user, String organization, String repositoryName, String webhookUrl) throws IOException {
+        log.info("Creating GitHub webhook on {} / {} -> {}", organization, repositoryName, webhookUrl);
+        GitHub gitHub = this.getConnection(user);
+        GHRepository repository = gitHub.getRepository(organization + "/" + repositoryName);
+        for (GHHook hook : repository.getHooks()) {
+            if (webhookUrl.equals(hook.getConfig().get("url"))) {
+                log.info("Webhook already exists, skipping");
+                return;
+            }
+        }
+        Map<String, String> config = new HashMap<>();
+        config.put("url", webhookUrl);
+        config.put("content_type", "json");
+        repository.createHook("web", config, Collections.singletonList(GHEvent.PUSH), true);
+        log.info("GitHub webhook created successfully");
+    }
+
+    @Override
     public boolean isConfigured() {
         Optional<User> user = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().orElse(null));
 

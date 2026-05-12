@@ -1,3 +1,5 @@
+# Optional standalone MariaDB for local / Dev Spaces testing (not used by the Helm chart, which uses helm/templates/*-mariadb*.yaml).
+# Copied into generated repos as src/main/kubernetes/preset-mariadb-standalone.yaml for devfile commands.
 kind: Secret
 apiVersion: v1
 metadata:

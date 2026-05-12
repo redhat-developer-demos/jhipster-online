@@ -30,9 +30,9 @@ import io.github.jhipster.online.domain.enums.GitProvider;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(value = ApplicationProperties.class)
@@ -73,25 +72,9 @@ class GeneratorServiceTest {
 
     private GeneratorService generatorService;
 
-    private Path devfileFixture;
-
-    private Path pipelineFixture;
-
-    private Path pipelineRunFixture;
-
-    private Path backstageFixture;
-
     @BeforeEach
     void shouldConstructGeneratorService() throws Exception {
         applicationId = UUID.randomUUID().toString();
-        devfileFixture = Files.createTempFile("devfile", ".yaml");
-        Files.writeString(devfileFixture, "schemaVersion: 2.2.0\nmetadata:\n  name: test\n");
-        pipelineFixture = Files.createTempFile("pipeline", ".yaml");
-        Files.writeString(pipelineFixture, "apiVersion: tekton.dev/v1\nkind: Pipeline\nmetadata:\n  name: p\n");
-        pipelineRunFixture = Files.createTempFile("pipeline-run", ".yaml");
-        Files.writeString(pipelineRunFixture, "apiVersion: tekton.dev/v1\nkind: PipelineRun\nmetadata:\n  name: pr\n");
-        backstageFixture = Files.createTempFile("catalog", ".yaml");
-        Files.writeString(backstageFixture, "apiVersion: backstage.io/v1alpha1\nkind: Component\nmetadata:\n  name: c\n");
 
         generatorService =
             new GeneratorService(
@@ -102,10 +85,6 @@ class GeneratorServiceTest {
                 kubernetesManifestSnippetService,
                 openshiftScaffoldApplicationService
             );
-        ReflectionTestUtils.setField(generatorService, "devSpaces", devfileFixture.toUri().toURL().toString());
-        ReflectionTestUtils.setField(generatorService, "pipelineJhipster", pipelineFixture.toUri().toURL().toString());
-        ReflectionTestUtils.setField(generatorService, "pipelineJhipsterRun", pipelineRunFixture.toUri().toURL().toString());
-        ReflectionTestUtils.setField(generatorService, "backstage", backstageFixture.toUri().toURL().toString());
     }
 
     @Test
@@ -121,6 +100,17 @@ class GeneratorServiceTest {
         verify(logsService).addLog(applicationId, "Creating `.yo-rc.json` file");
         verify(jHipsterService).generateApplication(applicationId, new File(cwd));
         assertThat(new File(expectedYoRcPath)).isFile().hasContent(applicationConfiguration);
+        File workingDir = new File(cwd);
+        assertThat(new File(workingDir, "devfile.yaml")).isFile().exists();
+        assertThat(FileUtils.readFileToString(new File(workingDir, "devfile.yaml"), StandardCharsets.UTF_8))
+            .contains("https://github.com/gh-org/repo");
+        assertThat(new File(workingDir, "catalog-info.yaml")).isFile().exists();
+        assertThat(FileUtils.readFileToString(new File(workingDir, "catalog-info.yaml"), StandardCharsets.UTF_8)).contains("gh-org/repo");
+        assertThat(new File(workingDir, "src/main/kubernetes/preset-mariadb-standalone.yaml")).isFile().exists();
+        assertThat(new File(workingDir, "pipeline.yaml")).doesNotExist();
+        assertThat(new File(workingDir, "pipeline-run.yaml")).doesNotExist();
+        assertThat(new File(workingDir, "yq-script")).doesNotExist();
+        assertThat(new File(workingDir, "helm/templates/tekton-pipeline.yaml")).isFile().exists();
     }
 
     @Test

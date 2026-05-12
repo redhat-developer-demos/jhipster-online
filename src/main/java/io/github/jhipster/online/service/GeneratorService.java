@@ -31,17 +31,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -72,18 +69,6 @@ public class GeneratorService {
     private final KubernetesManifestSnippetService kubernetesManifestSnippetService;
 
     private final OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService;
-
-    @Value("${openshift.devspace.url-devfile}")
-    private String devSpaces;
-
-    @Value("${openshift.tekton.url-pipeline}")
-    private String pipelineJhipster;
-
-    @Value("${openshift.tekton.url-pipeline-run}")
-    private String pipelineJhipsterRun;
-
-    @Value("${openshift.backstage.url-backstage}")
-    private String backstage;
 
     public GeneratorService(
         ApplicationProperties applicationProperties,
@@ -135,15 +120,8 @@ public class GeneratorService {
         FileUtils.forceMkdir(workingDir);
         this.generateYoRc(applicationId, workingDir, applicationConfiguration);
         log.info(".yo-rc.json created");
-        this.generateDevSpaces(applicationId, workingDir);
-        log.info("devfile.yaml created");
-        this.generateTektonPipeline(applicationId, workingDir);
-        log.info("pipeline.yaml and pipeline-run.yaml created");
-        this.generateBackstage(applicationId, workingDir);
-        log.info("catalog-info.yaml created");
-        // this.jHipsterService.yqPatchPipelineRun(applicationId, workingDir, applicationConfiguration);
-        log.info("yq script created");
-        this.generateYqScript(applicationId, workingDir, applicationConfiguration);
+        this.generateRepoRootArtifacts(applicationId, workingDir, applicationConfiguration);
+        log.info("devfile.yaml, catalog-info.yaml, and optional MariaDB preset created from classpath templates");
         this.jHipsterService.generateApplication(applicationId, workingDir);
         this.writeKubernetesExtrasIfPresent(applicationId, workingDir, applicationConfiguration);
         this.copyDisabledKubernetesExamples(applicationId, workingDir);
@@ -161,77 +139,59 @@ public class GeneratorService {
         writer.close();
     }
 
-    private void generateDevSpaces(String applicationId, File workingDir) throws IOException {
-        this.logsService.addLog(applicationId, "Creating `devfile.yaml` file");
-        PrintWriter writer = new PrintWriter(workingDir + "/devfile.yaml", StandardCharsets.UTF_8);
-        writer.print(IOUtils.toString(new URL(devSpaces).openStream(), StandardCharsets.UTF_8));
-        writer.close();
+    private void generateRepoRootArtifacts(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
+        Map<String, String> tokens = buildGenerationTokens(applicationConfiguration);
+        copyClasspathResource("repo-root-template/devfile.yaml", new File(workingDir, "devfile.yaml"));
+        replaceTokensInFile(new File(workingDir, "devfile.yaml"), tokens);
+        this.logsService.addLog(applicationId, "Created devfile.yaml from classpath template");
+
+        copyClasspathResource("repo-root-template/catalog-info.yaml", new File(workingDir, "catalog-info.yaml"));
+        replaceTokensInFile(new File(workingDir, "catalog-info.yaml"), tokens);
+        this.logsService.addLog(applicationId, "Created catalog-info.yaml from classpath template");
+
+        File k8sDir = new File(workingDir, "src/main/kubernetes");
+        FileUtils.forceMkdir(k8sDir);
+        copyClasspathResource("kubernetes-snippets/preset-mariadb-standalone.yaml", new File(k8sDir, "preset-mariadb-standalone.yaml"));
+        this.logsService.addLog(
+                applicationId,
+                "Added optional MariaDB manifest at src/main/kubernetes/preset-mariadb-standalone.yaml (for Dev Spaces commands)"
+            );
     }
 
-    private void generateTektonPipeline(String applicationId, File workingDir) throws IOException {
-        this.logsService.addLog(applicationId, "Creating `pipeline.yaml` file");
-        PrintWriter writer = new PrintWriter(workingDir + "/pipeline.yaml", StandardCharsets.UTF_8);
-        writer.print(IOUtils.toString(new URL(pipelineJhipster).openStream(), StandardCharsets.UTF_8));
-        writer.flush();
-        writer.close();
-
-        writer = new PrintWriter(workingDir + "/pipeline-run.yaml", StandardCharsets.UTF_8);
-        writer.print(IOUtils.toString(new URL(pipelineJhipsterRun).openStream(), StandardCharsets.UTF_8));
-        writer.flush();
-        writer.close();
-    }
-
-    private void generateBackstage(String applicationId, File workingDir) throws IOException {
-        this.logsService.addLog(applicationId, "Creating `catalog-info.yaml` file");
-        PrintWriter writer = new PrintWriter(workingDir + "/catalog-info.yaml", StandardCharsets.UTF_8);
-        writer.print(IOUtils.toString(new URL(backstage).openStream(), StandardCharsets.UTF_8));
-        writer.flush();
-        writer.close();
-    }
-
-    //TODO re-name pipeline name value from jhipster-pipeline.yaml
-
-    private void generateYqScript(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
-        this.logsService.addLog(applicationId, "Creating `yq-script` file");
-        Object document = Configuration.defaultConfiguration().jsonProvider().parse(applicationConfiguration);
-        String gitCompany = JsonPath.read(document, "$.git-company");
-        String repositoryName = JsonPath.read(document, "$.repository-name");
-        String appJarVersion = "APP_JAR_VERSION";
-        //String gitHost = JsonPath.read(document, "$.git-provider");
-        String gitRepo =
-            "'(.spec.params[] | select(.name == \"GIT_REPO\").value) |=\"https://github.com/" + gitCompany + "/" + repositoryName + "\"'";
-
-        //TODO bypass APP_JAR_VERSION version
-        if (applicationProperties.getJhipsterCmd().getCmd().compareTo("jhipster-quarkus") == 0) {
-            appJarVersion =
-                "'(.spec.params[] | select(.name == \"APP_JAR_VERSION\").value) |=\"" +
-                repositoryName +
-                "-1.0.0-SNAPSHOT-runner.jar\"" +
-                "'";
-        } else {
-            appJarVersion =
-                "'(.spec.params[] | select(.name == \"APP_JAR_VERSION\").value) |=\"" + repositoryName + "-0.0.1-SNAPSHOT.jar\"" + "'";
-        }
-
-        //String pipelineName = "'.metadata.name=\"" + repositoryName + "\"'";
-        // removed the catch/log/throw since the exception is handled in calling code.
-        PrintWriter writer = new PrintWriter(workingDir + "/yq-script", StandardCharsets.UTF_8);
-        writer.println("#!/bin/sh");
-        //writer.println("yq -Yi " + pipelineName + " /pipeline-run.yaml");
-        writer.println("yq -Yi " + gitRepo + " pipeline-run.yaml");
-        writer.println("yq -Yi " + appJarVersion + " pipeline-run.yaml");
-        writer.flush();
-        writer.close();
-    }
-
-    private void generateHelmBundle(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
-        this.logsService.addLog(applicationId, "Adding helm/ chart and argocd/ Application manifest");
+    /**
+     * Tokens shared by Helm chart, Backstage catalog, Devfile, and Tekton values.
+     */
+    private Map<String, String> buildGenerationTokens(String applicationConfiguration) {
         Object document = Configuration.defaultConfiguration().jsonProvider().parse(applicationConfiguration);
         String gitCompany = JsonPath.read(document, "$.git-company");
         String repositoryName = JsonPath.read(document, "$.repository-name");
         String repoSan = sanitizeKubernetesName(repositoryName);
-        String gitRepo = "https://github.com/" + gitCompany + "/" + repositoryName;
         String framework = resolveFramework(applicationConfiguration);
+        String gitRepo = "https://github.com/" + gitCompany + "/" + repositoryName;
+        String appJarVersion = "quarkus".equals(framework) ? repoSan + "-1.0.0-SNAPSHOT-runner.jar" : repoSan + "-0.0.1-SNAPSHOT.jar";
+
+        Map<String, String> tokenReplacements = new LinkedHashMap<>();
+        tokenReplacements.put("__REPO_NAME__", repoSan);
+        tokenReplacements.put("__FRAMEWORK__", framework);
+        tokenReplacements.put("__GIT_REPO_URL__", gitRepo);
+        tokenReplacements.put("__APP_NAME__", repoSan);
+        tokenReplacements.put("__APP_JAR_VERSION__", appJarVersion);
+        tokenReplacements.put("__ARGOCD_APP_NAMESPACE__", "openshift-gitops");
+        tokenReplacements.put("__GIT_COMPANY__", gitCompany);
+        tokenReplacements.put("__REPO_SLUG__", repositoryName);
+        tokenReplacements.put("__DOCUMENTATION_LINK__", gitRepo + "/blob/main/README.md");
+        tokenReplacements.put(
+            "__DEVWORKSPACES_EDITOR_LINK__",
+            "https://workspaces.openshift.com/#" + gitRepo + "/tree/main?storageType=ephemeral"
+        );
+        tokenReplacements.put("__DEVFILE_IMAGE__", "quay.io/devfile/jhipster-online:2.40.1");
+        return tokenReplacements;
+    }
+
+    private void generateHelmBundle(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
+        this.logsService.addLog(applicationId, "Adding helm/ chart and argocd/ Application manifest");
+        Map<String, String> tokenReplacements = buildGenerationTokens(applicationConfiguration);
+        String framework = tokenReplacements.get("__FRAMEWORK__");
 
         copyClasspathResource("helm-template/Chart.yaml", new File(workingDir, "helm/Chart.yaml"));
         copyClasspathResource("helm-template/values.yaml", new File(workingDir, "helm/values.yaml"));
@@ -266,12 +226,6 @@ public class GeneratorService {
         copyClasspathResource("helm-template/templates/tekton-triggers.yaml", new File(workingDir, "helm/templates/tekton-triggers.yaml"));
         copyClasspathResource("helm-template/argocd/application.yaml", new File(workingDir, "argocd/application.yaml"));
 
-        Map<String, String> tokenReplacements = new LinkedHashMap<>();
-        tokenReplacements.put("__REPO_NAME__", repoSan);
-        tokenReplacements.put("__FRAMEWORK__", framework);
-        tokenReplacements.put("__GIT_REPO_URL__", gitRepo);
-        tokenReplacements.put("__APP_NAME__", repoSan);
-        tokenReplacements.put("__ARGOCD_APP_NAMESPACE__", "openshift-gitops");
         replaceTokensInFile(new File(workingDir, "helm/Chart.yaml"), tokenReplacements);
         replaceTokensInFile(new File(workingDir, "helm/values.yaml"), tokenReplacements);
         replaceTokensInFile(new File(workingDir, "argocd/application.yaml"), tokenReplacements);
@@ -394,12 +348,8 @@ public class GeneratorService {
     }
 
     private void openInDevSpaces(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
-        this.logsService.addLog(applicationId, "Creating `yq-script` file");
-        Object document = Configuration.defaultConfiguration().jsonProvider().parse(applicationConfiguration);
-        String gitCompany = JsonPath.read(document, "$.git-company");
-        String repositoryName = JsonPath.read(document, "$.repository-name");
-        //String gitHost = JsonPath.read(document, "$.git-provider");
-        String gitRepo = "https://github.com/" + gitCompany + "/" + repositoryName;
+        this.logsService.addLog(applicationId, "Appending Open in Dev Spaces badge to README.md");
+        String gitRepo = buildGenerationTokens(applicationConfiguration).get("__GIT_REPO_URL__");
 
         PrintWriter writer = new PrintWriter(new FileWriter(new File(workingDir + "/README.md"), true));
 

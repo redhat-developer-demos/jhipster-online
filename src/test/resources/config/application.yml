@@ -109,14 +109,7 @@ application:
     host: https://gitlab.test
 
 openshift:
-  devspace:
-    url-devfile: https://example.com/devfile.yaml
-  backstage:
-    url-backstage: https://example.com/catalog-info.yaml
   argocd:
     application-namespace: openshift-gitops
   deployment:
     enabled: false
-  tekton:
-    url-pipeline: https://example.com/pipeline.yaml
-    url-pipeline-run: https://example.com/pipeline-run.yaml

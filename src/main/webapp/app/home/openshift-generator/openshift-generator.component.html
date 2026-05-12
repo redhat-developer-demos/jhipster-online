@@ -151,9 +151,9 @@
             <b>Maven</b> will be the build tool used for the project.<br>
             <b>Angular</b> will be the default front-end framework used for the project.<br>
             <b>MariaDB</b> will default to passwordless database connections as it's more secure option.<br>
-            The DevSpaces <a href="https://github.com/redhat-developer-demos/jhipster-online/blob/main/src/main/kubernetes/jhipster-devspaces.yaml"><b>devfile.yaml</b></a> will be added.<br>
-            The Tekton Pipeline <a href="https://github.com/redhat-developer-demos/jhipster-online/blob/main/src/main/kubernetes/jhipster-pipeline.yaml"><b>jhipster-pipeline.yaml</b></a> will be added.<br>
-            An in-repo <a href="https://github.com/redhat-developer-demos/jhipster-online/tree/main/src/main/resources/helm-template"><b>helm/</b></a> chart and <b>argocd/application.yaml</b> are generated for OpenShift (legacy <code>template.yaml</code> is deprecated).<br>
+            The DevSpaces <a href="https://github.com/redhat-developer-demos/jhipster-online/blob/main/src/main/resources/repo-root-template/devfile.yaml"><b>devfile.yaml</b></a> template is copied into the generated repository (token-replaced).<br>
+            Tekton pipelines are generated under <a href="https://github.com/redhat-developer-demos/jhipster-online/tree/main/src/main/resources/helm-template/templates"><b>helm/templates/</b></a> (no standalone <code>pipeline.yaml</code> at repo root).<br>
+            An in-repo <a href="https://github.com/redhat-developer-demos/jhipster-online/tree/main/src/main/resources/helm-template"><b>helm/</b></a> chart and <b>argocd/application.yaml</b> are generated for OpenShift.<br>
             Taking a look at the <a href="https://www.youtube.com/watch?v=b7xbcTAGNIQ">Video Demo</a> .<br>   
           </div>
       </div>

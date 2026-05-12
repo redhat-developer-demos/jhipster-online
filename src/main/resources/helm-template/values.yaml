@@ -17,6 +17,9 @@ deploy:
   method: fabric8
 tekton:
   defaultBranch: main
+  pathContext: /
+  appJarVersion: __APP_JAR_VERSION__
+  timeout: 1h0m0s
 builder:
   image: 'quay.io/maximilianopizarro/jhipster-universal-developer-image:latest'
 # Toggle wiring in helm/templates/deployment.yaml (Spring / Quarkus) for optional extras from

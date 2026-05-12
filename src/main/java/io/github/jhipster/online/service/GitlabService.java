@@ -260,6 +260,15 @@ public class GitlabService implements GitProviderService {
     }
 
     @Override
+    public void createWebhook(User user, String group, String repositoryName, String webhookUrl) throws IOException {
+        log.info("Creating GitLab webhook on {} / {} -> {}", group, repositoryName, webhookUrl);
+        GitlabAPI gitlab = getConnection(user);
+        GitlabProject project = gitlab.getProject(group, repositoryName);
+        gitlab.addProjectHook(project.getId(), webhookUrl, true, false, false, false, false, false, false, null);
+        log.info("GitLab webhook created successfully");
+    }
+
+    @Override
     public boolean isConfigured() {
         Optional<User> user = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().orElse(null));
 

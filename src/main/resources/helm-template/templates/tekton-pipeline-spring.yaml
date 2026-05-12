@@ -547,14 +547,14 @@ spec:
         image-registry.openshift-image-registry.svc:5000/{{ .Values.image.namespace }}/{{ .Values.app.name }}
       name: IMAGE_NAME
       type: string
-    - default: /
+    - default: '{{ .Values.tekton.pathContext }}'
       name: PATH_CONTEXT
       type: string
     - default: >-
         {{ .Values.builder.image }}
       name: MAVEN_IMAGE
       type: string
-    - default: jhipster-vue-application-0.0.1-SNAPSHOT.jar
+    - default: '{{ .Values.tekton.appJarVersion }}'
       name: APP_JAR_VERSION
       type: string
     - default: '{{ .Values.app.name }}'
@@ -563,7 +563,7 @@ spec:
     - default: '{{ .Values.git.repoUrl }}'
       name: GIT_REPO
       type: string
-    - default: main
+    - default: '{{ .Values.tekton.defaultBranch }}'
       name: GIT_BRANCH
       type: string
   tasks:
@@ -717,3 +717,38 @@ spec:
     - name: workspace
       optional: false
   finally: []
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: '{{ .Values.app.name }}-'
+  labels:
+    tekton.dev/pipeline: '{{ .Values.app.name }}'
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+spec:
+  params:
+    - name: IMAGE_NAME
+      value: 'image-registry.openshift-image-registry.svc:5000/{{ .Values.image.namespace }}/{{ .Values.app.name }}'
+    - name: PATH_CONTEXT
+      value: '{{ .Values.tekton.pathContext }}'
+    - name: MAVEN_IMAGE
+      value: '{{ .Values.builder.image }}'
+    - name: APP_JAR_VERSION
+      value: '{{ .Values.tekton.appJarVersion }}'
+    - name: APP_NAME
+      value: '{{ .Values.app.name }}'
+    - name: GIT_REPO
+      value: '{{ .Values.git.repoUrl }}'
+    - name: GIT_BRANCH
+      value: '{{ .Values.tekton.defaultBranch }}'
+  pipelineRef:
+    name: '{{ .Values.app.name }}'
+  taskRunTemplate:
+    serviceAccountName: pipeline
+  timeouts:
+    pipeline: '{{ .Values.tekton.timeout }}'
+  workspaces:
+    - name: workspace
+      persistentVolumeClaim:
+        claimName: '{{ .Values.app.name }}-workspace'

@@ -86,13 +86,13 @@ commands:
       label: 'Kubernetes apply MariaDB Instance (Kubernetes cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'kubectl apply -f src/main/kubernetes/mysql.yaml'
+      commandLine: 'kubectl apply -f src/main/resources/kubernetes-snippets/preset-mariadb-standalone.yaml'
   - id: oc-add-mysql
     exec:
       label: 'OpenShift apply MariaDB Instance (OpenShift cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'oc apply -f src/main/kubernetes/mysql.yaml'
+      commandLine: 'oc apply -f src/main/resources/kubernetes-snippets/preset-mariadb-standalone.yaml'
   - id: oc-remove-mysql
     exec:
       label: 'OpenShift remove MariaDB Instance (OpenShift cluster)'

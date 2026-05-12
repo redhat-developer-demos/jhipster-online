@@ -43,5 +43,7 @@ public interface GitProviderService {
     int createPullRequest(User user, String organization, String applicationName, String title, String branchName, String body)
         throws IOException;
 
+    void createWebhook(User user, String organization, String repositoryName, String webhookUrl) throws IOException;
+
     boolean isConfigured();
 }

@@ -1,39 +1,29 @@
-schemaVersion: 2.2.2
+# OpenShift Dev Spaces devfile for the generated application.
+# Tokens are replaced at generation time by JHipster Online.
+schemaVersion: 2.3.0
 metadata:
-  name: jhipster-online
-  version: 2.40.0
-  description: 'Stack with JHipster Online on Red Hat OpenShift Dev Spaces.
-    This stack include:
-    - JHipster 9.0.0 for generate Spring Boot 3.4+ projects.
-    - generator-jhipster-micronaut 3.9.0 for generate Micronaut projects.
-    - generator-jhipster-quarkus 3.6.0 for generate Quarkus projects.
-    - generator-jhipster-dotnetcore 4.5.0 for generate .Net 8.0 projects.
-    - generator-jhipster-azure-container-apps for generate Azure Container Apps projects.
-    Watch the demo video:
-    - https://youtu.be/b7xbcTAGNIQ?si=snE57Th4S3gPv_Vn'
-  displayName: JHipster Online
+  name: __REPO_NAME__
+  version: 2.40.1
+  description: 'JHipster stack on Red Hat OpenShift Dev Spaces (JDK 21).'
+  displayName: __REPO_NAME__
   icon: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/jhipster-icon.png
-  website: https://start.jhipster.tech
+  website: https://www.jhipster.tech
   tags:
     - Java
     - JHipster
-    - Angular
-    - Spring
-    - Quarkus
-    - Micronaut
   language: Java
   projectType: springboot
 projects:
-  - name: jhipster-online
+  - name: __REPO_NAME__
     git:
       remotes:
-        origin: 'https://github.com/redhat-developer-demos/jhipster-online'
+        origin: '__GIT_REPO_URL__'
       checkoutFrom:
         revision: main
 components:
   - name: tools
     container:
-      image: 'quay.io/devfile/jhipster-online:2.40.0'
+      image: '__DEVFILE_IMAGE__'
       mountSources: true
       cpuLimit: '4'
       cpuRequest: '1'
@@ -71,8 +61,6 @@ components:
           name: JAVA_OPTS
         - value: $(JAVA_OPTS)
           name: MAVEN_OPTS
-        - value: '/home/tooling/.sdkman/candidates/java/11.0.15-tem'
-          name: JAVA_HOME
   - name: m2
     volume:
       size: 512Mi
@@ -88,13 +76,13 @@ commands:
       label: 'Kubernetes apply MariaDB Instance (Kubernetes cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'kubectl apply -f src/main/kubernetes/mysql.yaml'
+      commandLine: 'kubectl apply -f src/main/kubernetes/preset-mariadb-standalone.yaml'
   - id: oc-add-mysql
     exec:
       label: 'OpenShift apply MariaDB Instance (OpenShift cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'oc apply -f src/main/kubernetes/mysql.yaml'
+      commandLine: 'oc apply -f src/main/kubernetes/preset-mariadb-standalone.yaml'
   - id: oc-remove-mysql
     exec:
       label: 'OpenShift remove MariaDB Instance (OpenShift cluster)'
@@ -121,7 +109,7 @@ commands:
         isDefault: true
   - id: start-backend
     exec:
-      label: 'Start JHipster Online'
+      label: 'Start application (Maven)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: 'chmod 777 ./mvnw && ./mvnw'

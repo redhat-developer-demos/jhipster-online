@@ -187,7 +187,9 @@ export class OpenshiftGeneratorComponent implements OnInit {
         'Configure Git provider, organization/group, and repository name above, then push your generated repo before deploying.';
       return;
     }
-    this.deployToOpenShift(gitRepo, appName);
+    const provider = (this.generatorRef?.selectedGitProvider || '').toLowerCase();
+    const gitOwner = this.generatorRef?.selectedGitCompany || '';
+    this.deployToOpenShift(gitRepo, appName, provider, gitOwner, appName);
   }
 
   deployFromScaffold(row: OpenshiftScaffoldRow): void {
@@ -198,7 +200,7 @@ export class OpenshiftGeneratorComponent implements OnInit {
     if (!this.deployToCluster) {
       this.deployToCluster = true;
     }
-    this.deployToOpenShift(row.gitRepoUrl, row.repositoryName);
+    this.deployToOpenShift(row.gitRepoUrl, row.repositoryName, row.gitProvider, row.gitCompany, row.repositoryName);
   }
 
   removeFromScaffoldList(row: OpenshiftScaffoldRow): void {
@@ -213,35 +215,47 @@ export class OpenshiftGeneratorComponent implements OnInit {
     );
   }
 
-  private deployToOpenShift(gitRepo: string, appName: string): void {
+  private deployToOpenShift(gitRepo: string, appName: string, gitProvider?: string, gitOwner?: string, gitRepoName?: string): void {
     if (!this.namespace?.trim()) {
       return;
     }
     this.deployStatus = 'Deploying to namespace ' + this.namespace + ' (' + this.deployMethod + ')...';
-    this.http
-      .post<any>('api/openshift/deploy', {
-        namespace: this.namespace,
-        gitRepo,
-        appName,
-        deployMethod: this.deployMethod,
-        argocdApplicationNamespace: this.argocdApplicationNamespace
-      })
-      .subscribe(
-        (result: any) => {
-          if (this.deployMethod === 'argocd') {
-            this.deployStatus =
-              'Argo CD Application ' +
-              (result.application || appName) +
-              ' applied in ' +
-              (result.argocdNamespace || this.argocdApplicationNamespace);
-          } else {
-            this.deployStatus = 'Deployed ' + (result.resources?.length || 0) + ' resources to ' + this.namespace;
+    const body: any = {
+      namespace: this.namespace,
+      gitRepo,
+      appName,
+      deployMethod: this.deployMethod,
+      argocdApplicationNamespace: this.argocdApplicationNamespace
+    };
+    if (gitProvider) {
+      body.gitProvider = gitProvider;
+    }
+    if (gitOwner) {
+      body.gitOwner = gitOwner;
+    }
+    if (gitRepoName) {
+      body.gitRepoName = gitRepoName;
+    }
+    this.http.post<any>('api/openshift/deploy', body).subscribe(
+      (result: any) => {
+        if (this.deployMethod === 'argocd') {
+          this.deployStatus =
+            'Argo CD Application ' +
+            (result.application || appName) +
+            ' applied in ' +
+            (result.argocdNamespace || this.argocdApplicationNamespace);
+        } else {
+          let msg = 'Deployed ' + (result.resources?.length || 0) + ' resources to ' + this.namespace;
+          if (result.webhookUrl) {
+            msg += ' | Webhook configured: ' + result.webhookUrl;
           }
-          this.loadScaffoldApps();
-        },
-        (error: any) => {
-          this.deployStatus = 'Deploy failed: ' + (error.error?.error || error.message);
+          this.deployStatus = msg;
         }
-      );
+        this.loadScaffoldApps();
+      },
+      (error: any) => {
+        this.deployStatus = 'Deploy failed: ' + (error.error?.error || error.message);
+      }
+    );
   }
 }

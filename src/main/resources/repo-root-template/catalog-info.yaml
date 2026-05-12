@@ -1,0 +1,28 @@
+# Backstage / Red Hat Developer Hub component descriptor for this repository.
+# Tokens are replaced at generation time by JHipster Online.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: '__REPO_NAME__'
+  description: 'JHipster application (__FRAMEWORK__)'
+  annotations:
+    github.com/project-slug: __GIT_COMPANY__/__REPO_SLUG__
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/kubernetes-namespace: __TARGET_NAMESPACE__
+    backstage.io/kubernetes-id: __REPO_NAME__
+    janus-idp.io/tekton: __REPO_NAME__
+    backstage.io/kubernetes-label-selector: 'app.kubernetes.io/instance=__REPO_NAME__'
+  links:
+    - title: Documentation
+      url: __DOCUMENTATION_LINK__
+    - url: __DEVWORKSPACES_EDITOR_LINK__
+      title: OpenShift Dev Spaces
+      icon: web
+  tags:
+    - java
+    - jhipster
+    - __FRAMEWORK__
+spec:
+  type: service
+  lifecycle: experimental
+  owner: 'group:default/__GIT_COMPANY__'

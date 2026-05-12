@@ -216,7 +216,13 @@ public class OpenShiftDeploymentService {
             }
             for (HasMetadata r : resources) {
                 try {
-                    openShiftClient.resource(r).inNamespace(namespace).createOrReplace();
+                    boolean useGenerateName =
+                        StringUtils.isBlank(r.getMetadata().getName()) && StringUtils.isNotBlank(r.getMetadata().getGenerateName());
+                    if (useGenerateName) {
+                        openShiftClient.resource(r).inNamespace(namespace).create();
+                    } else {
+                        openShiftClient.resource(r).inNamespace(namespace).createOrReplace();
+                    }
                     applied.add(resourceRef(r));
                 } catch (KubernetesClientException e) {
                     log.warn("Skipping {}: {}", resourceRef(r), e.getMessage());
@@ -355,6 +361,19 @@ public class OpenShiftDeploymentService {
             trimmed = trimmed + ".git";
         }
         return trimmed;
+    }
+
+    public String getEventListenerRouteUrl(String namespace, String appName) {
+        try {
+            Route route = openShiftClient.routes().inNamespace(namespace).withName(appName + "-el").get();
+            if (route != null && route.getSpec() != null && route.getSpec().getHost() != null) {
+                boolean tls = route.getSpec().getTls() != null;
+                return (tls ? "https://" : "http://") + route.getSpec().getHost();
+            }
+        } catch (KubernetesClientException e) {
+            log.warn("Could not read EventListener route for {}: {}", appName, e.getMessage());
+        }
+        return null;
     }
 
     public List<Map<String, Object>> listDeployedApplications(String namespace) {
