@@ -63,6 +63,11 @@ class ClientForwardControllerTest {
         restMockMvc.perform(get("/admin/user-management")).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
     }
 
+    @Test
+    void staticAssetNotForwarded() throws Exception {
+        restMockMvc.perform(get("/main.js")).andExpect(status().isNotFound());
+    }
+
     @RestController
     static class TestController {
 

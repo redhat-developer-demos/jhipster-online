@@ -83,7 +83,7 @@ public class SecurityConfiguration {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/", "/index.html").permitAll()
+                .requestMatchers("/", "/index.html", "/error").permitAll()
                 .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg", "/*.woff2").permitAll()
                 .requestMatchers("/app/**").permitAll()
                 .requestMatchers("/i18n/**").permitAll()
@@ -116,7 +116,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/swagger-resources/configuration/ui").permitAll()
                 .requestMatchers("/swagger-ui/index.html").hasAuthority(AuthoritiesConstants.ADMIN)
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             .httpBasic(basic -> {});
         // @formatter:on

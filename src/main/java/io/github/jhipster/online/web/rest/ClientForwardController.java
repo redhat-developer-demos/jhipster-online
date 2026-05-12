@@ -21,16 +21,24 @@ package io.github.jhipster.online.web.rest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+/**
+ * SPA forward controller: forwards client-side routes (paths without a dot/extension)
+ * to {@code index.html} so the Angular router handles them.
+ *
+ * More specific @RestController mappings (/api/**, /management/**) take precedence
+ * in Spring MVC's path-matching priority.
+ */
 @Controller
 public class ClientForwardController {
 
-    /**
-     * Forwards unmapped paths to the client {@code index.html}.
-     * <p>Spring 6 path patterns no longer allow a segment after {@code **}; a catch-all {@code {*path}} is used instead.</p>
-     *
-     * @return forward to client {@code index.html}.
-     */
-    @GetMapping(value = "/{*path}")
+    @GetMapping(
+        value = {
+            "/{segment:[^\\.]*}",
+            "/{segment:[^\\.]*}/{segment2:[^\\.]*}",
+            "/{segment:[^\\.]*}/{segment2:[^\\.]*}/{segment3:[^\\.]*}",
+            "/{segment:[^\\.]*}/{segment2:[^\\.]*}/{segment3:[^\\.]*}/{segment4:[^\\.]*}"
+        }
+    )
     public String forward() {
         return "forward:/index.html";
     }
