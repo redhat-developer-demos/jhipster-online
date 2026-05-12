@@ -223,7 +223,13 @@ public class JdlService {
     }
 
     public String kebabCaseJdlName(JdlMetadata jdlMetadata) {
-        return jdlMetadata.getName().toLowerCase().replace(" ", "-");
+        return jdlMetadata
+            .getName()
+            .toLowerCase()
+            .replace(" ", "-")
+            .replaceAll("[^a-z0-9._/-]", "-")
+            .replaceAll("-{2,}", "-")
+            .replaceAll("^-|-$", "");
     }
 
     @Cacheable(cacheNames = CacheConfiguration.STATISTICS_JDL_COUNT)
