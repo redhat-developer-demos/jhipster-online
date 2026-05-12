@@ -13,7 +13,6 @@ RUN ARCH=$(uname -m) \
     && tar -xzf /tmp/node.tar.gz -C /usr/local --strip-components=1 \
     && rm -f /tmp/node.tar.gz \
     && node -v \
-    && npm install -g yarn \
     && npm install -g generator-jhipster-dotnetcore@4.5.0 \
     && npm install -g generator-jhipster-micronaut@3.9.0 \
     && npm install -g generator-jhipster-quarkus@3.6.0 \

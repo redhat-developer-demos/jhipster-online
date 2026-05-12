@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5 AS builder
+FROM registry.redhat.io/ubi8/openjdk-21:latest AS builder
 
 USER root
 
@@ -24,16 +24,15 @@ RUN microdnf install -y tar xz gzip curl git && \
     curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" -o /tmp/node.tar.xz && \
     tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 && \
     rm -f /tmp/node.tar.xz && \
-    npm install -g yarn && \
     microdnf clean all
 
 WORKDIR /build
 COPY . .
-RUN yarn install --frozen-lockfile --ignore-scripts && \
+RUN npm ci --ignore-scripts && \
     mvn -ntp package -Pprod -Dmaven.test.skip=true -DskipTests
 
 # --- Runtime ---
-FROM registry.redhat.io/ubi8/openjdk-17@sha256:af305e087061cbaa4107ce0b304a1ef987f6b54bae3f75bfd529cfd084cba9b5
+FROM registry.redhat.io/ubi8/openjdk-21:latest
 
 USER root
 
@@ -45,7 +44,7 @@ RUN microdnf install -y tar xz gzip curl git && \
     curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" -o /tmp/node.tar.xz && \
     tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 && \
     rm -f /tmp/node.tar.xz && \
-    npm install -g yarn generator-jhipster@9.0.0 generator-jhipster-quarkus@3.6.0 && \
+    npm install -g generator-jhipster@9.0.0 generator-jhipster-quarkus@3.6.0 && \
     microdnf clean all
 
 COPY --from=builder /build/target/jhonline-*.war /deployments/

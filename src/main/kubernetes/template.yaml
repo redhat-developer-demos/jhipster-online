@@ -72,7 +72,7 @@ spec:
       from:
         kind: DockerImage
         name: >-
-          image-registry.openshift-image-registry.svc:5000/openshift/ubi8-openjdk-17:1.12
+          registry.redhat.io/ubi8/openjdk-21:latest
       incremental: true
   postCommit: {}
   source:

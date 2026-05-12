@@ -86,7 +86,7 @@ graph TD
 | `Dockerfile`             | Dev Spaces workspace image with all generators pre-installed | `quay.io/devfile/jhipster-online`    |
 | `Dockerfile.app`         | Runtime image for the jhipster-online WAR                    | Docker Hub                           |
 | `jh-online-builder.yaml` | OpenShift BuildConfig for S2I binary builds                  | Internal OpenShift registry          |
-| Builder base             | UBI8 OpenJDK 17 + Maven 3.9.15 + Node 22                     | `registry.redhat.io/ubi8/openjdk-17` |
+| Builder base             | UBI8 OpenJDK 21 + Maven 3.9.15 + Node 22 (npm)               | `registry.redhat.io/ubi8/openjdk-21` |
 
 ## Deployment Topology
 
