@@ -34,7 +34,7 @@ COPY .mvn .mvn
 RUN mvn -ntp dependency:go-offline -Pprod -DskipTests 2>/dev/null || true
 
 COPY package.json package-lock.json .npmrc ./
-RUN npm ci --ignore-scripts
+RUN npm ci
 
 COPY . .
 RUN mvn -ntp package -Pprod -Dmaven.test.skip=true -DskipTests
