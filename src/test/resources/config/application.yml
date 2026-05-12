@@ -82,10 +82,6 @@ jhipster:
   logging:
     # To test json console appender
     use-json-format: true # By default, logs are in Json format
-    logstash:
-      enabled: false
-      host: localhost
-      port: 5000
   mail:
     from: test@localhost
     base-url: http://127.0.0.1:8080

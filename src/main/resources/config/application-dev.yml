@@ -106,11 +106,6 @@ jhipster:
     base-url: http://127.0.0.1:8080
   logging:
     use-json-format: false # By default, logs are not in Json format
-    logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
-      enabled: false
-      host: localhost
-      port: 5000
-      queue-size: 512
   audit-events:
     retention-period: 30 # Number of days before audit events are deleted.
 
