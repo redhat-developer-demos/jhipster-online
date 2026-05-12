@@ -19,15 +19,15 @@
 package io.github.jhipster.online.config;
 
 import io.github.jhipster.online.security.AuthoritiesConstants;
-import io.github.jhipster.online.security.jwt.JWTConfigurer;
+import io.github.jhipster.online.security.jwt.JWTFilter;
 import io.github.jhipster.online.security.jwt.TokenProvider;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,8 +37,9 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
 import org.springframework.web.filter.CorsFilter;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
+@Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 @Import(SecurityProblemSupport.class)
 public class SecurityConfiguration {
 
@@ -59,80 +60,64 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web ->
-            web
-                .ignoring()
-                .antMatchers(HttpMethod.OPTIONS, "/**")
-                .antMatchers("/app/**/*.{js,html}")
-                .antMatchers("/i18n/**")
-                .antMatchers("/content/**")
-                .antMatchers("/swagger-ui/index.html")
-                .antMatchers("/test/**")
-                .antMatchers("/h2-console/**");
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // @formatter:off
         http
-            .csrf()
-            .disable()
+            .csrf(csrf -> csrf.disable())
             .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
-            .exceptionHandling()
+            .addFilterBefore(new JWTFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(problemSupport)
                 .accessDeniedHandler(problemSupport)
-        .and()
-            .headers()
-            .contentSecurityPolicy("default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com  https://static.cloudflareinsights.com; connect-src 'self' https://www.googletagmanager.com  https://*.analytics.google.com https://analytics.google.com https://stats.g.doubleclick.net; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.googletagmanager.com https://www.google.fr https://www.google.com data:; font-src 'self' https://cdn.linearicons.com data:; manifest-src 'self' https://static.cloudflareinsights.com data:;")
-        .and()
-            .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
-        .and()
-            .permissionsPolicy(permissions -> permissions
-                .policy("geolocation=(none), midi=(none), sync-xhr=(none), microphone=(none), camera=(none), magnetometer=(none), gyroscope=(none), speaker=(none), fullscreen=(none), speaker=(none), payment=(none)")
             )
-        .and()
-            .frameOptions()
-            .deny()
-        .and()
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-            .authorizeRequests()
-            .antMatchers("/api/authenticate").permitAll()
-            .antMatchers("/api/register").permitAll()
-            .antMatchers("/api/activate").permitAll()
-            .antMatchers("/api/account/reset-password/init").permitAll()
-            .antMatchers("/api/account/reset-password/finish").permitAll()
-            .antMatchers("/api/account/reset-password/link").hasAnyAuthority(AuthoritiesConstants.ADMIN)
-            .antMatchers("/api/crash-reports/*").permitAll()
-            .antMatchers("/api/download-application").permitAll()
-            .antMatchers(HttpMethod.GET, "/api/kubernetes-snippets/**").permitAll()
-            .antMatchers("/api/s/link/*").authenticated()
-            .antMatchers(HttpMethod.GET, "/api/s/**").permitAll()
-            .antMatchers(HttpMethod.POST, "/api/s/**").permitAll()
-            .antMatchers("/api/git/config").permitAll()
-            .antMatchers("/api/github/callback").permitAll()
-            .antMatchers("/api/gitlab/callback").permitAll()
-            .antMatchers("/api/gitea/callback").permitAll()
-            .antMatchers("/jdl-studio/**").permitAll()
-            .antMatchers("/api/**").authenticated()
-            .antMatchers("/management/health").permitAll()
-            .antMatchers("/management/info").permitAll()
-            .antMatchers("/management/prometheus").permitAll()
-            .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
-            .antMatchers("/v2/api-docs/**").permitAll()
-            .antMatchers("/swagger-resources/configuration/ui").permitAll()
-            .antMatchers("/swagger-ui/index.html").hasAuthority(AuthoritiesConstants.ADMIN)
-        .and()
-            .httpBasic()
-        .and()
-            .apply(securityConfigurerAdapter());
-        return http.build();
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+                .contentSecurityPolicy(csp -> csp.policyDirectives(
+                    "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com  https://static.cloudflareinsights.com; connect-src 'self' https://www.googletagmanager.com  https://*.analytics.google.com https://analytics.google.com https://stats.g.doubleclick.net; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.googletagmanager.com https://www.google.fr https://www.google.com data:; font-src 'self' https://cdn.linearicons.com data:; manifest-src 'self' https://static.cloudflareinsights.com data:;"
+                ))
+                .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                .permissionsPolicy(permissions -> permissions.policy(
+                    "geolocation=(none), midi=(none), sync-xhr=(none), microphone=(none), camera=(none), magnetometer=(none), gyroscope=(none), speaker=(none), fullscreen=(none), speaker=(none), payment=(none)"
+                ))
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/app/**").permitAll()
+                .requestMatchers("/i18n/**").permitAll()
+                .requestMatchers("/content/**").permitAll()
+                .requestMatchers("/swagger-ui/index.html").permitAll()
+                .requestMatchers("/test/**").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/api/authenticate").permitAll()
+                .requestMatchers("/api/register").permitAll()
+                .requestMatchers("/api/activate").permitAll()
+                .requestMatchers("/api/account/reset-password/init").permitAll()
+                .requestMatchers("/api/account/reset-password/finish").permitAll()
+                .requestMatchers("/api/account/reset-password/link").hasAnyAuthority(AuthoritiesConstants.ADMIN)
+                .requestMatchers("/api/crash-reports/*").permitAll()
+                .requestMatchers("/api/download-application").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/kubernetes-snippets/**").permitAll()
+                .requestMatchers("/api/s/link/*").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/s/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/s/**").permitAll()
+                .requestMatchers("/api/git/config").permitAll()
+                .requestMatchers("/api/github/callback").permitAll()
+                .requestMatchers("/api/gitlab/callback").permitAll()
+                .requestMatchers("/api/gitea/callback").permitAll()
+                .requestMatchers("/jdl-studio/**").permitAll()
+                .requestMatchers("/api/**").authenticated()
+                .requestMatchers("/management/health").permitAll()
+                .requestMatchers("/management/info").permitAll()
+                .requestMatchers("/management/prometheus").permitAll()
+                .requestMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/swagger-resources/configuration/ui").permitAll()
+                .requestMatchers("/swagger-ui/index.html").hasAuthority(AuthoritiesConstants.ADMIN)
+                .anyRequest().authenticated()
+            )
+            .httpBasic(basic -> {});
         // @formatter:on
-    }
-
-    private JWTConfigurer securityConfigurerAdapter() {
-        return new JWTConfigurer(tokenProvider);
+        return http.build();
     }
 }

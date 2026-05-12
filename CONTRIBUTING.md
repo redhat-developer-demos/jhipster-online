@@ -181,7 +181,7 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 - Web apps JavaScript files **must follow** [Google's JavaScript Style Guide](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).
 - Angular Typescript files **must follow** [Official Angular style guide](https://angular.io/styleguide).
 
-Please ensure to run `yarn lint` and `yarn test` on the project root before submitting a pull request.
+Please ensure to run `npm run lint` and `npm test` on the project root before submitting a pull request.
 
 ## <a name="commit"></a> Git Commit Guidelines
 

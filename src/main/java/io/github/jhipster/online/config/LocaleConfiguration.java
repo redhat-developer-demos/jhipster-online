@@ -23,16 +23,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import tech.jhipster.config.locale.AngularCookieLocaleResolver;
 
 @Configuration
 public class LocaleConfiguration implements WebMvcConfigurer {
 
     @Bean(name = "localeResolver")
     public LocaleResolver localeResolver() {
-        AngularCookieLocaleResolver cookieLocaleResolver = new AngularCookieLocaleResolver();
-        cookieLocaleResolver.setCookieName("NG_TRANSLATE_LANG_KEY");
+        CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver("NG_TRANSLATE_LANG_KEY");
         return cookieLocaleResolver;
     }
 

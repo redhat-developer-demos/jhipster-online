@@ -85,7 +85,7 @@ public class JdlAiService {
         String model = StringUtils.isNotBlank(target.model()) ? target.model() : "gpt-3.5-turbo";
 
         String trimmedPrompt = userPrompt.trim();
-        String ragContext = jdlRagService.buildContext(trimmedPrompt, cfg.isRagEnabled(), cfg.getRagTopK(), cfg.getRagMaxChars());
+        String ragContext = jdlRagService.buildContext(trimmedPrompt, cfg);
         String systemContent = buildSystemContent(ragContext);
 
         ObjectNode root = objectMapper.createObjectNode();

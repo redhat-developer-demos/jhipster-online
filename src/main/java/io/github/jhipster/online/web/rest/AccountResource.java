@@ -32,9 +32,10 @@ import io.github.jhipster.online.web.rest.errors.InvalidPasswordException;
 import io.github.jhipster.online.web.rest.errors.LoginAlreadyUsedException;
 import io.github.jhipster.online.web.rest.vm.KeyAndPasswordVM;
 import io.github.jhipster.online.web.rest.vm.ManagedUserVM;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,7 +237,8 @@ public class AccountResource {
         return (
             !StringUtils.isEmpty(password) &&
             password.length() >= ManagedUserVM.PASSWORD_MIN_LENGTH &&
-            password.length() <= ManagedUserVM.PASSWORD_MAX_LENGTH
+            password.length() <= ManagedUserVM.PASSWORD_MAX_LENGTH &&
+            password.getBytes(StandardCharsets.UTF_8).length <= 72
         );
     }
 }

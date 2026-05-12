@@ -539,6 +539,8 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+  annotations:
+    chains.tekton.dev/transparency-upload: 'true'
 spec:
   params:
     - default: >-

@@ -5,3 +5,4 @@ package-lock.json
 # Helm templates with Go-template directives are not valid YAML for Prettier
 src/main/resources/helm-template/templates/deployment-app-spring.yaml
 src/main/resources/helm-template/templates/deployment-app-quarkus.yaml
+src/main/resources/helm-template/templates/rbac-deployer.yaml

@@ -31,6 +31,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -60,7 +61,11 @@ public class JHipsterService {
 
     private final Integer timeout;
 
-    public JHipsterService(LogsService logsService, ApplicationProperties applicationProperties, Executor taskExecutor) {
+    public JHipsterService(
+        LogsService logsService,
+        ApplicationProperties applicationProperties,
+        @Qualifier("taskExecutor") Executor taskExecutor
+    ) {
         this.logsService = logsService;
         this.taskExecutor = taskExecutor;
 

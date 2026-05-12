@@ -1,4 +1,4 @@
-# Architecture Specification -- JHipster Online v2.40.0
+# Architecture Specification -- JHipster Online v2.40.1
 
 This document describes the solution architecture of JHipster Online, designed for consumption by developers and AI models.
 
@@ -11,21 +11,21 @@ This document describes the solution architecture of JHipster Online, designed f
 
 ## Technology Stack
 
-| Layer              | Technology                | Version                   |
-| ------------------ | ------------------------- | ------------------------- |
-| Backend Runtime    | Java                      | 11                        |
-| Backend Framework  | Spring Boot               | 2.7.3                     |
-| JHipster Framework | jhipster-dependencies BOM | 7.9.3                     |
-| ORM                | Hibernate                 | 5.6.10.Final              |
-| Database Migration | Liquibase                 | 4.15.0                    |
-| Frontend           | Angular                   | 14.x                      |
-| Frontend Language  | TypeScript                | 4.8                       |
-| Package Manager    | Yarn                      | 1.22.19                   |
-| Build Tool         | Maven                     | WAR packaging             |
-| Node               | Node.js                   | 16.20.2                   |
-| Database           | MySQL / MariaDB           | MariaDB 10.3 on OpenShift |
-| Authentication     | JWT                       | Stateless                 |
-| OpenShift Client   | Fabric8 openshift-client  | 6.13.4                    |
+| Layer              | Technology                | Version                                |
+| ------------------ | ------------------------- | -------------------------------------- |
+| Backend Runtime    | Java                      | 17 (LTS; JDK 21+ supported for builds) |
+| Backend Framework  | Spring Boot               | 3.4.5                                  |
+| JHipster Framework | jhipster-dependencies BOM | 8.11.0                                 |
+| ORM                | Hibernate                 | 6.6.x                                  |
+| Database Migration | Liquibase                 | 4.29.x                                 |
+| Frontend           | Angular                   | 14.x                                   |
+| Frontend Language  | TypeScript                | 4.8                                    |
+| Package Manager    | npm                       | 10.x                                   |
+| Build Tool         | Maven                     | WAR packaging                          |
+| Node               | Node.js                   | 22.x (see package.json engines)        |
+| Database           | MySQL / MariaDB           | MariaDB 10.3 on OpenShift              |
+| Authentication     | JWT                       | Stateless                              |
+| OpenShift Client   | Fabric8 openshift-client  | 6.13.4                                 |
 
 ## Component Architecture
 
@@ -86,7 +86,7 @@ graph TD
 | `Dockerfile`             | Dev Spaces workspace image with all generators pre-installed | `quay.io/devfile/jhipster-online`    |
 | `Dockerfile.app`         | Runtime image for the jhipster-online WAR                    | Docker Hub                           |
 | `jh-online-builder.yaml` | OpenShift BuildConfig for S2I binary builds                  | Internal OpenShift registry          |
-| Builder base             | UBI8 OpenJDK 17 + Maven 3.9.4 + Node 20                      | `registry.redhat.io/ubi8/openjdk-17` |
+| Builder base             | UBI8 OpenJDK 17 + Maven 3.9.15 + Node 22                     | `registry.redhat.io/ubi8/openjdk-17` |
 
 ## Deployment Topology
 
@@ -162,7 +162,7 @@ graph LR
    - Appends "Open in Dev Spaces" badge to README.md
 5. `GitService` pushes the generated project to GitHub/GitLab
 
-## OpenShift Deployment Flow (v2.40.0)
+## OpenShift Deployment Flow (v2.40.1)
 
 1. User selects namespace in OpenShift generator form
 2. Frontend calls `POST /api/openshift/deploy`
@@ -193,11 +193,20 @@ See `src/main/kubernetes/rbac.yaml` for the full ClusterRole definition. Key per
 - **Tekton**: Pipelines, Tasks, PipelineRuns, TaskRuns
 - **Monitoring**: Pods, pods/log, events
 
-Pods use a **ServiceAccount** (often `default`); they do not inherit your user’s `edit` role. Grant `edit` to that ServiceAccount in the project (see README “RBAC Requirements”) or apply the RoleBinding in `rbac.yaml` after replacing `NAMESPACE`.
+Pods use a **ServiceAccount** (`jhipster-online-deployer` when `rbac.yaml` is applied, or the dedicated SA from generated Helm `rbac-deployer.yaml`); they do not inherit your user’s `edit` role. Grant `edit` to that ServiceAccount in the project only as a **Developer Sandbox fallback** (see README “RBAC Requirements”) or apply the RoleBinding in `rbac.yaml` after replacing `NAMESPACE`.
+
+## JDL AI assistant and RAG
+
+- **REST**: `GET /api/jdl-ai/config`, `POST /api/jdl-ai/generate` (`JdlAiResource` + `JdlAiService`).
+- **Upstream**: OpenAI-compatible chat completions; optional **semantic RAG** via `/v1/embeddings` when `application.jdl-ai.rag-semantic-enabled` and `embeddings-url` are set (`JdlRagService`).
+- **Lexical fallback**: keyword/token overlap over bundled `src/main/resources/jdl-ai/rag-chunks.json`.
+- **Health**: Actuator component `jdlAi` reports whether a completions URL is configured (`JdlAiHealthIndicator`).
+- **CI**: Mermaid blocks in this file are validated by `.github/workflows/docs-check.yml` (mermaid-cli render).
+- **Resilience**: A Resilience4j circuit breaker is optional; production can wrap the completions client or rely on upstream timeouts plus the health indicator for routing.
 
 ## MCP (Model Context Protocol) Ecosystem Status
 
-As of v2.40.0, there is **no official JHipster generator/blueprint for MCP servers**. Related ecosystem tools:
+As of v2.40.1, there is **no official JHipster generator/blueprint for MCP servers**. Related ecosystem tools:
 
 - **Spring AI MCP** (`spring-ai-mcp`): Spring framework integration for MCP, not a JHipster blueprint
 - **mcp-scaffold**: Maven plugin that generates `@McpTool` wrappers from Spring Data repositories (v0.1.3)

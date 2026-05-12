@@ -150,6 +150,9 @@ application:
     rag-enabled: true
     rag-top-k: 6
     rag-max-chars: 14000
+    rag-semantic-enabled: ${APPLICATION_JDL_AI_RAG_SEMANTIC_ENABLED:false}
+    embeddings-url: ${APPLICATION_JDL_AI_EMBEDDINGS_URL:}
+    embeddings-model: ${APPLICATION_JDL_AI_EMBEDDINGS_MODEL:text-embedding-3-small}
     models:
       - id: granite-31-8b
         label: IBM Granite 3.1 8B (FP8)

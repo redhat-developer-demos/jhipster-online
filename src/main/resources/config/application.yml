@@ -97,15 +97,12 @@ spring:
     hibernate:
       ddl-auto: none
       naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
   messages:
     basename: i18n/messages
   main:
     allow-bean-definition-overriding: true
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
   task:
     execution:
       thread-name-prefix: jhonline-task-
@@ -180,3 +177,7 @@ application:
     rag-enabled: true
     rag-top-k: 6
     rag-max-chars: 14000
+    # Semantic RAG: set rag-semantic-enabled: true and embeddings-url to an OpenAI-compatible /v1/embeddings endpoint (same api-key as chat if required).
+    rag-semantic-enabled: false
+    embeddings-url: ''
+    embeddings-model: text-embedding-3-small

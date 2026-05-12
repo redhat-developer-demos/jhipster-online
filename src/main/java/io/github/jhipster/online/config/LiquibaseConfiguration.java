@@ -55,25 +55,41 @@ public class LiquibaseConfiguration {
         ObjectProvider<DataSource> dataSource,
         DataSourceProperties dataSourceProperties
     ) {
-        // If you don't want Liquibase to start asynchronously, substitute by this: //NOSONAR
-        // SpringLiquibase liquibase = SpringLiquibaseUtil.createSpringLiquibase(liquibaseDataSource.getIfAvailable(), liquibaseProperties, dataSource.getIfUnique(), dataSourceProperties); //NOSONAR
-        SpringLiquibase liquibase = SpringLiquibaseUtil.createAsyncSpringLiquibase(
-            this.env,
-            executor,
-            liquibaseDataSource.getIfAvailable(),
-            liquibaseProperties,
-            dataSource.getIfUnique(),
-            dataSourceProperties
-        );
+        // Async Liquibase can race during tests on H2 in-memory DB (duplicate DATABASECHANGELOG). Use sync for H2.
+        String jdbcUrl = liquibaseProperties.getUrl() != null
+            ? liquibaseProperties.getUrl()
+            : (dataSourceProperties.getUrl() != null ? dataSourceProperties.getUrl() : env.getProperty("spring.datasource.url"));
+        boolean useAsyncLiquibase = jdbcUrl == null || !jdbcUrl.toLowerCase().contains("jdbc:h2:mem:");
+        SpringLiquibase liquibase;
+        if (useAsyncLiquibase) {
+            liquibase =
+                SpringLiquibaseUtil.createAsyncSpringLiquibase(
+                    this.env,
+                    executor,
+                    liquibaseDataSource.getIfAvailable(),
+                    liquibaseProperties,
+                    dataSource.getIfUnique(),
+                    dataSourceProperties
+                );
+        } else {
+            liquibase =
+                SpringLiquibaseUtil.createSpringLiquibase(
+                    liquibaseDataSource.getIfAvailable(),
+                    liquibaseProperties,
+                    dataSource.getIfUnique(),
+                    dataSourceProperties
+                );
+        }
         liquibase.setChangeLog("classpath:config/liquibase/master.xml");
-        liquibase.setContexts(liquibaseProperties.getContexts());
+        if (liquibaseProperties.getContexts() != null && !liquibaseProperties.getContexts().isEmpty()) {
+            liquibase.setContexts(String.join(",", liquibaseProperties.getContexts()));
+        }
         liquibase.setDefaultSchema(liquibaseProperties.getDefaultSchema());
         liquibase.setLiquibaseSchema(liquibaseProperties.getLiquibaseSchema());
         liquibase.setLiquibaseTablespace(liquibaseProperties.getLiquibaseTablespace());
         liquibase.setDatabaseChangeLogLockTable(liquibaseProperties.getDatabaseChangeLogLockTable());
         liquibase.setDatabaseChangeLogTable(liquibaseProperties.getDatabaseChangeLogTable());
         liquibase.setDropFirst(liquibaseProperties.isDropFirst());
-        liquibase.setLabels(liquibaseProperties.getLabels());
         liquibase.setChangeLogParameters(liquibaseProperties.getParameters());
         liquibase.setRollbackFile(liquibaseProperties.getRollbackFile());
         liquibase.setTestRollbackOnUpdate(liquibaseProperties.isTestRollbackOnUpdate());

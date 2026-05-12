@@ -117,6 +117,7 @@ public class OpenShiftDeploymentService {
             }
 
             List<String> ordered = Arrays.asList(
+                "rbac-deployer.yaml",
                 "secret-mariadb.yaml",
                 "pvc-mariadb.yaml",
                 "deployment-mariadb.yaml",

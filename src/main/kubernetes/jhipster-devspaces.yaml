@@ -101,12 +101,12 @@ commands:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: 'oc delete all --selector app=mariadb'
-  - id: yarn-install
+  - id: npm-install
     exec:
       label: 'Package the application'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'yarn install'
+      commandLine: 'npm install'
       group:
         kind: build
         isDefault: true
@@ -115,7 +115,7 @@ commands:
       label: 'Start Frontend'
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: 'yarn start'
+      commandLine: 'npm start'
       group:
         kind: run
         isDefault: true

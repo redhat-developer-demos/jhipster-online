@@ -45,7 +45,9 @@ public final class HelmTemplateRenderer {
     }
 
     public static String render(String template, Map<String, Object> flatValues) {
-        String result = resolveIfBlocks(template, flatValues);
+        // Normalize accidental spaces inside Helm delimiters (e.g. "{ { .Values.x } }") so .Values substitution works.
+        String normalized = template.replace("{ {", "{{").replace("} }", "}}");
+        String result = resolveIfBlocks(normalized, flatValues);
         result = resolveValues(result, flatValues);
         result = stripLeftoverDirectives(result);
         return result;

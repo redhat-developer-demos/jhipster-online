@@ -25,10 +25,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ClientForwardController {
 
     /**
-     * Forwards any unmapped paths (except those containing a period) to the client {@code index.html}.
+     * Forwards unmapped paths to the client {@code index.html}.
+     * <p>Spring 6 path patterns no longer allow a segment after {@code **}; a catch-all {@code {*path}} is used instead.</p>
+     *
      * @return forward to client {@code index.html}.
      */
-    @GetMapping(value = "/**/{path:[^\\.]*}")
+    @GetMapping(value = { "/", "/{*path}" })
     public String forward() {
         return "forward:/";
     }

@@ -131,20 +131,20 @@ class YoRCServiceChoicesIntTest {
             .hasSize(3)
             .extracting(TemporalDistributionDTO::getDate)
             .containsExactly(
-                Instant.parse("2018-12-27T00:00:00Z"),
                 Instant.parse("2018-09-13T00:00:00Z"),
-                Instant.parse("2018-09-27T00:00:00Z")
+                Instant.parse("2018-09-27T00:00:00Z"),
+                Instant.parse("2018-12-27T00:00:00Z")
             );
 
-        Map<String, Long> fst = result.get(0).getValues(); // thu 27/12/2018
-        Map<String, Long> snd = result.get(1).getValues(); // thu 13/09/2018
-        Map<String, Long> thr = result.get(2).getValues(); // thu 27/09/2018
+        Map<String, Long> sep13 = result.get(0).getValues(); // thu 13/09/2018
+        Map<String, Long> sep27 = result.get(1).getValues(); // thu 27/09/2018
+        Map<String, Long> dec27 = result.get(2).getValues(); // thu 27/12/2018
 
-        assertThat(fst).containsEntry("react", 2L).containsEntry("vuejs", 2L);
+        assertThat(dec27).containsEntry("react", 2L).containsEntry("vuejs", 2L);
 
-        assertThat(snd).containsEntry("angularX", 1L).containsEntry("vuejs", 1L);
+        assertThat(sep13).containsEntry("angularX", 1L).containsEntry("vuejs", 1L);
 
-        assertThat(thr).containsEntry("vuejs", 1L);
+        assertThat(sep27).containsEntry("vuejs", 1L);
     }
 
     @Transactional
@@ -162,28 +162,28 @@ class YoRCServiceChoicesIntTest {
             .hasSize(5)
             .extracting(TemporalDistributionDTO::getDate)
             .containsExactly(
-                Instant.parse("2019-01-01T00:00:00Z"),
-                Instant.parse("2018-09-27T00:00:00Z"),
-                Instant.parse("2019-01-02T00:00:00Z"),
                 Instant.parse("2018-09-13T00:00:00Z"),
-                Instant.parse("2018-09-14T00:00:00Z")
+                Instant.parse("2018-09-14T00:00:00Z"),
+                Instant.parse("2018-09-27T00:00:00Z"),
+                Instant.parse("2019-01-01T00:00:00Z"),
+                Instant.parse("2019-01-02T00:00:00Z")
             );
 
-        Map<String, Long> snd = result.get(0).getValues(); // 01 jan 2019
-        Map<String, Long> fst = result.get(1).getValues(); // 27 sept 2018
-        Map<String, Long> thr = result.get(2).getValues(); // 02 jan 2019
-        Map<String, Long> fou = result.get(3).getValues(); // 13 sept 2018
-        Map<String, Long> fiv = result.get(4).getValues(); // 14 sept 2018
+        Map<String, Long> sep13 = result.get(0).getValues(); // 13 sept 2018
+        Map<String, Long> sep14 = result.get(1).getValues(); // 14 sept 2018
+        Map<String, Long> sep27 = result.get(2).getValues(); // 27 sept 2018
+        Map<String, Long> jan01 = result.get(3).getValues(); // 01 jan 2019
+        Map<String, Long> jan02 = result.get(4).getValues(); // 02 jan 2019
 
-        assertThat(fst).containsEntry("vuejs", 1L);
+        assertThat(sep27).containsEntry("vuejs", 1L);
 
-        assertThat(snd).containsEntry("react", 1L).containsEntry("vuejs", 1L);
+        assertThat(jan01).containsEntry("react", 1L).containsEntry("vuejs", 1L);
 
-        assertThat(thr).containsEntry("react", 1L).containsEntry("vuejs", 1L);
+        assertThat(jan02).containsEntry("react", 1L).containsEntry("vuejs", 1L);
 
-        assertThat(fou).containsEntry("angularX", 1L);
+        assertThat(sep13).containsEntry("angularX", 1L);
 
-        assertThat(fiv).containsEntry("vuejs", 1L);
+        assertThat(sep14).containsEntry("vuejs", 1L);
     }
 
     @Transactional
@@ -201,19 +201,19 @@ class YoRCServiceChoicesIntTest {
             .hasSize(3)
             .extracting(TemporalDistributionDTO::getDate)
             .containsExactly(
+                Instant.parse("2019-01-01T05:00:00Z"),
                 Instant.parse("2019-01-01T13:00:00Z"),
-                Instant.parse("2019-01-02T16:00:00Z"),
-                Instant.parse("2019-01-01T05:00:00Z")
+                Instant.parse("2019-01-02T16:00:00Z")
             );
 
-        Map<String, Long> fst = result.get(0).getValues(); // /01/01/2018 13h
-        Map<String, Long> snd = result.get(1).getValues(); // 02/01/2018 16h
-        Map<String, Long> thr = result.get(2).getValues(); // 01/01/2018 5h
+        Map<String, Long> hour05 = result.get(0).getValues(); // 01/01/2019 5h
+        Map<String, Long> hour13 = result.get(1).getValues(); // 01/01/2019 13h
+        Map<String, Long> hour16 = result.get(2).getValues(); // 02/01/2019 16h
 
-        assertThat(fst).containsEntry("react", 1L);
+        assertThat(hour13).containsEntry("react", 1L);
 
-        assertThat(snd).containsEntry("react", 1L).containsEntry("vuejs", 1L);
+        assertThat(hour16).containsEntry("react", 1L).containsEntry("vuejs", 1L);
 
-        assertThat(thr).containsEntry("vuejs", 1L);
+        assertThat(hour05).containsEntry("vuejs", 1L);
     }
 }

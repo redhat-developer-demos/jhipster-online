@@ -19,6 +19,8 @@ tekton:
   defaultBranch: main
 # Toggle wiring in helm/templates/deployment.yaml (Spring / Quarkus) for optional extras from
 # src/main/kubernetes/jh-online-kubernetes-extras.yaml (Kafka, Redis, Keycloak issuer URI).
+rbac:
+  create: true
 integrations:
   kafka:
     enabled: false

@@ -62,7 +62,7 @@ learn how to configure and set up JHipster Online.
 - Install and run the front-end:
 
 ```
-yarn install && yarn start
+npm install && npm start
 ```
 
 - Run the database:
@@ -104,7 +104,7 @@ oc apply -f src/main/kubernetes/mysql.yaml
 #### Install and run the front-end
 
 ```
-yarn install && yarn start
+npm install && npm start
 ```
 
 #### Update application-dev.yaml

@@ -1,31 +1,20 @@
-# Bind the ClusterRole below to the ServiceAccount your JHipster Online pod uses
-# (replace NAMESPACE twice in the RoleBinding). If you cannot create ClusterRoles
-# (e.g. Developer Sandbox), grant the built-in edit role to that SA instead:
-#   oc policy add-role-to-user edit "system:serviceaccount:NAMESPACE:jhipster-online-deployer" -n NAMESPACE
+{{- if .Values.rbac.create }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: jhipster-online-deployer
-  namespace: NAMESPACE
+  name: '{{ .Values.app.name }}-deployer'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
-  name: jhipster-online-deployer
+  name: '{{ .Values.app.name }}-deployer'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
 rules:
-  - apiGroups: ['project.openshift.io']
-    resources: ['projects']
-    verbs: ['list', 'get']
-  - apiGroups: ['']
-    resources: ['namespaces']
-    verbs: ['list', 'get']
-  - apiGroups: ['template.openshift.io']
-    resources: ['templates']
-    verbs: ['get', 'list', 'create']
-  - apiGroups: ['template.openshift.io']
-    resources: ['templateinstances']
-    verbs: ['create']
   - apiGroups: ['']
     resources: ['services', 'secrets', 'persistentvolumeclaims', 'configmaps']
     verbs: ['get', 'list', 'create', 'update', 'patch', 'delete']
@@ -69,13 +58,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: jhipster-online-deployer
-  namespace: NAMESPACE
+  name: '{{ .Values.app.name }}-deployer-binding'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
 subjects:
   - kind: ServiceAccount
-    name: jhipster-online-deployer
-    namespace: NAMESPACE
+    name: '{{ .Values.app.name }}-deployer'
 roleRef:
-  kind: ClusterRole
-  name: jhipster-online-deployer
+  kind: Role
+  name: '{{ .Values.app.name }}-deployer'
   apiGroup: rbac.authorization.k8s.io
+{{- end }}

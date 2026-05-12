@@ -22,13 +22,13 @@ package io.github.jhipster.online.service.dto;
 import io.github.jhipster.online.config.Constants;
 import io.github.jhipster.online.domain.Authority;
 import io.github.jhipster.online.domain.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 /**
  * A DTO representing a user, with his authorities.

@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.jhipster.online.security.jwt.JWTFilter;
 import io.github.jhipster.online.security.jwt.TokenProvider;
 import io.github.jhipster.online.web.rest.vm.LoginVM;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

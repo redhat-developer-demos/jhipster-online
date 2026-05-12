@@ -24,13 +24,14 @@ import io.github.jhipster.online.service.dto.RawSQLField;
 import io.github.jhipster.online.service.dto.TemporalCountDTO;
 import io.github.jhipster.online.service.dto.TemporalDistributionDTO;
 import io.github.jhipster.online.service.enums.TemporalValueType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaQuery;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaQuery;
 
 public final class QueryUtil {
 
@@ -64,6 +65,7 @@ public final class QueryUtil {
                     return new TemporalDistributionDTO(date, values);
                 }
             )
+            .sorted(Comparator.comparing(TemporalDistributionDTO::getDate))
             .collect(Collectors.toList());
     }
 

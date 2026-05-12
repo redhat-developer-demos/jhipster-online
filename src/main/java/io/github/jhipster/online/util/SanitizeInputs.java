@@ -26,7 +26,7 @@ public class SanitizeInputs {
     private static final Pattern SANITIZE_REGEX = Pattern.compile("[\n\r\t]");
     private static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[a-zA-Z0-9]*");
     private static final Pattern ALPHANUMERIC_AND_SPACES_REGEX = Pattern.compile("[\\w\\s]*");
-    private static final Pattern JDL_NAME_REGEX = Pattern.compile("[\\w\\s.\\-:,()]+");
+    private static final Pattern JDL_NAME_REGEX = Pattern.compile("^[^\\r\\n\\t]{1,255}$");
 
     private SanitizeInputs() {
         throw new IllegalStateException("Utility class: SanitizeInputs");

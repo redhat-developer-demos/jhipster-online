@@ -36,6 +36,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -48,10 +49,10 @@ jobs:
         run: sudo /etc/init.d/mysql stop
 
       - name: Install node.js packages
-        run: yarn install
+        run: npm ci
 
       - name: Run Prettier Check
-        run: yarn run prettier:check
+        run: npm run prettier:check
 
       - name: Run backend test
         run: |
@@ -59,7 +60,7 @@ jobs:
           ./mvnw -ntp clean verify -P-webpack -DskipTests
 
       - name: Run frontend test
-        run: yarn test
+        run: npm test
 
       - name: Sonar analysis
         if: github.repository == 'jhipster/jhipster-online' && github.ref == 'refs/heads/main'

@@ -1,0 +1,48 @@
+# Validates Mermaid diagrams embedded in ARCHITECTURE.md (mermaid-cli parse/render).
+name: Docs check
+on:
+  push:
+    paths:
+      - 'ARCHITECTURE.md'
+      - '.github/workflows/docs-check.yml'
+  pull_request:
+    paths:
+      - 'ARCHITECTURE.md'
+      - '.github/workflows/docs-check.yml'
+
+jobs:
+  mermaid-architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Mermaid blocks in ARCHITECTURE.md
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const { execSync } = require('child_process');
+          const content = fs.readFileSync('ARCHITECTURE.md', 'utf8');
+          if (!content.includes('JDL AI')) {
+            throw new Error('ARCHITECTURE.md should document JDL AI / RAG');
+          }
+          const re = /```mermaid\n([\s\S]*?)```/g;
+          let m;
+          let i = 0;
+          while ((m = re.exec(content)) !== null) {
+            i += 1;
+            const inPath = `/tmp/arch-mermaid-${i}.mmd`;
+            const outPath = `/tmp/arch-mermaid-${i}.svg`;
+            fs.writeFileSync(inPath, m[1].trimEnd() + '\n');
+            execSync(
+              `npx --yes @mermaid-js/mermaid-cli@11.4.0 -i ${inPath} -o ${outPath}`,
+              { stdio: 'inherit' }
+            );
+          }
+          if (i === 0) {
+            console.log('No ```mermaid blocks in ARCHITECTURE.md (skipped render).');
+          } else {
+            console.log(`Rendered ${i} Mermaid diagram(s) successfully.`);
+          }
+          NODE

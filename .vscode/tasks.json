@@ -11,7 +11,7 @@
 		},
 		{
 			"type": "devfile",
-			"command": "yarn install",
+			"command": "npm install",
 			"workdir": "${PROJECT_SOURCE}",
 			"component": "tools",
 			"problemMatcher": [],
@@ -19,7 +19,7 @@
 		},
 		{
 			"type": "devfile",
-			"command": "yarn start",
+			"command": "npm start",
 			"workdir": "${PROJECT_SOURCE}",
 			"component": "tools",
 			"problemMatcher": [],

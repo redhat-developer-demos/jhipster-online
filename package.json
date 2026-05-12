@@ -87,31 +87,31 @@
     "workbox-webpack-plugin": "^6.5.4"
   },
   "engines": {
-    "node": ">=22.18.0",
-    "yarn": ">=1.19.0"
+    "node": ">=22.9.0",
+    "npm": ">=10.0.0"
   },
   "scripts": {
     "prettier:format": "prettier --write \"{,src/**/}*.{md,json,yaml,yml,java,ts,js,css,scss}\"",
     "prettier:check": "prettier --check \"{,src/**/}*.{md,json,yaml,yml,java,ts,js,css,scss}\"",
     "lint": "eslint . --ext .js,.ts",
-    "lint:fix": "yarn run lint --fix",
+    "lint:fix": "npm run lint -- --fix",
     "cleanup": "rimraf target/classes/static/{index.html,favicon.ico,manifest.webapp,robots.txt,app/,content/,swagger-ui/} target/classes/aot",
     "clean-www": "rimraf target/classes/static/app/{src,target/}",
     "start": "ng serve --hmr",
-    "start-tls": "yarn run webapp:dev-ssl",
-    "serve": "yarn run start",
-    "build": "yarn run webapp:prod",
-    "pretest": "yarn run lint",
+    "start-tls": "npm run webapp:dev-ssl",
+    "serve": "npm run start",
+    "build": "npm run webapp:prod",
+    "pretest": "npm run lint",
     "test": "ng test --coverage --log-heap-usage -w=2",
-    "test:watch": "yarn run test --watch",
-    "webapp:build": "yarn run clean-www && yarn run webapp:build:dev",
+    "test:watch": "npm run test -- --watch",
+    "webapp:build": "npm run clean-www && npm run webapp:build:dev",
     "webapp:build:dev": "ng build --configuration development",
     "webapp:build:prod": "ng build --configuration production --delete-output-path false",
     "webapp:dev": "ng serve",
     "webapp:dev-ssl": "ng serve --ssl",
     "webapp:dev-verbose": "ng serve --verbose",
-    "webapp:prod": "yarn run clean-www && yarn run webapp:build:prod",
-    "webapp:test": "yarn run test",
+    "webapp:prod": "npm run clean-www && npm run webapp:build:prod",
+    "webapp:test": "npm run test",
     "update-jdl-studio": "cd src/main/resources/static/jdl-studio && git pull origin gh-pages --rebase && cd .. && git add jdl-studio && git commit -m 'jdl-studio submodule updated'"
   },
   "jestSonar": {
@@ -119,6 +119,6 @@
     "reportFile": "TESTS-results-sonar.xml"
   },
   "overrides": {
-    "webpack": "5.75.0"
+    "webpack": "5.104.1"
   }
 }

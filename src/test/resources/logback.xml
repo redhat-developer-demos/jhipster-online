@@ -37,8 +37,7 @@
     <logger name="sun.rmi.transport" level="WARN"/>
     <logger name="com.github.dockerjava" level="WARN"/>
     <logger name="org.testcontainers" level="INFO"/>
-    <root>
-        <level>WARN</level>
+    <root level="WARN">
         <appender-ref ref="CONSOLE"/>
     </root>
 

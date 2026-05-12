@@ -203,6 +203,41 @@ public class ApplicationProperties {
         /** Approximate max characters of RAG context appended to the system prompt. */
         private int ragMaxChars = 14000;
 
+        /**
+         * When true and {@link #embeddingsUrl} is set, pre-compute chunk embeddings and rank the user prompt by cosine similarity (falls back to lexical on failure).
+         */
+        private boolean ragSemanticEnabled;
+
+        /** OpenAI-compatible embeddings URL (e.g. https://host/v1/embeddings). */
+        private String embeddingsUrl = "";
+
+        /** Model id for the embeddings request body. */
+        private String embeddingsModel = "text-embedding-3-small";
+
+        public boolean isRagSemanticEnabled() {
+            return ragSemanticEnabled;
+        }
+
+        public void setRagSemanticEnabled(boolean ragSemanticEnabled) {
+            this.ragSemanticEnabled = ragSemanticEnabled;
+        }
+
+        public String getEmbeddingsUrl() {
+            return embeddingsUrl;
+        }
+
+        public void setEmbeddingsUrl(String embeddingsUrl) {
+            this.embeddingsUrl = embeddingsUrl == null ? "" : embeddingsUrl;
+        }
+
+        public String getEmbeddingsModel() {
+            return embeddingsModel;
+        }
+
+        public void setEmbeddingsModel(String embeddingsModel) {
+            this.embeddingsModel = embeddingsModel == null ? "" : embeddingsModel;
+        }
+
         public boolean isEnabled() {
             return enabled;
         }

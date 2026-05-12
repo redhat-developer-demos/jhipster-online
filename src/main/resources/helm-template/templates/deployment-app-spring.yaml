@@ -25,6 +25,9 @@ spec:
         deployment: '{{ .Values.app.name }}'
         app.openshift.io/runtime: java
     spec:
+{{- if .Values.rbac.create }}
+      serviceAccountName: '{{ .Values.app.name }}-deployer'
+{{- end }}
       containers:
         - name: '{{ .Values.app.name }}'
           image: image-registry.openshift-image-registry.svc:5000/{{ .Values.image.namespace }}/{{ .Values.image.stream }}:latest
