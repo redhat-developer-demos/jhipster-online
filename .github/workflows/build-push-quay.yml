@@ -24,6 +24,7 @@ jobs:
   build-spring-boot:
     name: Build Spring Boot Runtime Image
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -63,10 +64,13 @@ jobs:
             org.opencontainers.image.title=JHipster Online (Spring Boot)
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
             org.opencontainers.image.source=https://github.com/redhat-developer-demos/jhipster-online
+          cache-from: type=gha,scope=spring-boot
+          cache-to: type=gha,mode=max,scope=spring-boot
 
   build-quarkus:
     name: Build Quarkus Runtime Image
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -106,10 +110,13 @@ jobs:
             org.opencontainers.image.title=JHipster Online (Quarkus)
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
             org.opencontainers.image.source=https://github.com/redhat-developer-demos/jhipster-online
+          cache-from: type=gha,scope=quarkus
+          cache-to: type=gha,mode=max,scope=quarkus
 
   build-devspaces:
     name: Build Dev Spaces Workspace Image
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
