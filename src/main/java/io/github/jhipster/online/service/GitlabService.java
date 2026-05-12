@@ -264,7 +264,8 @@ public class GitlabService implements GitProviderService {
         log.info("Creating GitLab webhook on {} / {} -> {}", group, repositoryName, webhookUrl);
         GitlabAPI gitlab = getConnection(user);
         GitlabProject project = gitlab.getProject(group, repositoryName);
-        gitlab.addProjectHook(project.getId(), webhookUrl, true, false, false, false, false, false, false, null);
+        // java-gitlab-api 4.1.1: push, issues, merge_requests, note, tag_push, ssl_verification, job, pipeline, wiki, then hook token
+        gitlab.addProjectHook(project.getId(), webhookUrl, true, false, false, false, false, true, false, true, false, "");
         log.info("GitLab webhook created successfully");
     }
 
