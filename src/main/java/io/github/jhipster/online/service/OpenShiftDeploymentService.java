@@ -145,7 +145,9 @@ public class OpenShiftDeploymentService {
                 }
                 processed.add(fname);
                 String rendered = HelmTemplateRenderer.render(Files.readString(p, StandardCharsets.UTF_8), flat);
+                int before = applied.size();
                 applyYamlDocuments(namespace, rendered, applied);
+                log.info("Template {} -> {} resource(s) applied", fname, applied.size() - before);
             }
 
             try (var listing = Files.list(templatesDir)) {
@@ -165,6 +167,8 @@ public class OpenShiftDeploymentService {
                         }
                     );
             }
+
+            log.info("Helm deploy complete: {} total resource(s) applied to {}", applied.size(), namespace);
 
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("namespace", namespace);

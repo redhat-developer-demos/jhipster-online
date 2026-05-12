@@ -235,6 +235,7 @@ public class GeneratorService {
 
         copyClasspathResource("helm-template/Chart.yaml", new File(workingDir, "helm/Chart.yaml"));
         copyClasspathResource("helm-template/values.yaml", new File(workingDir, "helm/values.yaml"));
+        copyClasspathResource("helm-template/templates/rbac-deployer.yaml", new File(workingDir, "helm/templates/rbac-deployer.yaml"));
         copyClasspathResource("helm-template/templates/pvc-mariadb.yaml", new File(workingDir, "helm/templates/pvc-mariadb.yaml"));
         copyClasspathResource("helm-template/templates/secret-mariadb.yaml", new File(workingDir, "helm/templates/secret-mariadb.yaml"));
         copyClasspathResource(
