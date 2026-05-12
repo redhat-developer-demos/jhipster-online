@@ -12,7 +12,8 @@ RUN curl -L -o apache-maven-3.9.15-bin.zip https://dlcdn.apache.org/maven/maven-
     rm -rf apache-maven-3.9.15-bin.zip
 
 ENV MAVEN_VERSION=3.9.15
-ENV MAVEN_OPTS="-Xmx3489m"
+ENV MAVEN_OPTS="-Xmx2048m"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 ENV M2_HOME=/usr/share/maven/apache-maven-3.9.15
 ENV PATH=$PATH:/usr/share/maven/apache-maven-3.9.15/bin
 
