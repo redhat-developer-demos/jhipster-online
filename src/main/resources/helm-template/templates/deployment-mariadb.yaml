@@ -11,7 +11,7 @@ metadata:
 spec:
   strategy:
     type: Recreate
-  replicas: { { .Values.replicas.mariadb } }
+  replicas: {{ .Values.replicas.mariadb }}
   selector:
     matchLabels:
       app: mariadb-{{ .Values.app.name }}

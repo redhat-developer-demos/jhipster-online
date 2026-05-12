@@ -6,3 +6,4 @@ package-lock.json
 src/main/resources/helm-template/templates/deployment-app-spring.yaml
 src/main/resources/helm-template/templates/deployment-app-quarkus.yaml
 src/main/resources/helm-template/templates/rbac-deployer.yaml
+src/main/resources/helm-template/templates/deployment-mariadb.yaml

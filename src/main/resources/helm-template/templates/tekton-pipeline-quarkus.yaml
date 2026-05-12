@@ -603,7 +603,7 @@ spec:
         - name: CONTEXT_DIR
           value: $(params.PATH_CONTEXT)
       runAfter:
-        - npm
+        - npm-webapp-prod
       taskRef:
         kind: Task
         name: '{{ .Values.app.name }}-maven'
@@ -666,6 +666,26 @@ spec:
           value: '{{ .Values.builder.image }}'
       runAfter:
         - oc-apply-manifest
+      taskRef:
+        kind: Task
+        name: '{{ .Values.app.name }}-npm'
+      workspaces:
+        - name: source
+          workspace: workspace
+    # Ensure the Vue (Vite) production bundle exists before Maven packages the Quarkus uber-jar.
+    # Without this, META-INF/resources can miss /assets/* and the SPA shows blank / 404 images in prod.
+    - name: npm-webapp-prod
+      params:
+        - name: PATH_CONTEXT
+          value: $(params.PATH_CONTEXT)
+        - name: ARGS
+          value:
+            - run
+            - webapp:build:prod
+        - name: IMAGE
+          value: '{{ .Values.builder.image }}'
+      runAfter:
+        - npm
       taskRef:
         kind: Task
         name: '{{ .Values.app.name }}-npm'
