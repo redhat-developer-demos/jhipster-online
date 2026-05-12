@@ -45,7 +45,8 @@ export class NavbarComponent implements OnInit {
     private router: Router,
     private gitConfigurationService: GitConfigurationService
   ) {
-    this.version = VERSION ? (VERSION.toLowerCase().startsWith('v') ? VERSION : 'v' + VERSION) : '';
+    const ver = VERSION ? VERSION.replace(/-SNAPSHOT$/i, '') : '';
+    this.version = ver ? (ver.toLowerCase().startsWith('v') ? ver : 'v' + ver) : '';
   }
 
   ngOnInit(): void {

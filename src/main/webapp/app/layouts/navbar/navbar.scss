@@ -6,8 +6,11 @@ Navbar
 ========================================================================== */
 
 .navbar-version {
-  font-size: 0.65em;
-  color: $navbar-light-color;
+  font-size: 0.6em;
+  font-weight: 300;
+  color: rgba($navbar-light-color, 0.55);
+  margin-left: 0.3em;
+  letter-spacing: 0.02em;
 }
 
 .profile-image {
