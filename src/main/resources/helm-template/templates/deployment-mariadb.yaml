@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
     app.kubernetes.io/name: mariadb-{{ .Values.app.name }}
     app.openshift.io/runtime: mariadb
 spec:
@@ -20,6 +21,7 @@ spec:
         app: mariadb-{{ .Values.app.name }}
         app.kubernetes.io/managed-by: jhipster-online
         app.kubernetes.io/instance: '{{ .Values.app.name }}'
+        app.kubernetes.io/part-of: '{{ .Values.app.name }}'
         deployment: mariadb-{{ .Values.app.name }}
         app.openshift.io/runtime: mariadb
     spec:

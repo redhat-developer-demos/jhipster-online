@@ -120,6 +120,12 @@ application:
   yq-cmd:
     cmd: yq
     timeout: 120
+  helm-template:
+    override-directory: ''
+    seed-on-startup: true
+    package-chart-repository-on-generate: false
+    chart-repository-index-base-url: ''
+    helm-binary: helm
   # Optional: JDL AI — Developer Sandbox shared models (namespace sandbox-shared-models).
   # Enable with: APPLICATION_JDL_AI_ENABLED=true, APPLICATION_JDL_AI_API_KEY=<oc whoami -t>, APPLICATION_JDL_AI_INSECURE_TLS=true
   # Default model: APPLICATION_JDL_AI_DEFAULT_MODEL_ID=granite-31-8b | nemotron-nano-9b-v2 | qwen3-8b
@@ -148,6 +154,10 @@ openshift:
   deployment:
     enabled: true
     default-namespace: ''
+    use-helm-cli: false
+    helm-binary: helm
+    helm-timeout-seconds: 600
+    helm-fallback-to-fabric8: true
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class

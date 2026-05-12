@@ -134,20 +134,20 @@ graph LR
 
 ## Key Directories
 
-| Directory                                       | Purpose                                                                                 |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `src/main/java/io/github/jhipster/online/`      | Backend Java source (Spring Boot)                                                       |
-| `src/main/java/.../service/`                    | Business logic (GeneratorService, OpenShiftDeploymentService, etc.)                     |
-| `src/main/java/.../web/rest/`                   | REST controllers                                                                        |
-| `src/main/java/.../config/`                     | Spring configuration (Security, Liquibase, OpenShift client, etc.)                      |
-| `src/main/webapp/app/`                          | Angular frontend                                                                        |
-| `src/main/webapp/app/home/`                     | Home module with all generator components                                               |
-| `src/main/webapp/app/home/openshift-generator/` | OpenShift-specific generator with namespace selector                                    |
-| `src/main/webapp/app/home/deployed-apps/`       | Deployed applications dashboard                                                         |
-| `src/main/resources/config/`                    | Spring profiles (dev/prod) and Liquibase migrations                                     |
-| `src/main/resources/config/liquibase/`          | Database migration changelogs                                                           |
-| `src/main/kubernetes/`                          | Backstage descriptor for this repo (`catalog-info.yaml`) and cluster RBAC (`rbac.yaml`) |
-| `src/main/docker/`                              | Docker Compose files for local development                                              |
+| Directory                                       | Purpose                                                                                                                         |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `src/main/java/io/github/jhipster/online/`      | Backend Java source (Spring Boot)                                                                                               |
+| `src/main/java/.../service/`                    | Business logic (GeneratorService, OpenShiftDeploymentService, etc.)                                                             |
+| `src/main/java/.../web/rest/`                   | REST controllers                                                                                                                |
+| `src/main/java/.../config/`                     | Spring configuration (Security, Liquibase, OpenShift client, etc.)                                                              |
+| `src/main/webapp/app/`                          | Angular frontend                                                                                                                |
+| `src/main/webapp/app/home/`                     | Home module with all generator components                                                                                       |
+| `src/main/webapp/app/home/openshift-generator/` | OpenShift-specific generator with namespace selector                                                                            |
+| `src/main/webapp/app/home/deployed-apps/`       | Deployed applications dashboard                                                                                                 |
+| `src/main/resources/config/`                    | Spring profiles (dev/prod) and Liquibase migrations                                                                             |
+| `src/main/resources/config/liquibase/`          | Database migration changelogs                                                                                                   |
+| `src/main/kubernetes/`                          | `catalog-info.yaml`, `rbac.yaml`, optional Dev Spaces MariaDB (`mysql.yaml`, mirror of the `preset-mariadb-standalone` snippet) |
+| `src/main/docker/`                              | Docker Compose files for local development                                                                                      |
 
 ## Generation Flow
 

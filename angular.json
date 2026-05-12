@@ -45,7 +45,11 @@
               "src/main/webapp/manifest.webapp",
               "src/main/webapp/robots.txt"
             ],
-            "styles": ["src/main/webapp/content/scss/vendor.scss", "src/main/webapp/content/scss/global.scss"],
+            "styles": [
+              "src/main/webapp/content/scss/vendor.scss",
+              "src/main/webapp/content/scss/global.scss",
+              "node_modules/codemirror/lib/codemirror.css"
+            ],
             "scripts": []
           },
           "configurations": {

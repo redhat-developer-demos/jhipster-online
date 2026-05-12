@@ -101,7 +101,7 @@ Import from Git and Open Terminal
 #### Run the mariadb database (optional local / Dev Spaces)
 
 ```
-oc apply -f src/main/resources/kubernetes-snippets/preset-mariadb-standalone.yaml
+oc apply -f src/main/kubernetes/mysql.yaml
 ```
 
 #### Install and run the front-end
@@ -207,11 +207,18 @@ This release merges all upstream changes including:
 
 ### Namespace-Aware OpenShift Deployment
 
-The OpenShift generator now includes a namespace selector. When "Deploy to OpenShift" is enabled, the application template and Tekton pipeline are applied directly to the selected namespace via Fabric8 OpenShift client.
+The OpenShift generator includes a namespace selector. When "Deploy to OpenShift" is enabled, the server clones the generated Git repository and installs the `helm/` chart into the selected namespace.
+
+- **Helm CLI** (`openshift.deployment.use-helm-cli`): when `true` (default in `application-prod.yml` when `OPENSHIFT_USE_HELM_CLI` is unset), the server runs `helm upgrade --install` so the release appears in the OpenShift developer console. The runtime image must include the `helm` binary (see `Dockerfile.app`). On failure, `openshift.deployment.helm-fallback-to-fabric8` can fall back to the previous Fabric8 apply path.
+- **Admin Helm editor**: set `application.helm-template.override-directory` to an absolute path (mount a PVC there in production) and use **Administration → Helm templates** to edit the live chart; new generations prefer files on disk, then the classpath bundle. Startup can seed an empty directory from the classpath when `application.helm-template.seed-on-startup` is `true`.
 
 ### Helm chart: multiple apps per namespace
 
 Generated `helm/` charts scope Tekton PVCs, `Task` definitions, and the workspace PVC per application name so more than one JHipster app can be deployed in the same OpenShift namespace without name collisions. Tekton triggers (EventListener, Route) are included for optional pipeline runs.
+
+The chart includes **Artifact Hub–friendly** `Chart.yaml` annotations and a **`helm/README.md`** with a minimal **ChartMuseum → `helm repo index` → `artifacthub-repo.yml` beside `index.yaml` → register on [artifacthub.io](https://artifacthub.io)** (or a self-hosted hub) workflow. At the repository root, **`artifacthub-repo.template.yml`** is a starter for [repository metadata](https://artifacthub.io/docs/topics/repositories/helm-charts/); copy and rename to `artifacthub-repo.yml` next to your published `index.yaml` when you expose a real chart repo URL.
+
+In **production**, JHipster Online can optionally emit **`chart-repository/`** (`.tgz` + `index.yaml`) on each generation when `application.helm-template.package-chart-repository-on-generate` is enabled and `helm` is on the server `PATH`—see `application-prod.yml` / env `APPLICATION_HELM_TEMPLATE_PACKAGE_CHART_REPOSITORY_ON_GENERATE`.
 
 ### Optional JDL AI assistant with RAG
 
@@ -226,7 +233,7 @@ A new "Deployed Applications" section in the sidebar lists all JHipster applicat
 
 ### Context for optional Kubernetes extras
 
-Optional YAML from the generator UI is written to `src/main/kubernetes/jh-online-kubernetes-extras.yaml` in generated projects. Preset snippets live under `src/main/resources/kubernetes-snippets/` in this repo (for example `preset-mariadb-standalone.yaml`).
+On the **classic** generator (not the OpenShift-focused page), optional YAML from the UI can still be written to `src/main/kubernetes/jh-online-kubernetes-extras.yaml` in generated projects. Preset snippets live under `src/main/resources/kubernetes-snippets/` (for example `preset-mariadb-standalone.yaml`). For **JHipster Online** on Dev Spaces, the devfile still uses `src/main/kubernetes/mysql.yaml` (same manifest as that preset; keep both in sync).
 
 ## Specific Configuration
 

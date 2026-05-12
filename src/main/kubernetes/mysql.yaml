@@ -1,6 +1,5 @@
-# Optional standalone MariaDB for the Kubernetes extras UI and generated apps (not used by the Helm chart).
-# Mirror of src/main/kubernetes/mysql.yaml in this repo — keep both in sync when editing.
-# Copied into generated repos as src/main/kubernetes/preset-mariadb-standalone.yaml for devfile commands.
+# Standalone MariaDB for OpenShift Dev Spaces / local `oc apply` on this repo.
+# Same resources as src/main/resources/kubernetes-snippets/preset-mariadb-standalone.yaml — keep both in sync when editing.
 kind: Secret
 apiVersion: v1
 metadata:

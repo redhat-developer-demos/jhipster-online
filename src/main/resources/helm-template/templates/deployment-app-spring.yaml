@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
     app.kubernetes.io/name: '{{ .Values.app.name }}'
     app.openshift.io/runtime: java
   annotations:
@@ -22,6 +23,7 @@ spec:
         app: '{{ .Values.app.name }}'
         app.kubernetes.io/managed-by: jhipster-online
         app.kubernetes.io/instance: '{{ .Values.app.name }}'
+        app.kubernetes.io/part-of: '{{ .Values.app.name }}'
         deployment: '{{ .Values.app.name }}'
         app.openshift.io/runtime: java
     spec:

@@ -58,6 +58,10 @@ import { RouterModule } from '@angular/router';
       {
         path: 'git-runtime',
         loadChildren: () => import('./git-runtime/git-runtime.module').then(m => m.GitRuntimeModule)
+      },
+      {
+        path: 'helm-template',
+        loadChildren: () => import('./helm-template/helm-template.module').then(m => m.HelmTemplateModule)
       }
       /* jhipster-needle-add-admin-route - JHipster will add admin routes here */
     ])

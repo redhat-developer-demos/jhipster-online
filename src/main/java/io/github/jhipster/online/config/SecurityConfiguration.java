@@ -97,6 +97,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/account/reset-password/init").permitAll()
                 .requestMatchers("/api/account/reset-password/finish").permitAll()
                 .requestMatchers("/api/account/reset-password/link").hasAnyAuthority(AuthoritiesConstants.ADMIN)
+                .requestMatchers("/api/admin/helm-template/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .requestMatchers("/api/crash-reports/*").permitAll()
                 .requestMatchers("/api/download-application").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/kubernetes-snippets/**").permitAll()

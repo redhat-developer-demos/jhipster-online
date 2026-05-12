@@ -47,6 +47,8 @@ public class ApplicationProperties {
 
     private final JdlAi jdlAi = new JdlAi();
 
+    private final HelmTemplate helmTemplate = new HelmTemplate();
+
     private String tmpFolder = System.getProperty("java.io.tmpdir");
 
     public JhipsterCmd getJhipsterCmd() {
@@ -99,6 +101,87 @@ public class ApplicationProperties {
 
     public JdlAi getJdlAi() {
         return jdlAi;
+    }
+
+    public HelmTemplate getHelmTemplate() {
+        return helmTemplate;
+    }
+
+    /**
+     * Optional on-disk mirror of {@code classpath:helm-template/} for live admin edits; generation prefers these files when present.
+     */
+    public static class HelmTemplate {
+
+        /** Absolute path to a directory with the same layout as {@code helm-template/} (Chart.yaml, values.yaml, templates/, argocd/). */
+        private String overrideDirectory = "";
+
+        /**
+         * When {@link #overrideDirectory} is set and {@code Chart.yaml} is missing there, copy the bundled chart at startup.
+         */
+        private boolean seedOnStartup = true;
+
+        /** Max bytes accepted for a single template file in the admin API. */
+        private int maxFileSizeBytes = 2097152;
+
+        /**
+         * When true, runs {@code helm package} and {@code helm repo index} after the chart is rendered, writing {@code chart-repository/}
+         * ({@code .tgz} + {@code index.yaml}) for GitHub Pages / Artifact Hub. Requires the {@code helm} CLI on the JHipster Online host.
+         */
+        private boolean packageChartRepositoryOnGenerate;
+
+        /** Optional {@code helm repo index --url} base (trailing slash optional). If blank, uses {@code https://<git-company>.github.io/<repository-name>/}. */
+        private String chartRepositoryIndexBaseUrl = "";
+
+        /** Helm CLI binary for chart packaging (default {@code helm}). */
+        private String helmBinary = "helm";
+
+        public String getOverrideDirectory() {
+            return overrideDirectory;
+        }
+
+        public void setOverrideDirectory(String overrideDirectory) {
+            this.overrideDirectory = overrideDirectory == null ? "" : overrideDirectory;
+        }
+
+        public boolean isSeedOnStartup() {
+            return seedOnStartup;
+        }
+
+        public void setSeedOnStartup(boolean seedOnStartup) {
+            this.seedOnStartup = seedOnStartup;
+        }
+
+        public int getMaxFileSizeBytes() {
+            return maxFileSizeBytes;
+        }
+
+        public void setMaxFileSizeBytes(int maxFileSizeBytes) {
+            this.maxFileSizeBytes = maxFileSizeBytes;
+        }
+
+        public boolean isPackageChartRepositoryOnGenerate() {
+            return packageChartRepositoryOnGenerate;
+        }
+
+        public void setPackageChartRepositoryOnGenerate(boolean packageChartRepositoryOnGenerate) {
+            this.packageChartRepositoryOnGenerate = packageChartRepositoryOnGenerate;
+        }
+
+        public String getChartRepositoryIndexBaseUrl() {
+            return chartRepositoryIndexBaseUrl;
+        }
+
+        public void setChartRepositoryIndexBaseUrl(String chartRepositoryIndexBaseUrl) {
+            this.chartRepositoryIndexBaseUrl = chartRepositoryIndexBaseUrl == null ? "" : chartRepositoryIndexBaseUrl;
+        }
+
+        public String getHelmBinary() {
+            return helmBinary;
+        }
+
+        public void setHelmBinary(String helmBinary) {
+            this.helmBinary = helmBinary == null ? "" : helmBinary;
+        }
     }
 
     /**

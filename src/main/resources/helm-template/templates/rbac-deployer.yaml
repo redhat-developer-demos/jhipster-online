@@ -7,6 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

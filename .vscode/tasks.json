@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "devfile",
-			"command": "oc apply -f src/main/resources/kubernetes-snippets/preset-mariadb-standalone.yaml",
+			"command": "oc apply -f src/main/kubernetes/mysql.yaml",
 			"workdir": "${PROJECT_SOURCE}",
 			"component": "tools",
 			"problemMatcher": [],

@@ -7,6 +7,7 @@ import io.fabric8.kubernetes.client.dsl.base.ResourceDefinitionContext;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.github.jhipster.online.service.helm.HelmReleaseNameUtil;
 import io.github.jhipster.online.service.helm.HelmTemplateRenderer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +49,18 @@ public class OpenShiftDeploymentService {
 
     @Value("${openshift.deployment.default-namespace:}")
     private String configuredDefaultNamespace;
+
+    @Value("${openshift.deployment.use-helm-cli:false}")
+    private boolean useHelmCli;
+
+    @Value("${openshift.deployment.helm-binary:helm}")
+    private String helmBinary;
+
+    @Value("${openshift.deployment.helm-timeout-seconds:600}")
+    private int helmTimeoutSeconds;
+
+    @Value("${openshift.deployment.helm-fallback-to-fabric8:true}")
+    private boolean helmFallbackToFabric8;
 
     public OpenShiftDeploymentService(OpenShiftClient openShiftClient, Environment environment) {
         this.openShiftClient = openShiftClient;
@@ -95,7 +109,7 @@ public class OpenShiftDeploymentService {
      */
     public Map<String, Object> helmInstall(String namespace, String gitRepo, String appName, Map<String, String> valuesOverrides)
         throws IOException {
-        log.info("Helm-style deploy (Fabric8) to namespace {} from {}", namespace, gitRepo);
+        log.info("Helm deploy to namespace {} from {} (useHelmCli={})", namespace, gitRepo, useHelmCli);
         Path workDir = Files.createTempDirectory("jh-helm-");
         try {
             cloneShallow(gitRepo, workDir);
@@ -105,70 +119,41 @@ public class OpenShiftDeploymentService {
             }
             String valuesYaml = Files.readString(helmDir.resolve("values.yaml"), StandardCharsets.UTF_8);
             valuesYaml = applyNamespaceToValues(valuesYaml, namespace, valuesOverrides);
+            Files.writeString(helmDir.resolve("values.yaml"), valuesYaml, StandardCharsets.UTF_8);
+
             Yaml yaml = new Yaml();
             @SuppressWarnings("unchecked")
             Map<String, Object> values = yaml.load(valuesYaml);
             Map<String, Object> flat = HelmTemplateRenderer.flattenValues(values);
             ensureResolvedImageNamespace(flat, namespace);
 
-            Path templatesDir = helmDir.resolve("templates");
-            if (!Files.isDirectory(templatesDir)) {
-                throw new IOException("helm/templates missing in repository");
-            }
+            String release = HelmReleaseNameUtil.sanitizeReleaseName(appName);
 
-            List<String> ordered = Arrays.asList(
-                "rbac-deployer.yaml",
-                "secret-mariadb.yaml",
-                "pvc-mariadb.yaml",
-                "deployment-mariadb.yaml",
-                "service-mariadb.yaml",
-                "imagestream.yaml",
-                "buildconfig.yaml",
-                "tekton-pipeline.yaml",
-                "tekton-pipeline-spring.yaml",
-                "tekton-pipeline-quarkus.yaml",
-                "tekton-triggers.yaml",
-                "deployment.yaml",
-                "deployment-app-spring.yaml",
-                "deployment-app-quarkus.yaml",
-                "service-app.yaml",
-                "route.yaml"
-            );
-
-            Set<String> processed = new LinkedHashSet<>();
-            List<String> applied = new ArrayList<>();
-            for (String fname : ordered) {
-                Path p = templatesDir.resolve(fname);
-                if (!Files.isRegularFile(p)) {
-                    log.debug("Skipping missing template {}", fname);
-                    continue;
+            if (useHelmCli) {
+                try {
+                    runHelmUpgradeInstall(namespace, helmDir, release);
+                    Map<String, Object> result = new LinkedHashMap<>();
+                    result.put("namespace", namespace);
+                    result.put("deployMethod", "helm");
+                    result.put("release", release);
+                    result.put("resources", Collections.singletonList("helm/release:" + release));
+                    return result;
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.warn("Helm CLI deploy interrupted: {}", e.getMessage());
+                    if (!helmFallbackToFabric8) {
+                        throw new IOException("helm interrupted", e);
+                    }
+                } catch (IOException e) {
+                    log.warn("Helm CLI deploy failed: {}", e.getMessage());
+                    if (!helmFallbackToFabric8) {
+                        throw e;
+                    }
                 }
-                processed.add(fname);
-                String rendered = HelmTemplateRenderer.render(Files.readString(p, StandardCharsets.UTF_8), flat);
-                int before = applied.size();
-                applyYamlDocuments(namespace, rendered, applied);
-                log.info("Template {} -> {} resource(s) applied", fname, applied.size() - before);
             }
 
-            try (var listing = Files.list(templatesDir)) {
-                listing
-                    .filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().endsWith(".yaml") || p.getFileName().toString().endsWith(".yml"))
-                    .filter(p -> !processed.contains(p.getFileName().toString()))
-                    .sorted()
-                    .forEach(
-                        p -> {
-                            try {
-                                String rendered = HelmTemplateRenderer.render(Files.readString(p, StandardCharsets.UTF_8), flat);
-                                applyYamlDocuments(namespace, rendered, applied);
-                            } catch (IOException e) {
-                                log.warn("Could not read template {}: {}", p.getFileName(), e.getMessage());
-                            }
-                        }
-                    );
-            }
-
-            log.info("Helm deploy complete: {} total resource(s) applied to {}", applied.size(), namespace);
+            List<String> applied = applyHelmTemplatesWithFabric8(namespace, helmDir, flat);
+            log.info("Helm deploy complete (Fabric8): {} total resource(s) applied to {}", applied.size(), namespace);
 
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("namespace", namespace);
@@ -182,6 +167,100 @@ public class OpenShiftDeploymentService {
                 log.warn("Could not delete temp dir {}: {}", workDir, e.getMessage());
             }
         }
+    }
+
+    private void runHelmUpgradeInstall(String namespace, Path helmDir, String releaseName) throws IOException, InterruptedException {
+        List<String> cmd = new ArrayList<>();
+        cmd.add(helmBinary);
+        cmd.add("upgrade");
+        cmd.add("--install");
+        cmd.add(releaseName);
+        cmd.add(".");
+        cmd.add("--namespace");
+        cmd.add(namespace);
+        cmd.add("-f");
+        cmd.add("values.yaml");
+        cmd.add("--wait");
+        cmd.add("--timeout");
+        cmd.add(Math.max(60, helmTimeoutSeconds) + "s");
+
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.directory(helmDir.toFile());
+        pb.redirectErrorStream(true);
+        log.debug("Running: {} (in {})", String.join(" ", cmd), helmDir);
+        Process p = pb.start();
+        String output = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        long waitCap = Math.max(helmTimeoutSeconds + 120L, 300L);
+        if (!p.waitFor(waitCap, TimeUnit.SECONDS)) {
+            p.destroyForcibly();
+            throw new IOException("helm timed out after " + waitCap + "s");
+        }
+        int exit = p.exitValue();
+        if (exit != 0) {
+            throw new IOException("helm exited with " + exit + ": " + output);
+        }
+        log.info("helm upgrade --install {} in {} completed", releaseName, namespace);
+    }
+
+    private List<String> applyHelmTemplatesWithFabric8(String namespace, Path helmDir, Map<String, Object> flat) throws IOException {
+        Path templatesDir = helmDir.resolve("templates");
+        if (!Files.isDirectory(templatesDir)) {
+            throw new IOException("helm/templates missing in repository");
+        }
+
+        List<String> ordered = Arrays.asList(
+            "rbac-deployer.yaml",
+            "secret-mariadb.yaml",
+            "pvc-mariadb.yaml",
+            "deployment-mariadb.yaml",
+            "service-mariadb.yaml",
+            "imagestream.yaml",
+            "buildconfig.yaml",
+            "tekton-pipeline.yaml",
+            "tekton-pipeline-spring.yaml",
+            "tekton-pipeline-quarkus.yaml",
+            "tekton-triggers.yaml",
+            "deployment.yaml",
+            "deployment-app-spring.yaml",
+            "deployment-app-quarkus.yaml",
+            "service-app.yaml",
+            "route.yaml"
+        );
+
+        Set<String> processed = new LinkedHashSet<>();
+        List<String> applied = new ArrayList<>();
+        for (String fname : ordered) {
+            Path p = templatesDir.resolve(fname);
+            if (!Files.isRegularFile(p)) {
+                log.debug("Skipping missing template {}", fname);
+                continue;
+            }
+            processed.add(fname);
+            String rendered = HelmTemplateRenderer.render(Files.readString(p, StandardCharsets.UTF_8), flat);
+            int before = applied.size();
+            applyYamlDocuments(namespace, rendered, applied);
+            log.info("Template {} -> {} resource(s) applied", fname, applied.size() - before);
+        }
+
+        try (var listing = Files.list(templatesDir)) {
+            listing
+                .filter(Files::isRegularFile)
+                .filter(path -> path.getFileName().toString().endsWith(".yaml") || path.getFileName().toString().endsWith(".yml"))
+                .filter(path -> !processed.contains(path.getFileName().toString()))
+                .sorted()
+                .forEach(
+                    path -> {
+                        try {
+                            String rendered = HelmTemplateRenderer.render(Files.readString(path, StandardCharsets.UTF_8), flat);
+                            applyYamlDocuments(namespace, rendered, applied);
+                        } catch (IOException e) {
+                            log.warn("Could not read template {}: {}", path.getFileName(), e.getMessage());
+                        }
+                    }
+                );
+        }
+
+        return applied;
     }
 
     private static String applyNamespaceToValues(String valuesYaml, String namespace, Map<String, String> overrides) {
@@ -438,6 +517,9 @@ public class OpenShiftDeploymentService {
 
     private String resolveDeployMethod(io.fabric8.kubernetes.api.model.apps.Deployment dep, String name, ResourceDefinitionContext appCrd) {
         Map<String, String> ann = dep.getMetadata().getAnnotations();
+        if (ann != null && ann.containsKey("meta.helm.sh/release-name")) {
+            return "helm";
+        }
         if (ann != null && ann.containsKey("deploy.jhipster.online/method")) {
             return ann.get("deploy.jhipster.online/method");
         }

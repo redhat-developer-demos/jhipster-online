@@ -27,6 +27,8 @@ import static org.mockito.Mockito.verify;
 import io.github.jhipster.online.config.ApplicationProperties;
 import io.github.jhipster.online.domain.User;
 import io.github.jhipster.online.domain.enums.GitProvider;
+import io.github.jhipster.online.service.helm.HelmChartRepositoryPackager;
+import io.github.jhipster.online.service.helm.HelmTemplateSource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -83,7 +85,9 @@ class GeneratorServiceTest {
                 jHipsterService,
                 logsService,
                 kubernetesManifestSnippetService,
-                openshiftScaffoldApplicationService
+                openshiftScaffoldApplicationService,
+                new HelmTemplateSource(applicationProperties),
+                new HelmChartRepositoryPackager(applicationProperties)
             );
     }
 
@@ -106,11 +110,35 @@ class GeneratorServiceTest {
             .contains("https://github.com/gh-org/repo");
         assertThat(new File(workingDir, "catalog-info.yaml")).isFile().exists();
         assertThat(FileUtils.readFileToString(new File(workingDir, "catalog-info.yaml"), StandardCharsets.UTF_8)).contains("gh-org/repo");
+        assertThat(new File(workingDir, "artifacthub-repo.template.yml")).isFile().exists();
+        assertThat(FileUtils.readFileToString(new File(workingDir, "artifacthub-repo.template.yml"), StandardCharsets.UTF_8))
+            .contains("https://github.com/gh-org/repo");
+        assertThat(new File(workingDir, "helm/README.md")).isFile().exists();
+        assertThat(FileUtils.readFileToString(new File(workingDir, "helm/Chart.yaml"), StandardCharsets.UTF_8))
+            .contains("artifacthub.io/license");
         assertThat(new File(workingDir, "src/main/kubernetes/preset-mariadb-standalone.yaml")).isFile().exists();
         assertThat(new File(workingDir, "pipeline.yaml")).doesNotExist();
         assertThat(new File(workingDir, "pipeline-run.yaml")).doesNotExist();
         assertThat(new File(workingDir, "yq-script")).doesNotExist();
         assertThat(new File(workingDir, "helm/templates/tekton-pipeline.yaml")).isFile().exists();
+    }
+
+    @Test
+    void generateZippedApplication_usesGeneratorBaseNameForHelmWhenDifferentFromRepositoryName() throws IOException {
+        String cfg =
+            "{\"git-company\":\"gh-org\",\"repository-name\":\"sensor-gas\",\"generator-jhipster\":{\"baseName\":\"sensorgas\"},\"generator-jhipster-quarkus\":{}}";
+        final String cwd = buildCwdPath();
+        final String result = generatorService.generateZippedApplication(applicationId, cfg);
+        assertThat(result).isEqualTo(cwd + ".zip");
+        File workingDir = new File(cwd);
+        String values = FileUtils.readFileToString(new File(workingDir, "helm/values.yaml"), StandardCharsets.UTF_8);
+        assertThat(values).contains("name: sensorgas");
+        String pipeline = FileUtils.readFileToString(new File(workingDir, "helm/templates/tekton-pipeline.yaml"), StandardCharsets.UTF_8);
+        assertThat(pipeline).contains("*-runner.jar");
+        assertThat(values).doesNotContain("appJarVersion:");
+        String catalog = FileUtils.readFileToString(new File(workingDir, "catalog-info.yaml"), StandardCharsets.UTF_8);
+        assertThat(catalog).contains("github.com/project-slug: gh-org/sensor-gas");
+        assertThat(catalog).contains("name: 'sensorgas'");
     }
 
     @Test

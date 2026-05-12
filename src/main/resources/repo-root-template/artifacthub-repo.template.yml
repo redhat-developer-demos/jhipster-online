@@ -1,0 +1,16 @@
+# Source application repository (for maintainers; not used by Artifact Hub): __GIT_REPO_URL__
+#
+# Template for Artifact Hub repository metadata.
+# When your Helm repository is served over HTTPS (same directory as index.yaml):
+#   1. Copy this file to that directory.
+#   2. Rename to: artifacthub-repo.yml
+#   3. Fill optional fields (repositoryID from Artifact Hub after adding the repo, owners, ignore rules).
+#
+# Docs: https://artifacthub.io/docs/topics/repositories/helm-charts/
+# Reference: https://github.com/artifacthub/hub/blob/master/docs/metadata/artifacthub-repo.yml
+#
+# repositoryID: ''   # optional; enables verified publisher when set from Artifact Hub UI
+# owners:
+#   - name: Your Name
+#     email: you@example.com
+# ignore: []        # optional; packages or versions to skip indexing

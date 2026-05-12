@@ -25,6 +25,9 @@ import com.jayway.jsonpath.PathNotFoundException;
 import io.github.jhipster.online.config.ApplicationProperties;
 import io.github.jhipster.online.domain.User;
 import io.github.jhipster.online.domain.enums.GitProvider;
+import io.github.jhipster.online.service.helm.HelmBundlePaths;
+import io.github.jhipster.online.service.helm.HelmChartRepositoryPackager;
+import io.github.jhipster.online.service.helm.HelmTemplateSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -70,13 +73,19 @@ public class GeneratorService {
 
     private final OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService;
 
+    private final HelmTemplateSource helmTemplateSource;
+
+    private final HelmChartRepositoryPackager helmChartRepositoryPackager;
+
     public GeneratorService(
         ApplicationProperties applicationProperties,
         GitService gitService,
         JHipsterService jHipsterService,
         LogsService logsService,
         KubernetesManifestSnippetService kubernetesManifestSnippetService,
-        OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService
+        OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService,
+        HelmTemplateSource helmTemplateSource,
+        HelmChartRepositoryPackager helmChartRepositoryPackager
     ) {
         this.applicationProperties = applicationProperties;
         this.gitService = gitService;
@@ -84,6 +93,8 @@ public class GeneratorService {
         this.logsService = logsService;
         this.kubernetesManifestSnippetService = kubernetesManifestSnippetService;
         this.openshiftScaffoldApplicationService = openshiftScaffoldApplicationService;
+        this.helmTemplateSource = helmTemplateSource;
+        this.helmChartRepositoryPackager = helmChartRepositoryPackager;
     }
 
     public String generateZippedApplication(String applicationId, String applicationConfiguration) throws IOException {
@@ -149,6 +160,13 @@ public class GeneratorService {
         replaceTokensInFile(new File(workingDir, "catalog-info.yaml"), tokens);
         this.logsService.addLog(applicationId, "Created catalog-info.yaml from classpath template");
 
+        copyClasspathResource("repo-root-template/artifacthub-repo.template.yml", new File(workingDir, "artifacthub-repo.template.yml"));
+        replaceTokensInFile(new File(workingDir, "artifacthub-repo.template.yml"), tokens);
+        this.logsService.addLog(
+                applicationId,
+                "Added artifacthub-repo.template.yml (copy beside index.yaml when publishing a chart repo for Artifact Hub)"
+            );
+
         File k8sDir = new File(workingDir, "src/main/kubernetes");
         FileUtils.forceMkdir(k8sDir);
         copyClasspathResource("kubernetes-snippets/preset-mariadb-standalone.yaml", new File(k8sDir, "preset-mariadb-standalone.yaml"));
@@ -165,17 +183,16 @@ public class GeneratorService {
         Object document = Configuration.defaultConfiguration().jsonProvider().parse(applicationConfiguration);
         String gitCompany = JsonPath.read(document, "$.git-company");
         String repositoryName = JsonPath.read(document, "$.repository-name");
-        String repoSan = sanitizeKubernetesName(repositoryName);
+        String applicationBaseName = readGeneratorBaseName(document, repositoryName);
+        String appK8sName = sanitizeKubernetesName(applicationBaseName);
         String framework = resolveFramework(applicationConfiguration);
         String gitRepo = "https://github.com/" + gitCompany + "/" + repositoryName;
-        String appJarVersion = "quarkus".equals(framework) ? repoSan + "-1.0.0-SNAPSHOT-runner.jar" : repoSan + "-0.0.1-SNAPSHOT.jar";
 
         Map<String, String> tokenReplacements = new LinkedHashMap<>();
-        tokenReplacements.put("__REPO_NAME__", repoSan);
+        tokenReplacements.put("__REPO_NAME__", appK8sName);
         tokenReplacements.put("__FRAMEWORK__", framework);
         tokenReplacements.put("__GIT_REPO_URL__", gitRepo);
-        tokenReplacements.put("__APP_NAME__", repoSan);
-        tokenReplacements.put("__APP_JAR_VERSION__", appJarVersion);
+        tokenReplacements.put("__APP_NAME__", appK8sName);
         tokenReplacements.put("__ARGOCD_APP_NAMESPACE__", "openshift-gitops");
         tokenReplacements.put("__GIT_COMPANY__", gitCompany);
         tokenReplacements.put("__REPO_SLUG__", repositoryName);
@@ -188,43 +205,36 @@ public class GeneratorService {
         return tokenReplacements;
     }
 
+    /**
+     * JHipster Maven artifact (and jar) uses {@code generator-jhipster.baseName}, while the Git repo slug may differ
+     * (e.g. repository {@code sensor-gas} with baseName {@code sensorgas}). Helm/Tekton use that id for APP_NAME and routes; the pipeline discovers the built jar under {@code target/}.
+     */
+    private static String readGeneratorBaseName(Object document, String repositoryName) {
+        try {
+            Object v = JsonPath.read(document, "$['generator-jhipster'].baseName");
+            if (v instanceof String && StringUtils.isNotBlank((String) v)) {
+                return ((String) v).trim();
+            }
+        } catch (PathNotFoundException e) {
+            // older or minimal payloads
+        }
+        return repositoryName;
+    }
+
     private void generateHelmBundle(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
         this.logsService.addLog(applicationId, "Adding helm/ chart and argocd/ Application manifest");
         Map<String, String> tokenReplacements = buildGenerationTokens(applicationConfiguration);
         String framework = tokenReplacements.get("__FRAMEWORK__");
 
-        copyClasspathResource("helm-template/Chart.yaml", new File(workingDir, "helm/Chart.yaml"));
-        copyClasspathResource("helm-template/values.yaml", new File(workingDir, "helm/values.yaml"));
-        copyClasspathResource("helm-template/templates/rbac-deployer.yaml", new File(workingDir, "helm/templates/rbac-deployer.yaml"));
-        copyClasspathResource("helm-template/templates/pvc-mariadb.yaml", new File(workingDir, "helm/templates/pvc-mariadb.yaml"));
-        copyClasspathResource("helm-template/templates/secret-mariadb.yaml", new File(workingDir, "helm/templates/secret-mariadb.yaml"));
-        copyClasspathResource(
-            "helm-template/templates/deployment-mariadb.yaml",
-            new File(workingDir, "helm/templates/deployment-mariadb.yaml")
-        );
-        copyClasspathResource("helm-template/templates/service-mariadb.yaml", new File(workingDir, "helm/templates/service-mariadb.yaml"));
-        copyClasspathResource("helm-template/templates/imagestream.yaml", new File(workingDir, "helm/templates/imagestream.yaml"));
-        copyClasspathResource("helm-template/templates/buildconfig.yaml", new File(workingDir, "helm/templates/buildconfig.yaml"));
-        copyClasspathResource(
-            "helm-template/templates/deployment-app-spring.yaml",
-            new File(workingDir, "helm/templates/deployment-app-spring.yaml")
-        );
-        copyClasspathResource(
-            "helm-template/templates/deployment-app-quarkus.yaml",
-            new File(workingDir, "helm/templates/deployment-app-quarkus.yaml")
-        );
-        copyClasspathResource("helm-template/templates/service-app.yaml", new File(workingDir, "helm/templates/service-app.yaml"));
-        copyClasspathResource("helm-template/templates/route.yaml", new File(workingDir, "helm/templates/route.yaml"));
-        copyClasspathResource(
-            "helm-template/templates/tekton-pipeline-spring.yaml",
-            new File(workingDir, "helm/templates/tekton-pipeline-spring.yaml")
-        );
-        copyClasspathResource(
-            "helm-template/templates/tekton-pipeline-quarkus.yaml",
-            new File(workingDir, "helm/templates/tekton-pipeline-quarkus.yaml")
-        );
-        copyClasspathResource("helm-template/templates/tekton-triggers.yaml", new File(workingDir, "helm/templates/tekton-triggers.yaml"));
-        copyClasspathResource("helm-template/argocd/application.yaml", new File(workingDir, "argocd/application.yaml"));
+        for (String rel : HelmBundlePaths.RELATIVE_PATHS) {
+            File dest;
+            if (rel.startsWith("argocd/")) {
+                dest = new File(workingDir, rel.replace('/', File.separatorChar));
+            } else {
+                dest = new File(workingDir, ("helm/" + rel).replace('/', File.separatorChar));
+            }
+            helmTemplateSource.copyRelativeTo(rel, dest);
+        }
 
         replaceTokensInFile(new File(workingDir, "helm/Chart.yaml"), tokenReplacements);
         replaceTokensInFile(new File(workingDir, "helm/values.yaml"), tokenReplacements);
@@ -233,6 +243,8 @@ public class GeneratorService {
 
         selectDeploymentVariant(new File(workingDir, "helm/templates"), framework);
         selectTektonPipelineVariant(new File(workingDir, "helm/templates"), framework);
+
+        helmChartRepositoryPackager.packageRepositoryIfEnabled(applicationId, workingDir, tokenReplacements, this.logsService);
     }
 
     private static String sanitizeKubernetesName(String name) {

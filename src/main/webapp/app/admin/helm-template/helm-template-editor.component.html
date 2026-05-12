@@ -1,0 +1,34 @@
+<div class="container-fluid mt-3">
+  <h2>Helm chart templates (admin)</h2>
+  <p class="text-muted">
+    Edit the on-disk mirror of the bundled <code>helm-template/</code> chart when
+    <code>application.helm-template.override-directory</code> is set. Generation prefers those files, then falls back to the classpath.
+  </p>
+  <div *ngIf="loadError" class="alert alert-warning">{{ loadError }}</div>
+  <div class="row">
+    <div class="col-md-3 border-end">
+      <button type="button" class="btn btn-sm btn-outline-secondary mb-2" (click)="reloadFileList()">Refresh list</button>
+      <ul class="list-group list-group-flush small" style="max-height: 70vh; overflow-y: auto">
+        <li
+          *ngFor="let f of files"
+          class="list-group-item list-group-item-action text-break"
+          [class.active]="f === selectedPath"
+          (click)="select(f)"
+          style="cursor: pointer"
+        >
+          {{ f }}
+        </li>
+      </ul>
+    </div>
+    <div class="col-md-9">
+      <div *ngIf="selectedPath" class="mb-2"><strong>{{ selectedPath }}</strong></div>
+      <jhi-yaml-editor *ngIf="selectedPath" [value]="content" (valueChange)="content = $event"></jhi-yaml-editor>
+      <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
+        <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!selectedPath">Save</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="resetFromClasspath()">Reset from classpath</button>
+        <span class="text-success" *ngIf="saveMessage">{{ saveMessage }}</span>
+        <span class="text-danger" *ngIf="saveError">{{ saveError }}</span>
+      </div>
+    </div>
+  </div>
+</div>

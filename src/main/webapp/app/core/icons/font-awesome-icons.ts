@@ -35,6 +35,7 @@ import {
   faExclamationTriangle,
   faExpand,
   faEye,
+  faFileCode,
   faFlag,
   faGlobe,
   faHdd,
@@ -135,6 +136,7 @@ export const fontAwesomeIcons = [
   faLightbulb,
   faSkull,
   faExpand,
+  faFileCode,
   faProjectDiagram
   // jhipster-needle-add-icon-import
 ];

@@ -76,12 +76,6 @@ export class OpenshiftGeneratorComponent implements OnInit {
   deployMethod: 'fabric8' | 'argocd' = 'fabric8';
   argocdApplicationNamespace = 'openshift-gitops';
 
-  kubernetesExtrasYaml = '';
-
-  snippetPresets: { id: string; title: string }[] = [];
-
-  snippetLoadError = '';
-
   scaffoldApps: OpenshiftScaffoldRow[] = [];
 
   scaffoldLoadError = '';
@@ -104,7 +98,6 @@ export class OpenshiftGeneratorComponent implements OnInit {
     this.openshiftJHipsterModel.clientFramework = 'vue';
     this.openshiftJHipsterModel.withAdminUi = true;
     this.loadNamespaces();
-    this.loadSnippetPresets();
     this.loadScaffoldApps();
   }
 
@@ -117,31 +110,6 @@ export class OpenshiftGeneratorComponent implements OnInit {
       () => {
         this.scaffoldApps = [];
         this.scaffoldLoadError = 'Could not load your OpenShift application list.';
-      }
-    );
-  }
-
-  loadSnippetPresets(): void {
-    this.http.get<{ id: string; title: string }[]>('api/kubernetes-snippets').subscribe(
-      data => {
-        this.snippetPresets = data ?? [];
-        this.snippetLoadError = '';
-      },
-      () => {
-        this.snippetPresets = [];
-        this.snippetLoadError = 'Could not load Kubernetes snippet presets.';
-      }
-    );
-  }
-
-  appendPresetToKubernetesExtras(presetId: string): void {
-    this.http.get('api/kubernetes-snippets/' + encodeURIComponent(presetId), { responseType: 'text' }).subscribe(
-      text => {
-        const sep = this.kubernetesExtrasYaml.trim().length > 0 ? '\n---\n' : '';
-        this.kubernetesExtrasYaml = (this.kubernetesExtrasYaml + sep + text).replace(/^\s+/, '');
-      },
-      () => {
-        this.snippetLoadError = 'Failed to load preset: ' + presetId;
       }
     );
   }
@@ -245,7 +213,10 @@ export class OpenshiftGeneratorComponent implements OnInit {
             ' applied in ' +
             (result.argocdNamespace || this.argocdApplicationNamespace);
         } else {
-          let msg = 'Deployed ' + (result.resources?.length || 0) + ' resources to ' + this.namespace;
+          let msg =
+            result.deployMethod === 'helm' && result.release
+              ? 'Helm release ' + result.release + ' installed in ' + this.namespace
+              : 'Deployed ' + (result.resources?.length || 0) + ' resources to ' + this.namespace;
           if (result.webhookUrl) {
             msg += ' | Webhook configured: ' + result.webhookUrl;
           }

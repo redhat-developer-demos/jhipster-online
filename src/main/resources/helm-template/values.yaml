@@ -18,7 +18,6 @@ deploy:
 tekton:
   defaultBranch: main
   pathContext: /
-  appJarVersion: __APP_JAR_VERSION__
   timeout: 1h0m0s
 builder:
   image: 'quay.io/maximilianopizarro/jhipster-universal-developer-image:latest'

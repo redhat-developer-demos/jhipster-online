@@ -161,6 +161,9 @@ application:
         label: Qwen3 8B (FP8)
         model: isvc-qwen3-8b-fp8
         api-url: https://isvc-qwen3-8b-fp8-predictor.sandbox-shared-models.svc.cluster.local:8443/v1/chat/completions
+  helm-template:
+    package-chart-repository-on-generate: ${APPLICATION_HELM_TEMPLATE_PACKAGE_CHART_REPOSITORY_ON_GENERATE:true}
+    chart-repository-index-base-url: ${APPLICATION_HELM_TEMPLATE_CHART_REPOSITORY_INDEX_BASE_URL:}
 
 #application:
 #    tmp-folder: /tmp
@@ -184,3 +187,7 @@ openshift:
     enabled: true
     # Optional: always offer this namespace first in UI (e.g. your Developer Sandbox project).
     default-namespace: ${OPENSHIFT_DEPLOYMENT_DEFAULT_NAMESPACE:}
+    use-helm-cli: ${OPENSHIFT_USE_HELM_CLI:true}
+    helm-binary: ${OPENSHIFT_HELM_BINARY:helm}
+    helm-timeout-seconds: ${OPENSHIFT_HELM_TIMEOUT_SECONDS:600}
+    helm-fallback-to-fabric8: ${OPENSHIFT_HELM_FALLBACK_TO_FABRIC8:true}

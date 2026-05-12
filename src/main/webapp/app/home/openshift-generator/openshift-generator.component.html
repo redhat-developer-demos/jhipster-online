@@ -2,37 +2,10 @@
   #generatorRef
   [config]="openshiftGeneratorConfig"
   [defaultModel]="openshiftJHipsterModel"
-  [kubernetesExtrasYaml]="kubernetesExtrasYaml"
   [openshiftGeneratorApplication]="true"
   [generationFinishedCallback]="generationFinishedHandler"
->  <div class="row" generator-header>
-      <div class="col-md-12">
-        <div class="card mb-3">
-          <div class="card-body">
-            <h5 class="card-title">Kubernetes / Helm extras</h5>
-            <p class="card-text text-muted">
-              Optional YAML written to <code>src/main/kubernetes/jh-online-kubernetes-extras.yaml</code> in the generated project.
-              You can use Helm-style placeholders (for example <code ngNonBindable>{{ .Values.app.name }}</code>) and align them with your
-              <code>helm/</code> chart. Each download also includes sample files under
-              <code>src/main/kubernetes/examples/*.yaml.disabled</code> (rename to enable).
-            </p>
-            <div class="mb-2" *ngIf="snippetPresets.length > 0">
-              <span class="me-2">Insert preset:</span>
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary me-1 mb-1"
-                *ngFor="let p of snippetPresets"
-                (click)="appendPresetToKubernetesExtras(p.id)"
-              >
-                {{ p.title }}
-              </button>
-            </div>
-            <div *ngIf="snippetLoadError" class="alert alert-warning py-1">{{ snippetLoadError }}</div>
-            <label class="form-label" for="k8sExtras">Custom YAML</label>
-            <textarea id="k8sExtras" class="form-control font-monospace" rows="10" [(ngModel)]="kubernetesExtrasYaml" name="k8sExtras"></textarea>
-          </div>
-        </div>
-      </div>
+>
+  <div class="row" generator-header>
       <div class="col-md-12">
         <div class="alert alert-info" role="alert">
           <p>Generated applications can be deployed on <a href="https://developers.redhat.com/developer-sandbox" target="_blank">OpenShift Spring Apps</a> in a few easy steps, please refer to the readme file in the generated project for the deployment guide.</p>

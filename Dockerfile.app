@@ -11,6 +11,17 @@ RUN \
     rm -Rf /home/jhipster/jhipster-online/ /home/jhipster/.m2 /home/jhipster/.cache /tmp/* /var/tmp/*
 
 USER root
+RUN set -eux; \
+    ARCH="$(uname -m)"; \
+    case "$ARCH" in x86_64) HELM_ARCH=amd64 ;; aarch64) HELM_ARCH=arm64 ;; *) HELM_ARCH=amd64 ;; esac; \
+    curl -fsSL "https://get.helm.sh/helm-v3.14.4-linux-${HELM_ARCH}.tar.gz" -o /tmp/helm.tgz; \
+    tar -xzf /tmp/helm.tgz -C /tmp; \
+    mv "/tmp/linux-${HELM_ARCH}/helm" /usr/local/bin/helm; \
+    chmod +x /usr/local/bin/helm; \
+    rm -rf /tmp/helm.tgz "/tmp/linux-${HELM_ARCH}"; \
+    helm version
+
+USER root
 RUN \
     npm install -g generator-jhipster-azure-spring-apps
     

@@ -107,6 +107,13 @@ application:
     host: https://github.test
   gitlab:
     host: https://gitlab.test
+  helm-template:
+    override-directory: ''
+    seed-on-startup: false
+    max-file-size-bytes: 2097152
+    package-chart-repository-on-generate: false
+    chart-repository-index-base-url: ''
+    helm-binary: helm
 
 openshift:
   argocd:

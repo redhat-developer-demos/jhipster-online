@@ -181,3 +181,11 @@ application:
     rag-semantic-enabled: false
     embeddings-url: ''
     embeddings-model: text-embedding-3-small
+  helm-template:
+    # Absolute directory mirroring classpath helm-template/ (Chart.yaml, templates/, argocd/). Empty = classpath only.
+    override-directory: ''
+    seed-on-startup: true
+    max-file-size-bytes: 2097152
+    package-chart-repository-on-generate: false
+    chart-repository-index-base-url: ''
+    helm-binary: helm

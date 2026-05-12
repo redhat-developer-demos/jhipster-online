@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
     app.kubernetes.io/name: '{{ .Values.app.name }}'
 spec:
   output:

@@ -187,7 +187,7 @@ export class GeneratorComponent implements OnInit {
     if (this.selectedGitProvider && this.selectedGitCompany && this.repositoryName) {
       this.generatorService
         .generateOnGit(this.model, this.selectedGitProvider, this.selectedGitCompany, this.repositoryName, {
-          kubernetesExtrasYaml: this.kubernetesExtrasYaml,
+          ...(this.openshiftGeneratorApplication ? {} : { kubernetesExtrasYaml: this.kubernetesExtrasYaml }),
           openshiftGeneratorApplication: this.openshiftGeneratorApplication
         })
         .subscribe(
@@ -205,16 +205,18 @@ export class GeneratorComponent implements OnInit {
 
   onSubmitDownload(): void {
     this.checkModelBeforeSubmit();
-    this.generatorService.download(this.model, { kubernetesExtrasYaml: this.kubernetesExtrasYaml }).subscribe(
-      (data: any) => this.downloadFile(data.body),
-      // eslint-disable-next-line no-console
-      (error: any) => console.log(error),
-      () => {
+    this.generatorService
+      .download(this.model, this.openshiftGeneratorApplication ? {} : { kubernetesExtrasYaml: this.kubernetesExtrasYaml })
+      .subscribe(
+        (data: any) => this.downloadFile(data.body),
         // eslint-disable-next-line no-console
-        console.log('Application downloaded');
-        this.submitted = false;
-      }
-    );
+        (error: any) => console.log(error),
+        () => {
+          // eslint-disable-next-line no-console
+          console.log('Application downloaded');
+          this.submitted = false;
+        }
+      );
   }
 
   openOutputModal(applicationId: string): void {

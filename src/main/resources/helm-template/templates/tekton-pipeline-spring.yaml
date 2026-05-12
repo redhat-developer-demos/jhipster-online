@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
 spec:
   accessModes:
     - ReadWriteOnce
@@ -21,6 +22,7 @@ metadata:
     app.kubernetes.io/version: '0.4'
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
   annotations:
     tekton.dev/pipelines.minVersion: '0.50.0'
     tekton.dev/categories: Build Tools
@@ -196,6 +198,7 @@ metadata:
     app.kubernetes.io/version: '0.2'
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
   annotations:
     tekton.dev/categories: Openshift
     tekton.dev/pipelines.minVersion: '0.17.0'
@@ -252,6 +255,7 @@ metadata:
     app.kubernetes.io/version: '0.9'
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
   annotations:
     tekton.dev/pipelines.minVersion: '0.38.0'
     tekton.dev/categories: Git
@@ -497,6 +501,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
 spec:
   description: >-
     This task can be used to run npm goals on a project.
@@ -539,6 +544,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
   annotations:
     chains.tekton.dev/transparency-upload: 'true'
 spec:
@@ -553,9 +559,6 @@ spec:
     - default: >-
         {{ .Values.builder.image }}
       name: MAVEN_IMAGE
-      type: string
-    - default: '{{ .Values.tekton.appJarVersion }}'
-      name: APP_JAR_VERSION
       type: string
     - default: '{{ .Values.app.name }}'
       name: APP_NAME
@@ -671,9 +674,12 @@ spec:
     - name: s2i-binary-build
       params:
         - name: SCRIPT
-          value: >-
-            oc start-build {{ .Values.app.name }}-devspace
-            --from-file=$(workspaces.manifest-dir.path)/$(params.PATH_CONTEXT)/target/$(params.APP_JAR_VERSION)
+          value: |
+            set -e
+            ROOT="$(workspaces.manifest-dir.path)/$(params.PATH_CONTEXT)/target"
+            JAR="$(find "$ROOT" -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name 'original-*.jar' ! -name '*-plain.jar' ! -name '*-exec.jar' 2>/dev/null | head -1)"
+            test -n "$JAR" && test -f "$JAR"
+            oc start-build {{ .Values.app.name }}-devspace --from-file="$JAR"
         - name: VERSION
           value: latest
       runAfter:
@@ -726,6 +732,7 @@ metadata:
     tekton.dev/pipeline: '{{ .Values.app.name }}'
     app.kubernetes.io/managed-by: jhipster-online
     app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
 spec:
   params:
     - name: IMAGE_NAME
@@ -734,8 +741,6 @@ spec:
       value: '{{ .Values.tekton.pathContext }}'
     - name: MAVEN_IMAGE
       value: '{{ .Values.builder.image }}'
-    - name: APP_JAR_VERSION
-      value: '{{ .Values.tekton.appJarVersion }}'
     - name: APP_NAME
       value: '{{ .Values.app.name }}'
     - name: GIT_REPO
