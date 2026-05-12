@@ -27,9 +27,16 @@ RUN microdnf install -y tar xz gzip curl git && \
     microdnf clean all
 
 WORKDIR /build
+
+COPY pom.xml .
+COPY .mvn .mvn
+RUN mvn -ntp dependency:go-offline -Pprod -DskipTests 2>/dev/null || true
+
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci --ignore-scripts
+
 COPY . .
-RUN npm ci --ignore-scripts && \
-    mvn -ntp package -Pprod -Dmaven.test.skip=true -DskipTests
+RUN mvn -ntp package -Pprod -Dmaven.test.skip=true -DskipTests
 
 # --- Runtime ---
 FROM registry.redhat.io/ubi8/openjdk-21:latest
