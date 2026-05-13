@@ -1,0 +1,73 @@
+# Minimal install: set generatorProfile: single, defaultStack: quarkus, and all workers.enabled: false.
+# Example multi (Quarkus + .NET workers): see commented block at bottom of this file.
+nameOverride: ''
+
+jhipsterOnline:
+  generatorProfile: single
+  defaultStack: quarkus
+  image:
+    repository: quay.io/maximilianopizarro/jhipster-online
+    tag: "2.40.1-quarkus"
+  replicas: 1
+  generator:
+    cmd: jhipster
+  workers:
+    quarkus:
+      enabled: false
+      replicas: 1
+      image:
+        repository: quay.io/maximilianopizarro/jhipster-online
+        tag: "2.40.1-quarkus"
+    springBoot:
+      enabled: false
+      replicas: 1
+      image:
+        repository: quay.io/maximilianopizarro/jhipster-online
+        tag: "2.40.1-spring-boot"
+    micronaut:
+      enabled: false
+      replicas: 1
+      image:
+        repository: quay.io/maximilianopizarro/jhipster-online
+        tag: "2.40.1-micronaut"
+    dotnet:
+      enabled: false
+      replicas: 1
+      image:
+        repository: quay.io/maximilianopizarro/jhipster-online
+        tag: "2.40.1-dotnet"
+    azureAca:
+      enabled: false
+      replicas: 0
+      image: {}
+    node:
+      enabled: false
+      replicas: 1
+      image:
+        repository: quay.io/maximilianopizarro/jhipster-builder-node
+        tag: "0.1.0-builder-node"
+    go:
+      enabled: false
+      replicas: 1
+      image:
+        repository: quay.io/maximilianopizarro/jhipster-builder-go
+        tag: "0.1.0-builder-go"
+    rust:
+      enabled: false
+      replicas: 1
+      image:
+        repository: quay.io/maximilianopizarro/jhipster-builder-rust
+        tag: "0.1.0-builder-rust"
+  routing:
+    mode: local-process
+
+# Example (documented): multi profile with Quarkus + .NET workers enabled — requires app-side routing to workers.
+# jhipsterOnline:
+#   generatorProfile: multi
+#   defaultStack: quarkus
+#   image:
+#     repository: quay.io/maximilianopizarro/jhipster-online
+#     tag: "2.40.1-quarkus"
+#   workers:
+#     quarkus: { enabled: true, replicas: 1, image: { repository: quay.io/maximilianopizarro/jhipster-online, tag: "2.40.1-quarkus" } }
+#     dotnet: { enabled: true, replicas: 1, image: { repository: quay.io/maximilianopizarro/jhipster-online, tag: "2.40.1-dotnet" } }

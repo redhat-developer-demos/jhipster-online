@@ -167,7 +167,34 @@ export class GeneratorComponent implements OnInit {
       this.model.enableHibernateCache = false;
       this.model.websocket = false;
       this.model.enableSwaggerCodegen = false;
-    } else if (this.model.websocket) {
+    } else if (this.model.backendFramework === 'micronaut') {
+      this.model.blueprints = [{ name: 'generator-jhipster-micronaut' }];
+    } else if (this.model.backendFramework === 'dotnet') {
+      this.model.blueprints = [{ name: 'generator-jhipster-dotnetcore' }];
+    } else if (this.model.backendFramework === 'azure-aca') {
+      this.model.blueprints = [{ name: 'generator-jhipster-azure-container-apps' }];
+    } else if (this.model.backendFramework === 'node') {
+      this.model.blueprints = [{ name: 'generator-jhipster-nodejs' }];
+    } else if (this.model.backendFramework === 'go') {
+      this.model.blueprints = [{ name: 'generator-jhipster-go' }];
+    } else if (this.model.backendFramework === 'rust') {
+      this.model.blueprints = [{ name: 'generator-jhipster-rust' }];
+    } else {
+      this.model.blueprints = (this.model.blueprints ?? []).filter(
+        b =>
+          ![
+            'generator-jhipster-quarkus',
+            'generator-jhipster-micronaut',
+            'generator-jhipster-dotnetcore',
+            'generator-jhipster-azure-container-apps',
+            'generator-jhipster-nodejs',
+            'generator-jhipster-go',
+            'generator-jhipster-rust'
+          ].includes(b.name)
+      );
+    }
+
+    if (this.model.websocket && this.model.backendFramework !== 'quarkus') {
       this.model.websocket = 'spring-websocket';
     }
 
@@ -293,15 +320,45 @@ export class GeneratorComponent implements OnInit {
   }
 
   changeBackendFramework(): void {
+    const bp = (name: string): BlueprintModel[] => [{ name }];
     if (this.model.backendFramework === 'quarkus') {
       this.model.clientFramework = 'vue';
       this.model.cacheProvider = 'no';
       this.model.enableHibernateCache = false;
       this.model.websocket = false;
       this.model.enableSwaggerCodegen = false;
-      this.model.blueprints = [{ name: 'generator-jhipster-quarkus' }];
+      this.model.blueprints = bp('generator-jhipster-quarkus');
+    } else if (this.model.backendFramework === 'micronaut') {
+      this.model.clientFramework = 'angularX';
+      this.model.blueprints = bp('generator-jhipster-micronaut');
+    } else if (this.model.backendFramework === 'dotnet') {
+      this.model.clientFramework = 'angularX';
+      this.model.blueprints = bp('generator-jhipster-dotnetcore');
+    } else if (this.model.backendFramework === 'azure-aca') {
+      this.model.clientFramework = 'angularX';
+      this.model.blueprints = bp('generator-jhipster-azure-container-apps');
+    } else if (this.model.backendFramework === 'node') {
+      this.model.clientFramework = 'angularX';
+      this.model.blueprints = bp('generator-jhipster-nodejs');
+    } else if (this.model.backendFramework === 'go' || this.model.backendFramework === 'rust') {
+      this.model.clientFramework = 'angularX';
+      this.model.blueprints = this.model.backendFramework === 'go' ? bp('generator-jhipster-go') : bp('generator-jhipster-rust');
     } else {
-      this.model.blueprints = (this.model.blueprints ?? []).filter(b => b.name !== 'generator-jhipster-quarkus');
+      this.model.blueprints = (this.model.blueprints ?? []).filter(
+        b =>
+          ![
+            'generator-jhipster-quarkus',
+            'generator-jhipster-micronaut',
+            'generator-jhipster-dotnetcore',
+            'generator-jhipster-azure-container-apps',
+            'generator-jhipster-nodejs',
+            'generator-jhipster-go',
+            'generator-jhipster-rust'
+          ].includes(b.name)
+      );
+      if (!this.model.blueprints?.length) {
+        this.model.blueprints = [];
+      }
     }
   }
 

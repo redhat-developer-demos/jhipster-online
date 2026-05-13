@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: '{{ .Values.app.name }}'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: '{{ .Values.app.name }}'
+    app.openshift.io/runtime: micronaut
+  annotations:
+    app.openshift.io/vcs-uri: '{{ .Values.git.repoUrl }}'
+    deploy.jhipster.online/method: '{{ .Values.deploy.method }}'
+spec:
+  replicas: {{ .Values.replicas.app }}
+  selector:
+    matchLabels:
+      app: '{{ .Values.app.name }}'
+      deployment: '{{ .Values.app.name }}'
+  template:
+    metadata:
+      labels:
+        app: '{{ .Values.app.name }}'
+        app.kubernetes.io/managed-by: jhipster-online
+        app.kubernetes.io/instance: '{{ .Values.app.name }}'
+        app.kubernetes.io/part-of: '{{ .Values.app.name }}'
+        deployment: '{{ .Values.app.name }}'
+        app.openshift.io/runtime: micronaut
+    spec:
+{{- if .Values.rbac.create }}
+      serviceAccountName: '{{ .Values.app.name }}-deployer'
+{{- end }}
+      containers:
+        - name: '{{ .Values.app.name }}'
+          image: image-registry.openshift-image-registry.svc:5000/{{ .Values.image.namespace }}/{{ .Values.image.stream }}:latest
+          imagePullPolicy: Always
+          env:
+            - name: MICRONAUT_ENVIRONMENTS
+              value: prod
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              value: YlhrdGMyVmpjbVYwTFhSdmEyVnVMWFJ2TFdOb1lXNW5aUzFwYmkxd2NtOWtkV04wYVc5dUxXRnVaQzEwYnkxclpXVndMV2x1TFdFdGMyVmpkWEpsTFhCc1lXTmwK
+{{- if eq .Values.database.prodType "postgresql" }}
+            - name: DATASOURCES_DEFAULT_URL
+              value: jdbc:postgresql://postgresql-{{ .Values.app.name }}:5432/jhipsteronline
+            - name: DATASOURCES_DEFAULT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-{{ .Values.app.name }}
+                  key: database-user
+            - name: DATASOURCES_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-{{ .Values.app.name }}
+                  key: database-password
+{{- end }}
+{{- if ne .Values.database.prodType "postgresql" }}
+            - name: DATASOURCES_DEFAULT_URL
+              value: jdbc:mariadb://mariadb-{{ .Values.app.name }}:3306/jhipsteronline
+            - name: DATASOURCES_DEFAULT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-user
+            - name: DATASOURCES_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-password
+{{- end }}
+            {{- if .Values.integrations.kafka.enabled }}
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: '{{ .Values.app.name }}-kafka-kafka-bootstrap:9092'
+            {{- end }}
+            {{- if .Values.integrations.redis.enabled }}
+            - name: SPRING_REDIS_HOST
+              value: '{{ .Values.app.name }}-redis'
+            - name: SPRING_REDIS_PORT
+              value: '6379'
+            {{- end }}
+            {{- if and .Values.integrations.keycloak.enabled (ne .Values.integrations.keycloak.issuerUri "") }}
+            - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI
+              value: '{{ .Values.integrations.keycloak.issuerUri }}'
+            {{- end }}
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace

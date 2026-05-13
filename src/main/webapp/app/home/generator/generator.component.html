@@ -94,9 +94,18 @@
       >
         <option value="spring-boot">Spring Boot</option>
         <option value="quarkus">Quarkus (Vue + generator-jhipster-quarkus)</option>
+        <option value="micronaut">Micronaut (generator-jhipster-micronaut)</option>
+        <option value="dotnet">.NET Core (generator-jhipster-dotnetcore)</option>
+        <option value="azure-aca">Azure Container Apps (generator-jhipster-azure-container-apps)</option>
+        <option value="node">Node / NestJS (generator-jhipster-nodejs)</option>
+        <option value="go">Go (experimental)</option>
+        <option value="rust">Rust (experimental)</option>
       </select>
       <div *ngIf="model.backendFramework === 'quarkus'" class="form-text text-muted small">
         Quarkus requires Vue; Hibernate 2nd level cache, Spring WebSocket, and OpenAPI-generator options are turned off for compatibility.
+      </div>
+      <div *ngIf="model.backendFramework === 'go' || model.backendFramework === 'rust'" class="form-text text-muted small">
+        Go/Rust: verify generator packages exist on the server image; OpenShift defaults may still use JVM-oriented Tekton until customized.
       </div>
     </div>
   </div>

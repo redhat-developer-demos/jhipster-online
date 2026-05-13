@@ -19,7 +19,7 @@ spec:
     sourceStrategy:
       from:
         kind: DockerImage
-        name: registry.redhat.io/ubi8/openjdk-21:1.20-3.1743775676
+        name: registry.redhat.io/ubi8/dotnet-80:8.0
       incremental: true
   source:
     type: Binary

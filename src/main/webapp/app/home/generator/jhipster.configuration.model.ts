@@ -21,6 +21,8 @@ export interface BlueprintModel {
   name: string;
 }
 
+export type BackendFrameworkId = 'spring-boot' | 'quarkus' | 'micronaut' | 'dotnet' | 'azure-aca' | 'node' | 'go' | 'rust';
+
 export class JHipsterConfigurationModel {
   public applicationType = 'monolith';
   public gitCompany = '';
@@ -52,8 +54,8 @@ export class JHipsterConfigurationModel {
   public skipCommitHook = true;
   public blueprints: BlueprintModel[] = [{ name: 'generator-jhipster-quarkus' }];
   public iaCTools = ['bicep', 'terraform'];
-  /** Drives UI defaults for Quarkus vs Spring; server CLI still follows server-side jhipster-cmd. */
-  public backendFramework: 'spring-boot' | 'quarkus' = 'quarkus';
+  /** Drives blueprints + OpenShift/Tekton token; server CLI resolved per-stack via application.jhipster-commands-by-stack. */
+  public backendFramework: BackendFrameworkId = 'quarkus';
 
   constructor(data?: Partial<JHipsterConfigurationModel>) {
     if (data) {

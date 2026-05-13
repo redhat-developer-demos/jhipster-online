@@ -7,6 +7,7 @@ import io.github.jhipster.online.config.ApplicationProperties;
 import io.github.jhipster.online.domain.OpenshiftScaffoldApplication;
 import io.github.jhipster.online.domain.User;
 import io.github.jhipster.online.domain.enums.GitProvider;
+import io.github.jhipster.online.domain.stack.StackProfileResolver;
 import io.github.jhipster.online.repository.OpenshiftScaffoldApplicationRepository;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -57,7 +58,10 @@ public class OpenshiftScaffoldApplicationService {
             if (StringUtils.isAnyBlank(gitCompany, repositoryName)) {
                 return;
             }
-            String framework = resolveFramework(applicationConfiguration);
+            String framework = StackProfileResolver.resolveHelmFrameworkToken(
+                applicationConfiguration,
+                applicationProperties.getJhipsterCmd().getCmd()
+            );
             String gitRepoUrl = buildGitRepoUrl(gitProvider, gitCompany, repositoryName);
 
             openshiftScaffoldApplicationRepository
@@ -103,13 +107,7 @@ public class OpenshiftScaffoldApplicationService {
     }
 
     private String resolveFramework(String applicationConfiguration) {
-        if (applicationConfiguration != null && applicationConfiguration.contains("generator-jhipster-quarkus")) {
-            return "quarkus";
-        }
-        if ("jhipster-quarkus".equals(applicationProperties.getJhipsterCmd().getCmd())) {
-            return "quarkus";
-        }
-        return "spring-boot";
+        return StackProfileResolver.resolveHelmFrameworkToken(applicationConfiguration, applicationProperties.getJhipsterCmd().getCmd());
     }
 
     private String buildGitRepoUrl(GitProvider provider, String gitCompany, String repositoryName) {

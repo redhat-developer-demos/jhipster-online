@@ -25,6 +25,7 @@ import com.jayway.jsonpath.PathNotFoundException;
 import io.github.jhipster.online.config.ApplicationProperties;
 import io.github.jhipster.online.domain.User;
 import io.github.jhipster.online.domain.enums.GitProvider;
+import io.github.jhipster.online.domain.stack.StackProfileResolver;
 import io.github.jhipster.online.service.helm.HelmBundlePaths;
 import io.github.jhipster.online.service.helm.HelmChartRepositoryPackager;
 import io.github.jhipster.online.service.helm.HelmTemplateSource;
@@ -182,6 +183,27 @@ public class GeneratorService {
             );
         copyClasspathResource("kubernetes-snippets/preset-mongodb.yaml", new File(k8sDir, "preset-mongodb.yaml"));
         this.logsService.addLog(applicationId, "Added optional MongoDB manifest at src/main/kubernetes/preset-mongodb.yaml");
+
+        String fw = StackProfileResolver.resolveHelmFrameworkToken(
+            applicationConfiguration,
+            applicationProperties.getJhipsterCmd().getCmd()
+        );
+        if ("azure-aca".equals(fw)) {
+            File acaDir = new File(k8sDir, "azure-aca-iac");
+            FileUtils.forceMkdir(acaDir);
+            copyClasspathResource("kubernetes-snippets/azure-aca-iac-README.md", new File(acaDir, "README.md"));
+            this.logsService.addLog(
+                    applicationId,
+                    "Added Azure Container Apps IaC notes at src/main/kubernetes/azure-aca-iac/README.md (Java runtime unchanged; wire Bicep/Terraform from generator output)."
+                );
+        }
+        if (StackProfileResolver.isExperimentalStack(fw)) {
+            copyClasspathResource("kubernetes-snippets/go-rust-experimental.md", new File(k8sDir, "go-rust-experimental.md"));
+            this.logsService.addLog(
+                    applicationId,
+                    "Added experimental Go/Rust OpenShift notes at src/main/kubernetes/go-rust-experimental.md"
+                );
+        }
     }
 
     /**
@@ -193,7 +215,10 @@ public class GeneratorService {
         String repositoryName = JsonPath.read(document, "$.repository-name");
         String applicationBaseName = readGeneratorBaseName(document, repositoryName);
         String appK8sName = sanitizeKubernetesName(applicationBaseName);
-        String framework = resolveFramework(applicationConfiguration);
+        String framework = StackProfileResolver.resolveHelmFrameworkToken(
+            applicationConfiguration,
+            applicationProperties.getJhipsterCmd().getCmd()
+        );
         String gitRepo = "https://github.com/" + gitCompany + "/" + repositoryName;
 
         Map<String, String> tokenReplacements = new LinkedHashMap<>();
@@ -268,8 +293,18 @@ public class GeneratorService {
         replaceTokensInFile(new File(workingDir, "argocd/application.yaml"), tokenReplacements);
         replaceTokensInTree(new File(workingDir, "helm/templates"), tokenReplacements);
 
+        selectBuildConfigVariant(new File(workingDir, "helm/templates"), framework);
         selectDeploymentVariant(new File(workingDir, "helm/templates"), framework);
         selectTektonPipelineVariant(new File(workingDir, "helm/templates"), framework);
+
+        if (StackProfileResolver.isExperimentalStack(framework)) {
+            this.logsService.addLog(
+                    applicationId,
+                    "Experimental stack (" +
+                    framework +
+                    "): bundled OpenShift/Tekton defaults target JVM-style flows; validate or replace pipelines for your generator."
+                );
+        }
 
         helmChartRepositoryPackager.packageRepositoryIfEnabled(applicationId, workingDir, tokenReplacements, this.logsService);
     }
@@ -278,14 +313,93 @@ public class GeneratorService {
         return name.toLowerCase().replace('_', '-');
     }
 
-    private String resolveFramework(String applicationConfiguration) {
-        if (applicationConfiguration != null && applicationConfiguration.contains("generator-jhipster-quarkus")) {
-            return "quarkus";
+    private static void selectBuildConfigVariant(File templatesDir, String framework) throws IOException {
+        File javaBc = new File(templatesDir, "buildconfig.yaml");
+        File dotnetBc = new File(templatesDir, "buildconfig-dotnet.yaml");
+        File nodeBc = new File(templatesDir, "buildconfig-node.yaml");
+        if ("dotnet".equals(framework)) {
+            FileUtils.deleteQuietly(javaBc);
+            if (dotnetBc.isFile()) {
+                FileUtils.moveFile(dotnetBc, javaBc);
+            }
+            FileUtils.deleteQuietly(nodeBc);
+        } else if ("node".equals(framework)) {
+            FileUtils.deleteQuietly(javaBc);
+            if (nodeBc.isFile()) {
+                FileUtils.moveFile(nodeBc, javaBc);
+            }
+            FileUtils.deleteQuietly(dotnetBc);
+        } else {
+            FileUtils.deleteQuietly(dotnetBc);
+            FileUtils.deleteQuietly(nodeBc);
         }
-        if ("jhipster-quarkus".equals(applicationProperties.getJhipsterCmd().getCmd())) {
-            return "quarkus";
+    }
+
+    private static final String[] DEPLOYMENT_VARIANT_FILES = {
+        "deployment-app-spring.yaml",
+        "deployment-app-quarkus.yaml",
+        "deployment-app-micronaut.yaml",
+        "deployment-app-dotnet.yaml",
+        "deployment-app-node.yaml"
+    };
+
+    private static void selectDeploymentVariant(File templatesDir, String framework) throws IOException {
+        String pick;
+        if ("quarkus".equals(framework)) {
+            pick = "deployment-app-quarkus.yaml";
+        } else if ("micronaut".equals(framework)) {
+            pick = "deployment-app-micronaut.yaml";
+        } else if ("dotnet".equals(framework)) {
+            pick = "deployment-app-dotnet.yaml";
+        } else if ("node".equals(framework)) {
+            pick = "deployment-app-node.yaml";
+        } else {
+            pick = "deployment-app-spring.yaml";
         }
-        return "spring-boot";
+        File target = new File(templatesDir, "deployment.yaml");
+        FileUtils.deleteQuietly(target);
+        for (String name : DEPLOYMENT_VARIANT_FILES) {
+            File f = new File(templatesDir, name);
+            if (name.equals(pick)) {
+                if (f.isFile()) {
+                    FileUtils.moveFile(f, target);
+                }
+            } else {
+                FileUtils.deleteQuietly(f);
+            }
+        }
+    }
+
+    private static final String[] TEKTON_VARIANT_FILES = {
+        "tekton-pipeline-spring.yaml",
+        "tekton-pipeline-quarkus.yaml",
+        "tekton-pipeline-dotnet.yaml",
+        "tekton-pipeline-node.yaml"
+    };
+
+    private static void selectTektonPipelineVariant(File templatesDir, String framework) throws IOException {
+        String pick;
+        if ("quarkus".equals(framework)) {
+            pick = "tekton-pipeline-quarkus.yaml";
+        } else if ("dotnet".equals(framework)) {
+            pick = "tekton-pipeline-dotnet.yaml";
+        } else if ("node".equals(framework)) {
+            pick = "tekton-pipeline-node.yaml";
+        } else {
+            pick = "tekton-pipeline-spring.yaml";
+        }
+        File target = new File(templatesDir, "tekton-pipeline.yaml");
+        FileUtils.deleteQuietly(target);
+        for (String name : TEKTON_VARIANT_FILES) {
+            File f = new File(templatesDir, name);
+            if (name.equals(pick)) {
+                if (f.isFile()) {
+                    FileUtils.moveFile(f, target);
+                }
+            } else {
+                FileUtils.deleteQuietly(f);
+            }
+        }
     }
 
     private void copyClasspathResource(String classpathPath, File destFile) throws IOException {
@@ -314,32 +428,6 @@ public class GeneratorService {
         }
         for (File f : files) {
             replaceTokensInFile(f, replacements);
-        }
-    }
-
-    private static void selectDeploymentVariant(File templatesDir, String framework) throws IOException {
-        File spring = new File(templatesDir, "deployment-app-spring.yaml");
-        File quarkus = new File(templatesDir, "deployment-app-quarkus.yaml");
-        File target = new File(templatesDir, "deployment.yaml");
-        if ("quarkus".equals(framework)) {
-            FileUtils.deleteQuietly(spring);
-            FileUtils.moveFile(quarkus, target);
-        } else {
-            FileUtils.deleteQuietly(quarkus);
-            FileUtils.moveFile(spring, target);
-        }
-    }
-
-    private static void selectTektonPipelineVariant(File templatesDir, String framework) throws IOException {
-        File spring = new File(templatesDir, "tekton-pipeline-spring.yaml");
-        File quarkus = new File(templatesDir, "tekton-pipeline-quarkus.yaml");
-        File target = new File(templatesDir, "tekton-pipeline.yaml");
-        if ("quarkus".equals(framework)) {
-            FileUtils.deleteQuietly(spring);
-            FileUtils.moveFile(quarkus, target);
-        } else {
-            FileUtils.deleteQuietly(quarkus);
-            FileUtils.moveFile(spring, target);
         }
     }
 

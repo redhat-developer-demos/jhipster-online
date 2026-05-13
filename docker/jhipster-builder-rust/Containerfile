@@ -1,0 +1,4 @@
+FROM registry.redhat.io/ubi8/rust-toolset:1.75.0
+USER root
+RUN yum install -y --setopt=tsflags=nodocs git && yum clean all
+WORKDIR /workspace

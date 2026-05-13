@@ -22,13 +22,16 @@ package io.github.jhipster.online.service;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import io.github.jhipster.online.config.ApplicationProperties;
+import io.github.jhipster.online.domain.stack.StackProfileResolver;
 import io.github.jhipster.online.service.enums.CiCdTool;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,9 +52,11 @@ public class JHipsterService {
 
     private final LogsService logsService;
 
+    private final ApplicationProperties applicationProperties;
+
     private final Executor taskExecutor;
 
-    private final String jhipsterCommand;
+    private final String defaultJhipsterCommand;
 
     private final String npmCommand;
 
@@ -67,15 +72,31 @@ public class JHipsterService {
         @Qualifier("taskExecutor") Executor taskExecutor
     ) {
         this.logsService = logsService;
+        this.applicationProperties = applicationProperties;
         this.taskExecutor = taskExecutor;
 
-        jhipsterCommand = applicationProperties.getJhipsterCmd().getCmd();
+        defaultJhipsterCommand = applicationProperties.getJhipsterCmd().getCmd();
         npmCommand = applicationProperties.getNpmCmd().getCmd();
         yqCommand = applicationProperties.getYqCmd().getCmd();
         timeout = applicationProperties.getJhipsterCmd().getTimeout();
         githubHost = applicationProperties.getGithub().getHost();
 
-        log.info("JHipster service will be using \"{}\" to run generator-jhipster.", jhipsterCommand);
+        log.info("JHipster service default CLI is \"{}\" (per-stack overrides from yo-rc when present).", defaultJhipsterCommand);
+    }
+
+    private String resolveJhipsterCommand(String generationId, File workingDir) throws IOException {
+        File yo = new File(workingDir, ".yo-rc.json");
+        if (!yo.isFile()) {
+            return defaultJhipsterCommand;
+        }
+        String json = FileUtils.readFileToString(yo, StandardCharsets.UTF_8);
+        String cmd = StackProfileResolver.resolveJhipsterCliCommand(
+            json,
+            applicationProperties.getJhipsterCommandsByStack(),
+            defaultJhipsterCommand
+        );
+        this.logsService.addLog(generationId, "Resolved JHipster CLI for this generation: " + cmd);
+        return cmd;
     }
 
     public void installNpmDependencies(String generationId, File workingDir) throws IOException {
@@ -109,32 +130,14 @@ public class JHipsterService {
 
     public void generateApplication(String generationId, File workingDir) throws IOException {
         this.logsService.addLog(generationId, "Running JHipster");
-        this.runProcess(
-                generationId,
-                workingDir,
-                jhipsterCommand,
-                FORCE_INSIGHT,
-                SKIP_CHECKS,
-                SKIP_INSTALL,
-                "--skip-cache",
-                "--skip-git",
-                FORCE
-            );
+        String cmd = resolveJhipsterCommand(generationId, workingDir);
+        this.runProcess(generationId, workingDir, cmd, FORCE_INSIGHT, SKIP_CHECKS, SKIP_INSTALL, "--skip-cache", "--skip-git", FORCE);
     }
 
     public void runImportJdl(String generationId, File workingDir, String jdlFileName) throws IOException {
         this.logsService.addLog(generationId, "Running `jhipster import-jdl`");
-        this.runProcess(
-                generationId,
-                workingDir,
-                jhipsterCommand,
-                "import-jdl",
-                jdlFileName + ".jh",
-                FORCE_INSIGHT,
-                SKIP_CHECKS,
-                SKIP_INSTALL,
-                FORCE
-            );
+        String cmd = resolveJhipsterCommand(generationId, workingDir);
+        this.runProcess(generationId, workingDir, cmd, "import-jdl", jdlFileName + ".jh", FORCE_INSIGHT, SKIP_CHECKS, SKIP_INSTALL, FORCE);
     }
 
     public void addCiCd(String generationId, File workingDir, CiCdTool ciCdTool) throws IOException {
@@ -143,10 +146,11 @@ public class JHipsterService {
             throw new IllegalArgumentException("Invalid Continuous Integration system");
         }
         this.logsService.addLog(generationId, "Running `jhipster ci-cd`");
+        String cmd = resolveJhipsterCommand(generationId, workingDir);
         this.runProcess(
                 generationId,
                 workingDir,
-                jhipsterCommand,
+                cmd,
                 "ci-cd",
                 "--autoconfigure-" + ciCdTool.command(),
                 FORCE_INSIGHT,

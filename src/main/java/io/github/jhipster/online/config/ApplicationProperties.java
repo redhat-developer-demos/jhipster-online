@@ -19,7 +19,9 @@
 package io.github.jhipster.online.config;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -32,6 +34,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ApplicationProperties {
 
     private JhipsterCmd jhipsterCmd = new JhipsterCmd();
+
+    private Map<String, String> jhipsterCommandsByStack = defaultJhipsterCommandsByStack();
 
     private NpmCmd npmCmd = new NpmCmd();
 
@@ -73,6 +77,28 @@ public class ApplicationProperties {
 
     public void setJhipsterCmd(JhipsterCmd jhipsterCmd) {
         this.jhipsterCmd = jhipsterCmd;
+    }
+
+    public Map<String, String> getJhipsterCommandsByStack() {
+        return jhipsterCommandsByStack;
+    }
+
+    public void setJhipsterCommandsByStack(Map<String, String> jhipsterCommandsByStack) {
+        this.jhipsterCommandsByStack =
+            jhipsterCommandsByStack == null ? defaultJhipsterCommandsByStack() : new LinkedHashMap<>(jhipsterCommandsByStack);
+    }
+
+    private static Map<String, String> defaultJhipsterCommandsByStack() {
+        Map<String, String> m = new LinkedHashMap<>();
+        m.put("spring-boot", "jhipster");
+        m.put("quarkus", "jhipster");
+        m.put("micronaut", "jhipster");
+        m.put("dotnet", "jhipster-dotnetcore");
+        m.put("azure-aca", "jhipster");
+        m.put("node", "jhipster");
+        m.put("go", "jhipster");
+        m.put("rust", "jhipster");
+        return m;
     }
 
     public String getTmpFolder() {

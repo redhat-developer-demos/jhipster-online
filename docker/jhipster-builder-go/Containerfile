@@ -1,0 +1,4 @@
+FROM registry.redhat.io/ubi8/ubi:8.10
+USER root
+RUN yum install -y --setopt=tsflags=nodocs golang git && yum clean all
+WORKDIR /workspace

@@ -134,6 +134,15 @@ commands:
       group:
         kind: build
         isDefault: true
+  - id: nest-or-node-build
+    exec:
+      label: 'Node / NestJS production build (when package.json defines the script)'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'npm run build:prod || npm run webapp:prod || npm run build || true'
+      group:
+        kind: build
+        isDefault: false
   - id: start-frontend
     exec:
       label: 'Start Frontend'

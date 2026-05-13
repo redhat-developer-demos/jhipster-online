@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: '{{ .Values.app.name }}'
+  labels:
+    app.kubernetes.io/managed-by: jhipster-online
+    app.kubernetes.io/instance: '{{ .Values.app.name }}'
+    app.kubernetes.io/part-of: '{{ .Values.app.name }}'
+    app.kubernetes.io/name: '{{ .Values.app.name }}'
+    app.openshift.io/runtime: dotnet
+  annotations:
+    app.openshift.io/vcs-uri: '{{ .Values.git.repoUrl }}'
+    deploy.jhipster.online/method: '{{ .Values.deploy.method }}'
+spec:
+  replicas: {{ .Values.replicas.app }}
+  selector:
+    matchLabels:
+      app: '{{ .Values.app.name }}'
+      deployment: '{{ .Values.app.name }}'
+  template:
+    metadata:
+      labels:
+        app: '{{ .Values.app.name }}'
+        app.kubernetes.io/managed-by: jhipster-online
+        app.kubernetes.io/instance: '{{ .Values.app.name }}'
+        app.kubernetes.io/part-of: '{{ .Values.app.name }}'
+        deployment: '{{ .Values.app.name }}'
+        app.openshift.io/runtime: dotnet
+    spec:
+{{- if .Values.rbac.create }}
+      serviceAccountName: '{{ .Values.app.name }}-deployer'
+{{- end }}
+      containers:
+        - name: '{{ .Values.app.name }}'
+          image: image-registry.openshift-image-registry.svc:5000/{{ .Values.image.namespace }}/{{ .Values.image.stream }}:latest
+          imagePullPolicy: Always
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+{{- if eq .Values.database.prodType "postgresql" }}
+            - name: DB_HOST
+              value: postgresql-{{ .Values.app.name }}
+            - name: DB_PORT
+              value: '5432'
+            - name: DB_NAME
+              value: jhipsteronline
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-{{ .Values.app.name }}
+                  key: database-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-{{ .Values.app.name }}
+                  key: database-password
+{{- end }}
+{{- if ne .Values.database.prodType "postgresql" }}
+            - name: DB_HOST
+              value: mariadb-{{ .Values.app.name }}
+            - name: DB_PORT
+              value: '3306'
+            - name: DB_NAME
+              value: jhipsteronline
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-{{ .Values.app.name }}
+                  key: database-password
+{{- end }}
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace

@@ -229,3 +229,7 @@ As of v2.40.1, there is **no official JHipster generator/blueprint for MCP serve
 - **Quarkus MCP Server**: Quarkiverse extension (`quarkus-mcp-server` v1.11.0) for building MCP servers
 
 A custom blueprint `generator-jhipster-mcp` does not exist in the npm registry.
+
+## Multi-stack generator and OpenShift charts
+
+Generated repositories resolve stack from `.yo-rc.json` blueprints (`StackProfileResolver`), pick Helm/Tekton/BuildConfig variants, and resolve the JHipster CLI via `application.jhipster-commands-by-stack`. See [docs/MULTI_STACK_OPENSHIFT.md](docs/MULTI_STACK_OPENSHIFT.md).
