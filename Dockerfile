@@ -13,11 +13,14 @@ RUN ARCH=$(uname -m) \
     && tar -xzf /tmp/node.tar.gz -C /usr/local --strip-components=1 \
     && rm -f /tmp/node.tar.gz \
     && node -v \
-    && npm install -g generator-jhipster-dotnetcore@4.5.0 \
-    && npm install -g generator-jhipster-micronaut@3.9.0 \
-    && npm install -g generator-jhipster-quarkus@3.6.0 \
     && npm install -g generator-jhipster@9.0.0 \
-    && npm install -g generator-jhipster-azure-container-apps
+    && npm install -g generator-jhipster-quarkus@3.6.0 \
+    && npm install -g generator-jhipster-micronaut@3.9.0 \
+    && npm install -g generator-jhipster-dotnetcore@4.5.0 \
+    && npm install -g generator-jhipster-azure-container-apps \
+    && npm install -g generator-jhipster-nodejs@3.2.0 \
+    && npm install -g generator-jhipster-go@1.0.0 \
+    && npm install -g generator-jhipster-rust@1.0.0
 
 RUN mkdir -p /projects/jhipster-online && chown -R 1001:0 /projects/jhipster-online
 

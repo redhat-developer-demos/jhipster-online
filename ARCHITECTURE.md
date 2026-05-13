@@ -95,6 +95,18 @@ graph TD
 | Builder (Rust)           | Official Rust 1.85 slim + git                                | `docker.io/library/rust`                                  |
 | Builder (Go)             | UBI8 + golang + git                                          | `registry.access.redhat.com/ubi8/ubi`                     |
 
+### Generator packages per image
+
+Each runtime image installs only the generator(s) for its own stack. The Dev Spaces image installs all of them for local development.
+
+| Image                     | Generator packages installed                                                                                                                                                                                                                                                              | Stacks served |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `Dockerfile` (Dev Spaces) | `generator-jhipster@9.0.0`, `generator-jhipster-quarkus@3.6.0`, `generator-jhipster-micronaut@3.9.0`, `generator-jhipster-dotnetcore@4.5.0`, `generator-jhipster-azure-container-apps`, `generator-jhipster-nodejs@3.2.0`, `generator-jhipster-go@1.0.0`, `generator-jhipster-rust@1.0.0` | All           |
+| `Dockerfile.quarkus`      | `generator-jhipster@9.0.0`, `generator-jhipster-quarkus@3.6.0`                                                                                                                                                                                                                            | Quarkus       |
+| `Dockerfile.spring-boot`  | `generator-jhipster@9.0.0`                                                                                                                                                                                                                                                                | Spring Boot   |
+
+To serve additional stacks in production, deploy per-stack **workers** (see `charts/jhipster-online/values.yaml`). Each worker pod uses an image that includes the matching generator package. The `application.jhipster-commands-by-stack` map routes generations to the correct CLI; all blueprints use `jhipster` except `.NET` which uses `jhipster-dotnetcore`.
+
 ## Deployment Topology
 
 ```mermaid
