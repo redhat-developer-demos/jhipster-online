@@ -861,7 +861,7 @@ public class OpenShiftDeploymentService {
             installCmd.add(rhbkChartRef);
             installCmd.add("--namespace");
             installCmd.add(namespace);
-            installCmd.add("--set-string");
+            installCmd.add("--set");
             installCmd.add("neuroface.enabled=false");
             installCmd.add("--set-string");
             installCmd.add("admin.password=" + pwd);

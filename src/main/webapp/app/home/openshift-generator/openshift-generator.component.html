@@ -104,17 +104,20 @@
               </div>
               <div
                 *ngIf="deployMethod === 'fabric8' && generatorRef?.model?.authenticationType === 'oauth2'"
-                class="card border-secondary mt-3"
+                class="card border-secondary mt-3 mw-100"
               >
                 <div class="card-body py-2">
                   <h6 class="card-title small mb-2">Red Hat Build of Keycloak (RHBK)</h6>
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="deployRhbkCb" [(ngModel)]="deployRhbk" />
-                    <label class="form-check-label" for="deployRhbkCb">
-                      Deploy RHBK (Keycloak) chart to this namespace before the app (requires Helm CLI on the server;
-                      <code>openshift.deployment.use-helm-cli=true</code>).
+                    <label class="form-check-label text-break" for="deployRhbkCb">
+                      Deploy RHBK (Keycloak) chart to this namespace before the application.
                     </label>
                   </div>
+                  <small class="text-muted text-break d-block mt-1 ps-4">
+                    Requires Helm CLI on the server. Set
+                    <code class="text-break">openshift.deployment.use-helm-cli=true</code>.
+                  </small>
                   <div *ngIf="deployRhbk" class="mt-2">
                     <label class="form-label small" for="rhbkAdminPwd">RHBK admin password</label>
                     <input
@@ -127,7 +130,7 @@
                   </div>
                 </div>
               </div>
-              <p class="form-text text-muted mt-2">
+              <p class="form-text text-muted text-break mt-2">
                 The generated repository includes a <code>helm/</code> chart and <code>argocd/application.yaml</code>.
                 Push the repository first; Fabric8 renders templates server-side, Argo CD uses Helm in-cluster.
               </p>
