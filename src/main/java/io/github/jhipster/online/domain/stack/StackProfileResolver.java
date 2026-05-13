@@ -19,6 +19,7 @@ public final class StackProfileResolver {
     public static final String TOKEN_NODE = "node";
     public static final String TOKEN_GO = "go";
     public static final String TOKEN_RUST = "rust";
+    public static final String TOKEN_PYTHON = "python";
 
     private StackProfileResolver() {}
 
@@ -48,11 +49,18 @@ public final class StackProfileResolver {
         if (containsBlueprint(cfg, "generator-jhipster-rust")) {
             return StackId.RUST;
         }
+        if (containsBlueprint(cfg, "generator-pyhipster") || containsBackendFramework(cfg, "python")) {
+            return StackId.PYTHON;
+        }
         return defaultFromCmd(globalJhipsterCmd);
     }
 
     private static boolean containsBlueprint(String json, String needle) {
         return json.contains(needle);
+    }
+
+    private static boolean containsBackendFramework(String json, String framework) {
+        return json.contains("\"backendFramework\":\"" + framework + "\"");
     }
 
     private static StackId defaultFromCmd(String globalJhipsterCmd) {
@@ -93,6 +101,9 @@ public final class StackProfileResolver {
         }
         if (id == StackId.RUST) {
             return TOKEN_RUST;
+        }
+        if (id == StackId.PYTHON) {
+            return TOKEN_PYTHON;
         }
         return TOKEN_SPRING_BOOT;
     }

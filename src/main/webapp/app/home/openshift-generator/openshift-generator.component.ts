@@ -171,9 +171,30 @@ export class OpenshiftGeneratorComponent implements OnInit {
   }
 
   removeFromScaffoldList(row: OpenshiftScaffoldRow): void {
-    if (!window.confirm('Remove this repository from your deploy list? (The Git repo is not deleted.)')) {
+    const hasNamespace = !!this.namespace?.trim();
+    const msg = hasNamespace
+      ? 'Remove "' +
+        row.repositoryName +
+        '" from your deploy list AND undeploy from namespace ' +
+        this.namespace +
+        '?\n\n(Cancel to keep the cluster resources; the Git repo is never deleted.)'
+      : 'Remove this repository from your deploy list? (The Git repo is not deleted.)';
+
+    if (!window.confirm(msg)) {
       return;
     }
+
+    if (hasNamespace) {
+      this.http.delete('api/openshift/applications/' + row.repositoryName + '?namespace=' + this.namespace).subscribe(
+        () => {
+          this.deployStatus = 'Undeployed ' + row.repositoryName + ' from ' + this.namespace;
+        },
+        () => {
+          this.deployStatus = 'Could not undeploy from cluster (may not exist). List entry removed.';
+        }
+      );
+    }
+
     this.http.delete('api/openshift-scaffold-applications/' + row.id).subscribe(
       () => this.loadScaffoldApps(),
       () => {

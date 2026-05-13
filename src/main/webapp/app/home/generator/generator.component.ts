@@ -171,6 +171,8 @@ export class GeneratorComponent implements OnInit {
       this.model.blueprints = [{ name: 'generator-jhipster-micronaut' }];
     } else if (this.model.backendFramework === 'rust') {
       this.model.blueprints = [{ name: 'generator-jhipster-rust' }];
+    } else if (this.model.backendFramework === 'python') {
+      this.model.blueprints = [];
     } else {
       this.model.blueprints = [];
     }
@@ -319,6 +321,8 @@ export class GeneratorComponent implements OnInit {
       this.model.blueprints = bp('generator-jhipster-micronaut');
     } else if (this.model.backendFramework === 'rust') {
       this.model.blueprints = bp('generator-jhipster-rust');
+    } else if (this.model.backendFramework === 'python') {
+      this.model.blueprints = [];
     }
   }
 

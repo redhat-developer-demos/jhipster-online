@@ -16,7 +16,8 @@ RUN ARCH=$(uname -m) \
     && npm install -g generator-jhipster@9.0.0 \
     && npm install -g generator-jhipster-quarkus@4.0.0 \
     && npm install -g generator-jhipster-micronaut@4.0.0 \
-    && npm install -g generator-jhipster-rust@1.0.0
+    && npm install -g generator-jhipster-rust@1.0.0 \
+    && npm install -g generator-pyhipster@0.0.9
 
 RUN mkdir -p /projects/jhipster-online && chown -R 1001:0 /projects/jhipster-online
 

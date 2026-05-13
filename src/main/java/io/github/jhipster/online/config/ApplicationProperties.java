@@ -94,6 +94,7 @@ public class ApplicationProperties {
         m.put("quarkus", "jhipster");
         m.put("micronaut", "jhipster");
         m.put("rust", "jhipster");
+        m.put("python", "pyhipster");
         return m;
     }
 
