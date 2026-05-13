@@ -30,12 +30,12 @@ export class JHipsterConfigurationModel {
   public serverPort = 8080;
   public serviceDiscoveryType: any = false;
   public authenticationType = 'jwt';
-  public cacheProvider = 'ehcache';
-  public enableHibernateCache = true;
+  public cacheProvider = 'no';
+  public enableHibernateCache = false;
   public websocket: any = false;
   public databaseType = 'sql';
   public devDatabaseType = 'h2Disk';
-  public prodDatabaseType = 'postgresql';
+  public prodDatabaseType = 'mariadb';
   public searchEngine: any = false;
   public enableSwaggerCodegen: any = false;
   public messageBroker: any = false;
@@ -46,14 +46,14 @@ export class JHipsterConfigurationModel {
   public enableTranslation = true;
   public nativeLanguage = 'en';
   public languages = ['en'];
-  public clientFramework = 'angularX';
+  public clientFramework = 'vue';
   public jhiPrefix = 'jhi';
   public withAdminUi = true;
   public skipCommitHook = true;
-  public blueprints: BlueprintModel[] = [];
+  public blueprints: BlueprintModel[] = [{ name: 'generator-jhipster-quarkus' }];
   public iaCTools = ['bicep', 'terraform'];
   /** Drives UI defaults for Quarkus vs Spring; server CLI still follows server-side jhipster-cmd. */
-  public backendFramework: 'spring-boot' | 'quarkus' = 'spring-boot';
+  public backendFramework: 'spring-boot' | 'quarkus' = 'quarkus';
 
   constructor(data?: Partial<JHipsterConfigurationModel>) {
     if (data) {

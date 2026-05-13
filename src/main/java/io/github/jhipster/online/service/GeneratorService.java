@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -209,7 +210,26 @@ public class GeneratorService {
             "https://workspaces.openshift.com/#" + gitRepo + "/tree/main?storageType=ephemeral"
         );
         tokenReplacements.put("__DEVFILE_IMAGE__", "quay.io/devfile/jhipster-online:2.40.1");
+        tokenReplacements.put("__PROD_DATABASE_TYPE__", readProdDatabaseType(document));
         return tokenReplacements;
+    }
+
+    /**
+     * Maps {@code generator-jhipster.prodDatabaseType} to Helm {@code database.prodType} (MVP: postgresql vs mariadb for JDBC).
+     */
+    private static String readProdDatabaseType(Object document) {
+        try {
+            Object v = JsonPath.read(document, "$['generator-jhipster'].prodDatabaseType");
+            if (v instanceof String && StringUtils.isNotBlank((String) v)) {
+                String t = ((String) v).trim().toLowerCase(Locale.ROOT);
+                if ("postgresql".equals(t) || "postgres".equals(t)) {
+                    return "postgresql";
+                }
+            }
+        } catch (PathNotFoundException e) {
+            // minimal payloads
+        }
+        return "mariadb";
     }
 
     /**

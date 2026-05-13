@@ -19,8 +19,8 @@ tekton:
   defaultBranch: main
   pathContext: /
   timeout: 1h0m0s
-builder:
-  image: 'quay.io/maximilianopizarro/jhipster-universal-developer-image:latest'
+database:
+  prodType: __PROD_DATABASE_TYPE__
 # Toggle wiring in helm/templates/deployment.yaml (Spring / Quarkus) for optional extras from
 # src/main/kubernetes/jh-online-kubernetes-extras.yaml (Kafka, Redis, Keycloak issuer URI).
 rbac:

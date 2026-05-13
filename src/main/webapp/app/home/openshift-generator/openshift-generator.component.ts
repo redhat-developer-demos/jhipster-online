@@ -86,10 +86,15 @@ export class OpenshiftGeneratorComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.openshiftJHipsterModel.backendFramework = 'quarkus';
+    this.openshiftJHipsterModel.clientFramework = 'vue';
+    this.openshiftJHipsterModel.cacheProvider = 'no';
+    this.openshiftJHipsterModel.enableHibernateCache = false;
+    this.openshiftJHipsterModel.websocket = false;
+    this.openshiftJHipsterModel.enableSwaggerCodegen = false;
+    this.openshiftJHipsterModel.blueprints = [{ name: 'generator-jhipster-quarkus' }];
     this.openshiftJHipsterModel.devDatabaseType = 'h2Memory';
     this.openshiftJHipsterModel.prodDatabaseType = 'mariadb';
-    this.openshiftJHipsterModel.cacheProvider = 'no';
-    this.openshiftJHipsterModel.clientFramework = 'vue';
     this.openshiftJHipsterModel.withAdminUi = true;
     this.loadNamespaces();
     this.loadScaffoldApps();

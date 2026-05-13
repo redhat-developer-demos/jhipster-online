@@ -39,6 +39,21 @@ spec:
               value: prod,api-docs
             - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
               value: YlhrdGMyVmpjbVYwTFhSdmEyVnVMWFJ2TFdOb1lXNW5aUzFwYmkxd2NtOWtkV04wYVc5dUxXRnVaQzEwYnkxclpXVndMV2x1TFdFdGMyVmpkWEpsTFhCc1lXTmwK
+{{- if eq .Values.database.prodType "postgresql" }}
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgresql-{{ .Values.app.name }}:5432/jhipsteronline
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-{{ .Values.app.name }}
+                  key: database-user
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-{{ .Values.app.name }}
+                  key: database-password
+{{- end }}
+{{- if ne .Values.database.prodType "postgresql" }}
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mariadb://mariadb-{{ .Values.app.name }}:3306/jhipsteronline
             - name: SPRING_DATASOURCE_USERNAME
@@ -51,6 +66,7 @@ spec:
                 secretKeyRef:
                   name: mariadb-{{ .Values.app.name }}
                   key: database-password
+{{- end }}
             {{- if .Values.integrations.kafka.enabled }}
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: '{{ .Values.app.name }}-kafka-kafka-bootstrap:9092'

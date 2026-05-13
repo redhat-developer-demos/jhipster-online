@@ -258,6 +258,7 @@ export class GeneratorComponent implements OnInit {
   newGenerator(): void {
     this.model = new JHipsterConfigurationModel(this.defaultModel);
     this.repositoryName = 'jhipster-sample-application';
+    this.changeBackendFramework();
   }
 
   changeApplicationType(): void {

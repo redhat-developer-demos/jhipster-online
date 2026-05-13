@@ -1,5 +1,7 @@
 package io.github.jhipster.online.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -12,9 +14,15 @@ import io.github.jhipster.online.service.helm.HelmTemplateRenderer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -65,8 +73,11 @@ public class OpenShiftDeploymentService {
     @Value("${jhipster-online.rhbk.release-name:jh-rhbk}")
     private String rhbkReleaseName;
 
-    @Value("${jhipster-online.rhbk.realm:neuroface}")
+    @Value("${jhipster-online.rhbk.realm:jhipster}")
     private String rhbkRealmName;
+
+    @Value("${jhipster-online.rhbk.admin-username:admin}")
+    private String rhbkAdminUsername;
 
     @Value("${jhipster-online.rhbk.helm-repo-url:https://maximilianopizarro.github.io/rhbk-biometric-flow/}")
     private String rhbkHelmRepoUrl;
@@ -77,9 +88,14 @@ public class OpenShiftDeploymentService {
     @Value("${jhipster-online.rhbk.chart-ref:jh-rhbk-neuroface/rhbk-neuroface}")
     private String rhbkChartRef;
 
-    public OpenShiftDeploymentService(OpenShiftClient openShiftClient, Environment environment) {
+    private final ObjectMapper objectMapper;
+
+    private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build();
+
+    public OpenShiftDeploymentService(OpenShiftClient openShiftClient, Environment environment, ObjectMapper objectMapper) {
         this.openShiftClient = openShiftClient;
         this.environment = environment;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -232,9 +248,13 @@ public class OpenShiftDeploymentService {
         List<String> ordered = Arrays.asList(
             "rbac-deployer.yaml",
             "secret-mariadb.yaml",
+            "secret-postgresql.yaml",
             "pvc-mariadb.yaml",
+            "pvc-postgresql.yaml",
             "deployment-mariadb.yaml",
+            "deployment-postgresql.yaml",
             "service-mariadb.yaml",
+            "service-postgresql.yaml",
             "imagestream.yaml",
             "buildconfig.yaml",
             "tekton-pipeline.yaml",
@@ -833,7 +853,7 @@ public class OpenShiftDeploymentService {
     /**
      * Optional Red Hat Build of Keycloak (rhbk-neuroface chart with NeuroFace disabled). Requires Helm CLI.
      *
-     * @return issuer URI for Spring/Quarkus OIDC (e.g. {@code https://route-host/realms/neuroface}) and optional warning
+     * @return issuer URI for Spring/Quarkus OIDC (e.g. {@code https://route-host/realms/jhipster}) and optional warning
      */
     public RhbkDeployOutcome installRhbkChartIfRequested(String namespace, boolean deployRhbk, String adminPassword) {
         if (!deployRhbk) {
@@ -865,12 +885,17 @@ public class OpenShiftDeploymentService {
             installCmd.add("neuroface.enabled=false");
             installCmd.add("--set-string");
             installCmd.add("admin.password=" + pwd);
+            installCmd.add("--set-string");
+            installCmd.add("realm.name=" + rhbkRealmName);
+            installCmd.add("--set-string");
+            installCmd.add("realm.displayName=JHipster");
             installCmd.add("--wait");
             installCmd.add("--timeout");
             installCmd.add(Math.max(120, helmTimeoutSeconds) + "s");
             runHelmCommand(installCmd, null);
             String issuer = resolveRhbkIssuerUri(namespace);
-            return new RhbkDeployOutcome(issuer, null);
+            String provisionWarning = tryEnsureJhipsterWebAppClient(namespace, issuer, pwd);
+            return new RhbkDeployOutcome(issuer, provisionWarning);
         } catch (Exception e) {
             log.warn("RHBK helm install failed", e);
             return new RhbkDeployOutcome(null, "RHBK install failed: " + e.getMessage());
@@ -894,6 +919,150 @@ public class OpenShiftDeploymentService {
         }
         String svc = rhbkReleaseName + "-rhbk-http";
         return "http://" + svc + "." + namespace + ".svc.cluster.local:8080/realms/" + rhbkRealmName;
+    }
+
+    /**
+     * Matches Helm {@code rhbk-neuroface} chart {@code fullname} for the workload Service/DNS name.
+     */
+    private String rhbkHelmWorkloadDnsName() {
+        String release = rhbkReleaseName.trim();
+        String chart = "rhbk-neuroface";
+        if (release.contains(chart)) {
+            return release;
+        }
+        return release + "-" + chart;
+    }
+
+    /**
+     * Ensures a public {@code web_app} OIDC client exists in the RHBK realm (chart realm is NeuroFace-oriented;
+     * JHipster apps expect {@code web_app} by default).
+     */
+    private String tryEnsureJhipsterWebAppClient(String namespace, String issuerUri, String adminPassword) {
+        if (StringUtils.isBlank(issuerUri) || !issuerUri.contains("/realms/")) {
+            return null;
+        }
+        String realm = rhbkRealmName;
+        String externalBase = issuerUri.substring(0, issuerUri.indexOf("/realms/"));
+        String internalBase = "http://" + rhbkHelmWorkloadDnsName() + "." + namespace + ".svc.cluster.local:8080";
+
+        String token = null;
+        String usedBase = null;
+        for (String base : Arrays.asList(internalBase, externalBase)) {
+            try {
+                String t = fetchKeycloakAdminToken(base, rhbkAdminUsername, adminPassword);
+                if (StringUtils.isNotBlank(t)) {
+                    token = t;
+                    usedBase = base;
+                    break;
+                }
+            } catch (Exception e) {
+                log.debug("Keycloak admin token from {}: {}", base, e.getMessage());
+            }
+        }
+        if (StringUtils.isBlank(token) || usedBase == null) {
+            return (
+                "RHBK: could not obtain an admin token to register OIDC client web_app; add client web_app manually in realm " + realm + "."
+            );
+        }
+        try {
+            if (!keycloakWebAppClientExists(token, usedBase, realm)) {
+                createKeycloakWebAppClient(token, usedBase, realm);
+            }
+            return null;
+        } catch (Exception e) {
+            log.warn("Could not ensure web_app OIDC client in realm {}", realm, e);
+            return "RHBK: automatic web_app client registration failed: " + e.getMessage();
+        }
+    }
+
+    private String fetchKeycloakAdminToken(String serverBase, String username, String password) throws IOException, InterruptedException {
+        String form =
+            "grant_type=password&client_id=admin-cli&username=" +
+            URLEncoder.encode(username, StandardCharsets.UTF_8) +
+            "&password=" +
+            URLEncoder.encode(password, StandardCharsets.UTF_8);
+        HttpRequest req = HttpRequest
+            .newBuilder(URI.create(trimTrailingSlash(serverBase) + "/realms/master/protocol/openid-connect/token"))
+            .timeout(Duration.ofSeconds(30))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .POST(HttpRequest.BodyPublishers.ofString(form))
+            .build();
+        HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (resp.statusCode() / 100 != 2) {
+            throw new IOException("token endpoint HTTP " + resp.statusCode() + ": " + resp.body());
+        }
+        JsonNode root = objectMapper.readTree(resp.body());
+        String access = root.path("access_token").asText(null);
+        if (StringUtils.isBlank(access)) {
+            throw new IOException("token response missing access_token");
+        }
+        return access;
+    }
+
+    private boolean keycloakWebAppClientExists(String accessToken, String serverBase, String realm)
+        throws IOException, InterruptedException {
+        String url =
+            trimTrailingSlash(serverBase) +
+            "/admin/realms/" +
+            URLEncoder.encode(realm, StandardCharsets.UTF_8) +
+            "/clients?clientId=web_app&max=1";
+        HttpRequest req = HttpRequest
+            .newBuilder(URI.create(url))
+            .timeout(Duration.ofSeconds(30))
+            .header("Authorization", "Bearer " + accessToken)
+            .GET()
+            .build();
+        HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (resp.statusCode() == 404) {
+            return false;
+        }
+        if (resp.statusCode() / 100 != 2) {
+            throw new IOException("list clients HTTP " + resp.statusCode() + ": " + resp.body());
+        }
+        JsonNode arr = objectMapper.readTree(resp.body());
+        return arr.isArray() && arr.size() > 0;
+    }
+
+    private void createKeycloakWebAppClient(String accessToken, String serverBase, String realm) throws IOException, InterruptedException {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("clientId", "web_app");
+        body.put("name", "JHipster Application");
+        body.put("enabled", true);
+        body.put("publicClient", true);
+        body.put("protocol", "openid-connect");
+        body.put("standardFlowEnabled", true);
+        body.put("directAccessGrantsEnabled", true);
+        body.put("implicitFlowEnabled", false);
+        body.put("serviceAccountsEnabled", false);
+        body.put("redirectUris", Arrays.asList("/*", "http://localhost:8080/*", "http://localhost:9000/*", "https://*"));
+        body.put("webOrigins", Collections.singletonList("+"));
+        String json = objectMapper.writeValueAsString(body);
+        String url = trimTrailingSlash(serverBase) + "/admin/realms/" + URLEncoder.encode(realm, StandardCharsets.UTF_8) + "/clients";
+        HttpRequest req = HttpRequest
+            .newBuilder(URI.create(url))
+            .timeout(Duration.ofSeconds(30))
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
+            .build();
+        HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (resp.statusCode() / 100 == 2 || resp.statusCode() == 201 || resp.statusCode() == 204) {
+            return;
+        }
+        if (resp.statusCode() == 409) {
+            return;
+        }
+        throw new IOException("create client HTTP " + resp.statusCode() + ": " + resp.body());
+    }
+
+    private static String trimTrailingSlash(String s) {
+        if (s == null) {
+            return "";
+        }
+        while (s.endsWith("/")) {
+            s = s.substring(0, s.length() - 1);
+        }
+        return s;
     }
 
     private void runHelmCommand(List<String> command, Path workingDir) throws IOException, InterruptedException {

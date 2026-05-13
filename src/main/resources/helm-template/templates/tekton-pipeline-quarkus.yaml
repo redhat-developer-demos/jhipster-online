@@ -706,7 +706,7 @@ spec:
               JAR="$(find "$ROOT" -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name 'original-*.jar' 2>/dev/null | head -1)"
             fi
             test -n "$JAR" && test -f "$JAR"
-            oc start-build {{ .Values.app.name }}-devspace --from-file="$JAR"
+            oc start-build {{ .Values.app.name }}-devspace --from-file="$JAR" --follow
         - name: VERSION
           value: latest
       runAfter:
@@ -720,7 +720,10 @@ spec:
     - name: deploy
       params:
         - name: SCRIPT
-          value: oc rollout status deploy/$(params.APP_NAME)
+          value: |
+            set -e
+            oc rollout restart "deployment/$(params.APP_NAME)"
+            oc rollout status "deployment/$(params.APP_NAME)" --timeout=15m
         - name: VERSION
           value: latest
       runAfter:

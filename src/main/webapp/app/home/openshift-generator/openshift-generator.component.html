@@ -74,9 +74,9 @@
         <div class="card mb-3">
           <div class="card-body">
             <h5 class="card-title">OpenShift Deployment</h5>
-            <div class="form-group">
-              <label for="namespace">Target Namespace</label>
-              <select class="form-control" id="namespace" [(ngModel)]="namespace" *ngIf="namespaces.length > 0">
+            <div class="mb-3">
+              <label for="namespace" class="form-label">Target Namespace</label>
+              <select class="form-select" id="namespace" [(ngModel)]="namespace" *ngIf="namespaces.length > 0">
                 <option *ngFor="let ns of namespaces" [value]="ns">{{ ns }}</option>
               </select>
               <input type="text" class="form-control" id="namespace-manual" [(ngModel)]="namespace"
@@ -102,23 +102,22 @@
                 <label for="argoNs" class="form-label">Argo CD instance namespace</label>
                 <input class="form-control" id="argoNs" [(ngModel)]="argocdApplicationNamespace" placeholder="openshift-gitops">
               </div>
-              <div
-                *ngIf="deployMethod === 'fabric8' && generatorRef?.model?.authenticationType === 'oauth2'"
-                class="card border-secondary mt-3 mw-100"
-              >
-                <div class="card-body py-2">
-                  <h6 class="card-title small mb-2">Red Hat Build of Keycloak (RHBK)</h6>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="deployRhbkCb" [(ngModel)]="deployRhbk" />
+              <div class="row mt-3" *ngIf="deployMethod === 'fabric8' && generatorRef?.model?.authenticationType === 'oauth2'">
+                <div class="col-12">
+                <div class="rounded border p-3 bg-light mw-100">
+                  <h6 class="small text-uppercase text-muted mb-3">Red Hat Build of Keycloak (RHBK)</h6>
+                  <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="deployRhbkCb" role="switch" [(ngModel)]="deployRhbk" />
                     <label class="form-check-label text-break" for="deployRhbkCb">
-                      Deploy RHBK (Keycloak) chart to this namespace before the application.
+                      Install RHBK (Keycloak) in this namespace before the application
                     </label>
                   </div>
-                  <small class="text-muted text-break d-block mt-1 ps-4">
+                  <small class="text-muted text-break d-block mb-2">
                     Requires Helm CLI on the server. Set
                     <code class="text-break">openshift.deployment.use-helm-cli=true</code>.
+                    The chart realm is aligned to <strong>jhipster</strong>; a <code>web_app</code> OIDC client is registered when the admin API is reachable.
                   </small>
-                  <div *ngIf="deployRhbk" class="mt-2">
+                  <div *ngIf="deployRhbk" class="mb-0">
                     <label class="form-label small" for="rhbkAdminPwd">RHBK admin password</label>
                     <input
                       type="password"
@@ -128,6 +127,7 @@
                       autocomplete="new-password"
                     />
                   </div>
+                </div>
                 </div>
               </div>
               <p class="form-text text-muted text-break mt-2">
