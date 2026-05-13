@@ -104,8 +104,8 @@
       <div *ngIf="model.backendFramework === 'quarkus'" class="form-text text-muted small">
         Quarkus requires Vue; Hibernate 2nd level cache, Spring WebSocket, and OpenAPI-generator options are turned off for compatibility.
       </div>
-      <div *ngIf="model.backendFramework === 'go' || model.backendFramework === 'rust'" class="form-text text-muted small">
-        Go/Rust: verify generator packages exist on the server image; OpenShift defaults may still use JVM-oriented Tekton until customized.
+      <div *ngIf="model.backendFramework === 'rust'" class="form-text text-muted small">
+        Rust is experimental — verify generator packages exist on the server image; OpenShift defaults may still use JVM-oriented Tekton until customized.
       </div>
     </div>
   </div>
