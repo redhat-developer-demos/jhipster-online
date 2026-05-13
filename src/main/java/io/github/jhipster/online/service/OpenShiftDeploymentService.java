@@ -62,6 +62,21 @@ public class OpenShiftDeploymentService {
     @Value("${openshift.deployment.helm-fallback-to-fabric8:true}")
     private boolean helmFallbackToFabric8;
 
+    @Value("${jhipster-online.rhbk.release-name:jh-rhbk}")
+    private String rhbkReleaseName;
+
+    @Value("${jhipster-online.rhbk.realm:neuroface}")
+    private String rhbkRealmName;
+
+    @Value("${jhipster-online.rhbk.helm-repo-url:https://maximilianopizarro.github.io/rhbk-biometric-flow/}")
+    private String rhbkHelmRepoUrl;
+
+    @Value("${jhipster-online.rhbk.helm-repo-alias:jh-rhbk-neuroface}")
+    private String rhbkHelmRepoAlias;
+
+    @Value("${jhipster-online.rhbk.chart-ref:jh-rhbk-neuroface/rhbk-neuroface}")
+    private String rhbkChartRef;
+
     public OpenShiftDeploymentService(OpenShiftClient openShiftClient, Environment environment) {
         this.openShiftClient = openShiftClient;
         this.environment = environment;
@@ -129,6 +144,7 @@ public class OpenShiftDeploymentService {
 
             String release = HelmReleaseNameUtil.sanitizeReleaseName(appName);
 
+            String helmWarning = null;
             if (useHelmCli) {
                 try {
                     runHelmUpgradeInstall(namespace, helmDir, release);
@@ -141,11 +157,13 @@ public class OpenShiftDeploymentService {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     log.warn("Helm CLI deploy interrupted: {}", e.getMessage());
+                    helmWarning = "Helm CLI deploy interrupted: " + e.getMessage() + ". Fell back to Fabric8 apply.";
                     if (!helmFallbackToFabric8) {
                         throw new IOException("helm interrupted", e);
                     }
                 } catch (IOException e) {
                     log.warn("Helm CLI deploy failed: {}", e.getMessage());
+                    helmWarning = "Helm CLI failed: " + e.getMessage() + ". Fell back to Fabric8 apply.";
                     if (!helmFallbackToFabric8) {
                         throw e;
                     }
@@ -159,6 +177,9 @@ public class OpenShiftDeploymentService {
             result.put("namespace", namespace);
             result.put("deployMethod", "fabric8");
             result.put("resources", applied);
+            if (helmWarning != null) {
+                result.put("helmWarning", helmWarning);
+            }
             return result;
         } finally {
             try {
@@ -806,6 +827,110 @@ public class OpenShiftDeploymentService {
                 .getAllowed();
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /**
+     * Optional Red Hat Build of Keycloak (rhbk-neuroface chart with NeuroFace disabled). Requires Helm CLI.
+     *
+     * @return issuer URI for Spring/Quarkus OIDC (e.g. {@code https://route-host/realms/neuroface}) and optional warning
+     */
+    public RhbkDeployOutcome installRhbkChartIfRequested(String namespace, boolean deployRhbk, String adminPassword) {
+        if (!deployRhbk) {
+            return new RhbkDeployOutcome(null, null);
+        }
+        if (!useHelmCli) {
+            return new RhbkDeployOutcome(
+                null,
+                "RHBK chart was not installed: set openshift.deployment.use-helm-cli=true and ensure `helm` is on PATH."
+            );
+        }
+        String pwd = StringUtils.defaultIfBlank(adminPassword, "changeme");
+        try {
+            runHelmCommand(List.of(helmBinary, "repo", "add", rhbkHelmRepoAlias, rhbkHelmRepoUrl), null);
+        } catch (Exception e) {
+            log.debug("helm repo add (may already exist): {}", e.getMessage());
+        }
+        try {
+            runHelmCommand(List.of(helmBinary, "repo", "update"), null);
+            List<String> installCmd = new ArrayList<>();
+            installCmd.add(helmBinary);
+            installCmd.add("upgrade");
+            installCmd.add("--install");
+            installCmd.add(rhbkReleaseName);
+            installCmd.add(rhbkChartRef);
+            installCmd.add("--namespace");
+            installCmd.add(namespace);
+            installCmd.add("--set-string");
+            installCmd.add("neuroface.enabled=false");
+            installCmd.add("--set-string");
+            installCmd.add("admin.password=" + pwd);
+            installCmd.add("--wait");
+            installCmd.add("--timeout");
+            installCmd.add(Math.max(120, helmTimeoutSeconds) + "s");
+            runHelmCommand(installCmd, null);
+            String issuer = resolveRhbkIssuerUri(namespace);
+            return new RhbkDeployOutcome(issuer, null);
+        } catch (Exception e) {
+            log.warn("RHBK helm install failed", e);
+            return new RhbkDeployOutcome(null, "RHBK install failed: " + e.getMessage());
+        }
+    }
+
+    private String resolveRhbkIssuerUri(String namespace) {
+        try {
+            List<Route> routes = openShiftClient.routes().inNamespace(namespace).list().getItems();
+            for (Route r : routes) {
+                String name = r.getMetadata() != null ? r.getMetadata().getName() : "";
+                if (name != null && (name.contains("rhbk") || name.contains("keycloak"))) {
+                    String host = r.getSpec() != null ? r.getSpec().getHost() : null;
+                    if (StringUtils.isNotBlank(host)) {
+                        return "https://" + host + "/realms/" + rhbkRealmName;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not list routes for RHBK issuer: {}", e.getMessage());
+        }
+        String svc = rhbkReleaseName + "-rhbk-http";
+        return "http://" + svc + "." + namespace + ".svc.cluster.local:8080/realms/" + rhbkRealmName;
+    }
+
+    private void runHelmCommand(List<String> command, Path workingDir) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        if (workingDir != null) {
+            pb.directory(workingDir.toFile());
+        }
+        pb.redirectErrorStream(true);
+        log.debug("Running: {}", String.join(" ", command));
+        Process p = pb.start();
+        String output = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        long waitCap = Math.max(helmTimeoutSeconds + 120L, 300L);
+        if (!p.waitFor(waitCap, TimeUnit.SECONDS)) {
+            p.destroyForcibly();
+            throw new IOException("helm timed out: " + String.join(" ", command));
+        }
+        if (p.exitValue() != 0) {
+            throw new IOException("helm exited with " + p.exitValue() + ": " + output);
+        }
+    }
+
+    public static class RhbkDeployOutcome {
+
+        private final String issuerUri;
+        private final String warning;
+
+        public RhbkDeployOutcome(String issuerUri, String warning) {
+            this.issuerUri = issuerUri;
+            this.warning = warning;
+        }
+
+        public String getIssuerUri() {
+            return issuerUri;
+        }
+
+        public String getWarning() {
+            return warning;
         }
     }
 

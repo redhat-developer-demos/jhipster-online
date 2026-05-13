@@ -82,6 +82,25 @@
     </div>
   </div>
 
+  <div class="row g-3 mb-4" *ngIf="!config.hideBackendFramework">
+    <div class="col-md-6">
+      <label class="form-label" for="backendFramework">Backend framework</label>
+      <select
+        id="backendFramework"
+        [(ngModel)]="model.backendFramework"
+        name="backendFramework"
+        class="form-select"
+        (change)="changeBackendFramework()"
+      >
+        <option value="spring-boot">Spring Boot</option>
+        <option value="quarkus">Quarkus (Vue + generator-jhipster-quarkus)</option>
+      </select>
+      <div *ngIf="model.backendFramework === 'quarkus'" class="form-text text-muted small">
+        Quarkus requires Vue; Hibernate 2nd level cache, Spring WebSocket, and OpenAPI-generator options are turned off for compatibility.
+      </div>
+    </div>
+  </div>
+
   <hr />
 
   <!-- Server side options -->
@@ -305,7 +324,7 @@
       </div>
     </div>
 
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4" *ngIf="model.backendFramework !== 'quarkus'">
       <div class="col-md-6" *ngIf="!config.hideCacheProvider">
         <div>
           <label class="form-label" for="cacheProvider">Use Spring cache abstraction?</label>
@@ -354,7 +373,7 @@
 
         <div class="row g-2">
           <div class="col-md-6">
-            <div class="form-check">
+            <div class="form-check" *ngIf="model.backendFramework !== 'quarkus'">
               <input
                 type="checkbox"
                 class="form-check-input"
@@ -387,7 +406,7 @@
             </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-6" *ngIf="model.backendFramework !== 'quarkus'">
             <div class="form-check">
               <input
                 type="checkbox"
@@ -435,9 +454,10 @@
             name="clientFramework"
             class="form-select"
             #clientFramework="ngModel"
+            [disabled]="model.backendFramework === 'quarkus'"
           >
-            <option value="angularX">Angular</option>
-            <option value="react">React</option>
+            <option value="angularX" *ngIf="model.backendFramework !== 'quarkus'">Angular</option>
+            <option value="react" *ngIf="model.backendFramework !== 'quarkus'">React</option>
             <option value="vue">Vue</option>
           </select>
         </div>

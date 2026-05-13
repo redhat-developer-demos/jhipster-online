@@ -67,4 +67,15 @@ export class EditorAiService {
     }
     return this.http.post<EditorAiTextResponse>('api/editor-ai/generate-from-prompt', body);
   }
+
+  mergeJdl(existingYoRcJson: string, newJdlContent: string, modelId?: string): Observable<EditorAiTextResponse> {
+    const body: { existingYoRcJson: string; newJdlContent: string; modelId?: string } = {
+      existingYoRcJson: existingYoRcJson ?? '',
+      newJdlContent: newJdlContent ?? ''
+    };
+    if (modelId && modelId.trim().length > 0) {
+      body.modelId = modelId.trim();
+    }
+    return this.http.post<EditorAiTextResponse>('api/editor-ai/merge-jdl', body);
+  }
 }

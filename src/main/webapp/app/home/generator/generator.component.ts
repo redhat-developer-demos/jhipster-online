@@ -160,16 +160,24 @@ export class GeneratorComponent implements OnInit {
   checkModelBeforeSubmit(): void {
     this.submitted = true;
 
+    if (this.model.backendFramework === 'quarkus') {
+      this.model.clientFramework = 'vue';
+      this.model.blueprints = [{ name: 'generator-jhipster-quarkus' }];
+      this.model.cacheProvider = 'no';
+      this.model.enableHibernateCache = false;
+      this.model.websocket = false;
+      this.model.enableSwaggerCodegen = false;
+    } else if (this.model.websocket) {
+      this.model.websocket = 'spring-websocket';
+    }
+
     if (this.model.cacheProvider === 'no') {
       this.model.enableHibernateCache = false;
-    }
-    if (this.model.websocket) {
-      this.model.websocket = 'spring-websocket';
     }
     if (this.model.searchEngine) {
       this.model.searchEngine = 'elasticsearch';
     }
-    if (this.model.enableSwaggerCodegen) {
+    if (this.model.enableSwaggerCodegen && this.model.backendFramework !== 'quarkus') {
       this.model.enableSwaggerCodegen = 'true';
     }
     if (this.model.messageBroker) {
@@ -281,6 +289,19 @@ export class GeneratorComponent implements OnInit {
 
   changePackageName(): void {
     this.model.packageFolder = this.model.packageName.replace(/\./g, '/');
+  }
+
+  changeBackendFramework(): void {
+    if (this.model.backendFramework === 'quarkus') {
+      this.model.clientFramework = 'vue';
+      this.model.cacheProvider = 'no';
+      this.model.enableHibernateCache = false;
+      this.model.websocket = false;
+      this.model.enableSwaggerCodegen = false;
+      this.model.blueprints = [{ name: 'generator-jhipster-quarkus' }];
+    } else {
+      this.model.blueprints = (this.model.blueprints ?? []).filter(b => b.name !== 'generator-jhipster-quarkus');
+    }
   }
 
   changeServiceDiscoveryType(): void {

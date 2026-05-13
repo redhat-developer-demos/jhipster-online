@@ -83,12 +83,48 @@ commands:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: 'oc apply -f src/main/kubernetes/preset-mariadb-standalone.yaml'
+  - id: kubectl-add-postgresql
+    exec:
+      label: 'Kubernetes apply PostgreSQL (Red Hat registry image)'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'kubectl apply -f src/main/kubernetes/preset-postgresql-redhat.yaml'
+  - id: kubectl-add-mongodb
+    exec:
+      label: 'Kubernetes apply MongoDB (Docker Hub image)'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'kubectl apply -f src/main/kubernetes/preset-mongodb.yaml'
   - id: oc-remove-mysql
     exec:
       label: 'OpenShift remove MariaDB Instance (OpenShift cluster)'
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: 'oc delete all --selector app=mariadb'
+  - id: oc-add-postgresql
+    exec:
+      label: 'OpenShift apply PostgreSQL (Red Hat registry image)'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'oc apply -f src/main/kubernetes/preset-postgresql-redhat.yaml'
+  - id: oc-remove-postgresql
+    exec:
+      label: 'OpenShift remove PostgreSQL instance'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'oc delete all --selector app=postgresql'
+  - id: oc-add-mongodb
+    exec:
+      label: 'OpenShift apply MongoDB (Docker Hub image)'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'oc apply -f src/main/kubernetes/preset-mongodb.yaml'
+  - id: oc-remove-mongodb
+    exec:
+      label: 'OpenShift remove MongoDB instance'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'oc delete all --selector app=mongodb'
   - id: npm-install
     exec:
       label: 'Package the application'

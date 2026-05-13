@@ -44,6 +44,14 @@ public class EditorAiService {
         "You are a JHipster JDL expert. From the user's natural language description, output ONLY valid JDL. " +
         "No markdown fences. Follow https://www.jhipster.tech/jdl/ .";
 
+    private static final String SYSTEM_MERGE_JDL =
+        "You are a JHipster JDL expert. The user provides (1) existing application configuration as JSON from .yo-rc.json " +
+        "or a JDL application block, and (2) new JDL for entities/relationships/enums. " +
+        "Produce ONE valid JDL file that preserves all application settings from the existing config (authentication, database, " +
+        "cache, client framework, baseName, packageName, etc.) and merges in the new entity definitions. " +
+        "If the existing input is JSON, translate equivalent settings into a single `application { }` block where appropriate, " +
+        "then append the entity JDL. Output ONLY JDL text. No markdown fences.";
+
     private final JdlAiService jdlAiService;
 
     public EditorAiService(JdlAiService jdlAiService) {
@@ -90,6 +98,16 @@ public class EditorAiService {
         String lang = normalizeLang(language);
         String system = "yaml".equals(lang) ? SYSTEM_GENERATE_YAML : SYSTEM_GENERATE_JDL;
         return jdlAiService.chatCompletion(system, StringUtils.defaultString(prompt).trim(), modelId);
+    }
+
+    public String mergeJdl(String existingYoRcJson, String newJdlContent, String modelId) throws Exception {
+        String user =
+            "Existing application configuration (JSON from .yo-rc.json or JDL application block):\n```\n" +
+            StringUtils.defaultString(existingYoRcJson).trim() +
+            "\n```\n\nNew JDL to merge (entities, enums, relationships):\n```\n" +
+            StringUtils.defaultString(newJdlContent).trim() +
+            "\n```\n\nOutput the merged JDL only.";
+        return jdlAiService.chatCompletion(SYSTEM_MERGE_JDL, user, modelId);
     }
 
     private static String normalizeLang(String language) {

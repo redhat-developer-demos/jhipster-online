@@ -7,6 +7,7 @@ import io.github.jhipster.online.web.rest.vm.EditorAiCompleteRequestVM;
 import io.github.jhipster.online.web.rest.vm.EditorAiExplainRequestVM;
 import io.github.jhipster.online.web.rest.vm.EditorAiFixRequestVM;
 import io.github.jhipster.online.web.rest.vm.EditorAiGenerateSnippetRequestVM;
+import io.github.jhipster.online.web.rest.vm.EditorAiMergeJdlRequestVM;
 import io.github.jhipster.online.web.rest.vm.EditorAiTextResponseVM;
 import io.github.jhipster.online.web.rest.vm.JdlAiConfigVM;
 import io.github.jhipster.online.web.rest.vm.JdlAiErrorVM;
@@ -150,6 +151,24 @@ public class EditorAiResource {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new JdlAiErrorVM(e.getMessage()));
         } catch (Exception e) {
             log.error("Editor AI generate-from-prompt failed", e);
+            String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new JdlAiErrorVM(msg));
+        }
+    }
+
+    @PostMapping("/editor-ai/merge-jdl")
+    public ResponseEntity<?> mergeJdl(@Valid @RequestBody EditorAiMergeJdlRequestVM body) {
+        if (!editorAiService.isAvailable()) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+        try {
+            String text = editorAiService.mergeJdl(body.getExistingYoRcJson(), body.getNewJdlContent(), body.getModelId());
+            return ResponseEntity.ok(new EditorAiTextResponseVM(text));
+        } catch (IllegalStateException e) {
+            log.warn("Editor AI merge-jdl: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new JdlAiErrorVM(e.getMessage()));
+        } catch (Exception e) {
+            log.error("Editor AI merge-jdl failed", e);
             String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new JdlAiErrorVM(msg));
         }

@@ -66,4 +66,6 @@ export interface GeneratorConfigurationModel {
   hideHibernateCache?: boolean;
   disableNoDatabaseOptions?: boolean;
   hideIaCTool?: boolean;
+  /** When true, hides the Spring Boot / Quarkus selector (default: visible). */
+  hideBackendFramework?: boolean;
 }

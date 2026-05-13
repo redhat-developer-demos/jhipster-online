@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -70,6 +71,12 @@ public class OpenShiftDeploymentResource {
             ? (Map<String, String>) request.get("valuesOverrides")
             : null;
 
+        boolean deployRhbk = Boolean.TRUE.equals(request.get("deployRhbk"));
+        String rhbkAdminPassword = stringVal(request.get("rhbkAdminPassword"));
+        if (rhbkAdminPassword == null) {
+            rhbkAdminPassword = "changeme";
+        }
+
         String gitProvider = stringVal(request.get("gitProvider"));
         String gitOwner = stringVal(request.get("gitOwner"));
         String gitRepoName = stringVal(request.get("gitRepoName"));
@@ -79,10 +86,21 @@ public class OpenShiftDeploymentResource {
             if ("argocd".equalsIgnoreCase(deployMethod)) {
                 result = new LinkedHashMap<>(deploymentService.argoCDDeploy(namespace, gitRepo, appName, argocdNs));
             } else if ("fabric8".equalsIgnoreCase(deployMethod)) {
-                result =
-                    new LinkedHashMap<>(
-                        deploymentService.helmInstall(namespace, gitRepo, appName, overrides != null ? overrides : Collections.emptyMap())
-                    );
+                Map<String, String> merged = new LinkedHashMap<>();
+                if (overrides != null) {
+                    merged.putAll(overrides);
+                }
+                OpenShiftDeploymentService.RhbkDeployOutcome rhbk = deploymentService.installRhbkChartIfRequested(
+                    namespace,
+                    deployRhbk,
+                    rhbkAdminPassword
+                );
+                if (StringUtils.isNotBlank(rhbk.getIssuerUri())) {
+                    merged.put("integrations.keycloak.enabled: false", "integrations.keycloak.enabled: true");
+                    merged.put("issuerUri: ''", "issuerUri: '" + rhbk.getIssuerUri() + "'");
+                }
+                result = new LinkedHashMap<>(deploymentService.helmInstall(namespace, gitRepo, appName, merged));
+                appendWarning(result, rhbk.getWarning());
             } else {
                 return ResponseEntity.badRequest().body(Map.of("error", "deployMethod must be fabric8 or argocd"));
             }
@@ -145,6 +163,21 @@ public class OpenShiftDeploymentResource {
 
     private static String stringVal(Object o) {
         return o == null ? null : String.valueOf(o);
+    }
+
+    private static void appendWarning(Map<String, Object> result, String extra) {
+        if (StringUtils.isBlank(extra)) {
+            return;
+        }
+        Object existing = result.get("helmWarning");
+        if (existing instanceof String) {
+            String s = (String) existing;
+            if (StringUtils.isNotBlank(s)) {
+                result.put("helmWarning", s + " " + extra);
+                return;
+            }
+        }
+        result.put("helmWarning", extra);
     }
 
     @GetMapping("/applications")

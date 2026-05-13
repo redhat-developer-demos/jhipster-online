@@ -174,6 +174,13 @@ public class GeneratorService {
                 applicationId,
                 "Added optional MariaDB manifest at src/main/kubernetes/preset-mariadb-standalone.yaml (for Dev Spaces commands)"
             );
+        copyClasspathResource("kubernetes-snippets/preset-postgresql-redhat.yaml", new File(k8sDir, "preset-postgresql-redhat.yaml"));
+        this.logsService.addLog(
+                applicationId,
+                "Added optional PostgreSQL (Red Hat image) manifest at src/main/kubernetes/preset-postgresql-redhat.yaml"
+            );
+        copyClasspathResource("kubernetes-snippets/preset-mongodb.yaml", new File(k8sDir, "preset-mongodb.yaml"));
+        this.logsService.addLog(applicationId, "Added optional MongoDB manifest at src/main/kubernetes/preset-mongodb.yaml");
     }
 
     /**

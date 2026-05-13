@@ -17,16 +17,16 @@
             <a href="https://developers.redhat.com/products/openshift-dev-spaces/overview" target="_blank">https://developers.redhat.com/products/openshift-dev-spaces</a>
           </p>
           <div class="alert alert-warning" role="alert">
-            <p>Please note that the current version of this form only supports the following selections within JHipster Archetype:</p>
-            <ul>
-              <li>Application Type: <b>Monolith</b></li>
-              <li>FrontEnd: <b>VueJS</b></li>
-              <li>BackEnd: <b>Spring Boot Application</b></li>
-              <li>Database: <b>MariaDB</b></li>
+            <p class="mb-1">Recommended defaults for OpenShift; unsupported combinations may still fail at generation time.</p>
+            <ul class="mb-0">
+              <li>Application type: <b>Monolith</b> (recommended)</li>
+              <li>
+                Frontend:
+                <b>{{ generatorRef?.model?.backendFramework === 'quarkus' ? 'Vue (required for Quarkus)' : 'Vue (default); Angular/React for Spring Boot' }}</b>
+              </li>
+              <li>Backend: <b>{{ generatorRef?.model?.backendFramework === 'quarkus' ? 'Quarkus' : 'Spring Boot' }}</b> (selector above)</li>
+              <li>Production DB presets in repo: <b>MariaDB</b>, <b>PostgreSQL (Red Hat image)</b>, <b>MongoDB</b> — use Dev Spaces / devfile commands to apply the matching <code>preset-*.yaml</code>.</li>
             </ul>
-            <p>
-              Services, Databases and selections not listed above are currently not supported. 
-            </p>
           </div>
       </div>
       <div class="col-md-12">
@@ -102,6 +102,31 @@
                 <label for="argoNs" class="form-label">Argo CD instance namespace</label>
                 <input class="form-control" id="argoNs" [(ngModel)]="argocdApplicationNamespace" placeholder="openshift-gitops">
               </div>
+              <div
+                *ngIf="deployMethod === 'fabric8' && generatorRef?.model?.authenticationType === 'oauth2'"
+                class="card border-secondary mt-3"
+              >
+                <div class="card-body py-2">
+                  <h6 class="card-title small mb-2">Red Hat Build of Keycloak (RHBK)</h6>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="deployRhbkCb" [(ngModel)]="deployRhbk" />
+                    <label class="form-check-label" for="deployRhbkCb">
+                      Deploy RHBK (Keycloak) chart to this namespace before the app (requires Helm CLI on the server;
+                      <code>openshift.deployment.use-helm-cli=true</code>).
+                    </label>
+                  </div>
+                  <div *ngIf="deployRhbk" class="mt-2">
+                    <label class="form-label small" for="rhbkAdminPwd">RHBK admin password</label>
+                    <input
+                      type="password"
+                      class="form-control form-control-sm"
+                      id="rhbkAdminPwd"
+                      [(ngModel)]="rhbkAdminPassword"
+                      autocomplete="new-password"
+                    />
+                  </div>
+                </div>
+              </div>
               <p class="form-text text-muted mt-2">
                 The generated repository includes a <code>helm/</code> chart and <code>argocd/application.yaml</code>.
                 Push the repository first; Fabric8 renders templates server-side, Argo CD uses Helm in-cluster.
@@ -110,6 +135,9 @@
             </div>
             <div *ngIf="deployStatus" class="alert alert-info mt-2" role="alert">
               {{ deployStatus }}
+            </div>
+            <div *ngIf="deployHelmWarning" class="alert alert-warning mt-2" role="alert">
+              <strong>Helm notice:</strong> {{ deployHelmWarning }}
             </div>
           </div>
         </div>
@@ -121,9 +149,9 @@
     <div class="row">
       <div class="col-md-12">
           <div>
-            <b>Maven</b> will be the build tool used for the project.<br>
-            <b>Angular</b> will be the default front-end framework used for the project.<br>
-            <b>MariaDB</b> will default to passwordless database connections as it's more secure option.<br>
+            <b>Maven</b> is the default build tool (Gradle is available on the classic generator).<br />
+            <b>Vue</b> is the default front-end on this page; choose <b>Quarkus</b> in <b>Backend framework</b> for Quarkus + Vue.<br />
+            <b>MariaDB</b> remains a common default; <b>PostgreSQL</b> and <b>MongoDB</b> presets are included in generated repos — see the devfile commands.<br />
             The DevSpaces <a href="https://github.com/redhat-developer-demos/jhipster-online/blob/main/src/main/resources/repo-root-template/devfile.yaml"><b>devfile.yaml</b></a> template is copied into the generated repository (token-replaced).<br>
             Tekton pipelines are generated under <a href="https://github.com/redhat-developer-demos/jhipster-online/tree/main/src/main/resources/helm-template/templates"><b>helm/templates/</b></a> (no standalone <code>pipeline.yaml</code> at repo root).<br>
             An in-repo <a href="https://github.com/redhat-developer-demos/jhipster-online/tree/main/src/main/resources/helm-template"><b>helm/</b></a> chart and <b>argocd/application.yaml</b> are generated for OpenShift.<br>

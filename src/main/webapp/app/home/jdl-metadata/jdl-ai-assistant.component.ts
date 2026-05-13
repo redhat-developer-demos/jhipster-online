@@ -59,6 +59,11 @@ export class JdlAiAssistantComponent implements OnInit {
   refineResult = '';
   loadingRefine = false;
 
+  mergeExistingPaste = '';
+  mergeNewJdlPaste = '';
+  mergeResult = '';
+  loadingMerge = false;
+
   constructor(
     private jdlAiService: JdlAiService,
     private editorAiService: EditorAiService,
@@ -203,6 +208,45 @@ export class JdlAiAssistantComponent implements OnInit {
       () => this.alertService.success('Copied', null),
       () => this.alertService.error('Copy failed', null)
     );
+  }
+
+  mergeWithAi(): void {
+    const ex = this.mergeExistingPaste.trim();
+    const nw = this.mergeNewJdlPaste.trim();
+    if (!ex) {
+      this.alertService.error('Paste existing .yo-rc.json or application config.', null);
+      return;
+    }
+    if (!nw) {
+      this.alertService.error('Paste new JDL (entities) to merge.', null);
+      return;
+    }
+    this.loadingMerge = true;
+    this.mergeResult = '';
+    this.editorAiService.mergeJdl(ex, nw, this.selectedModelId).subscribe(
+      res => {
+        this.mergeResult = res.text ?? '';
+        this.loadingMerge = false;
+      },
+      err => this.handleMergeError(err)
+    );
+  }
+
+  copyMergeResult(): void {
+    if (!this.mergeResult) {
+      return;
+    }
+    navigator.clipboard.writeText(this.mergeResult).then(
+      () => this.alertService.success('Copied', null),
+      () => this.alertService.error('Copy failed', null)
+    );
+  }
+
+  private handleMergeError(err: { error?: { detail?: string; message?: string } }): void {
+    const body = err.error;
+    const fromServer = body?.detail || body?.message;
+    this.alertService.error(fromServer || 'Merge request failed.', null);
+    this.loadingMerge = false;
   }
 
   private handleRefineError(err: { error?: { detail?: string; message?: string } }): void {

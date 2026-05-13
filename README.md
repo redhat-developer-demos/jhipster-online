@@ -32,6 +32,7 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
   - [GitLab configuration](#gitlab-configuration)
   - [Gitea configuration](#gitea-configuration)
   - [JDL AI assistant (models, RAG, embeddings)](#jdl-ai-assistant-models-rag-embeddings)
+- [New Features in v2.40.1](#new-features-in-v2401)
 - [New Features in v2.40.0](#new-features-in-v2400)
 - [Help and Contribution](#help-and-contribution-to-the-project)
 
@@ -191,6 +192,15 @@ To generate a production build, like any normal JHipster application, please run
 #### Build container images (CI / Dockerfile)
 
 Use the Dockerfiles in the repository root (for example `Dockerfile.spring-boot`, `Dockerfile.quarkus`, `Dockerfile.builder`) and GitHub Actions, or your cluster's build strategy, instead of the removed in-repo `jh-online-builder.yaml` BuildConfig.
+
+## New Features in v2.40.1
+
+- **Quarkus monolith support**: **Backend framework** selector (Spring Boot / Quarkus) on the generator and OpenShift generator; Quarkus auto-selects **Vue**, disables Spring-only options, and adds **`generator-jhipster-quarkus`** to `blueprints`. Deployed Quarkus apps keep **`QUARKUS_PROFILE=prod,api-docs`** for Swagger UI at `/q/swagger-ui`.
+- **Database presets**: **`preset-postgresql-redhat.yaml`** (Red Hat `registry.redhat.io/rhel9/postgresql-15`) and **`preset-mongodb.yaml`** (Docker Hub `mongo:7`) are copied into generated repos with matching **devfile** `kubectl` / `oc apply` commands (alongside MariaDB).
+- **RHBK auto-deploy for OAuth2**: When **OAuth2** is selected on the OpenShift generator, optional **“Deploy RHBK (Keycloak)”** installs the **`rhbk-neuroface`** chart with NeuroFace disabled (requires **`openshift.deployment.use-helm-cli=true`** and `helm` on the server). The app Helm **`integrations.keycloak`** values are set from the discovered route or in-cluster issuer URL.
+- **Editor AI assist**: Helm/YAML and JDL **complete**, **explain**, **fix**, and **generate-from-prompt** in the admin Helm editor and JDL flows; **Ctrl+Shift+A** triggers completion in the YAML editor where wired.
+- **Smart JDL merge**: Applying a JDL model to Git **strips `application { }`** so `import-jdl` does not overwrite `.yo-rc.json`. Optional **AI merge** (`POST /api/editor-ai/merge-jdl`) merges pasted `.yo-rc.json` / app config with new entity JDL in the JDL AI assistant panel.
+- **Helm deploy visibility**: If the Helm CLI fails and the server falls back to Fabric8, the deploy API includes **`helmWarning`** so the UI can show that Helm did not succeed.
 
 ## New Features in v2.40.0
 

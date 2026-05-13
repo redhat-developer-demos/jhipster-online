@@ -45,27 +45,16 @@ export class OpenshiftGeneratorComponent implements OnInit {
     hideApplicationType: false,
     hideServiceDiscoveryType: true,
     hideAuthenticationType: false,
-    hideDatabaseType: true,
-    hideProdDatabaseTypeOptions: ['mysql', 'postgresql', 'oracle', 'mssql', 'mongodb', 'cassandra', 'couchbase', 'neo4j', 'no'],
-    hideDevDatabaseTypeOptions: [
-      'h2Disk',
-      'postgresql',
-      'mysql',
-      'mariadb',
-      'oracle',
-      'mssql',
-      'mongodb',
-      'cassandra',
-      'couchbase',
-      'neo4j',
-      'no'
-    ],
+    hideDatabaseType: false,
+    hideProdDatabaseTypeOptions: ['mysql', 'oracle', 'mssql', 'cassandra', 'couchbase', 'neo4j', 'no'],
+    hideDevDatabaseTypeOptions: ['h2Disk', 'postgresql', 'mysql', 'mariadb', 'oracle', 'mssql', 'cassandra', 'couchbase', 'neo4j', 'no'],
     hideCacheProvider: true,
     hideBuildTool: false,
     hideOtherComponents: false,
     hideClientSideOptions: false,
     hideI18nOptions: true,
-    hideTestingOptions: true
+    hideTestingOptions: true,
+    hideBackendFramework: false
   };
   openshiftJHipsterModel: JHipsterConfigurationModel = new JHipsterConfigurationModel();
 
@@ -79,6 +68,11 @@ export class OpenshiftGeneratorComponent implements OnInit {
   scaffoldApps: OpenshiftScaffoldRow[] = [];
 
   scaffoldLoadError = '';
+
+  /** Shown when Helm CLI failed but Fabric8 fallback succeeded. */
+  deployHelmWarning = '';
+  deployRhbk = false;
+  rhbkAdminPassword = 'changeme';
 
   constructor(private http: HttpClient) {}
 
@@ -188,6 +182,7 @@ export class OpenshiftGeneratorComponent implements OnInit {
       return;
     }
     this.deployStatus = 'Deploying to namespace ' + this.namespace + ' (' + this.deployMethod + ')...';
+    this.deployHelmWarning = '';
     const body: any = {
       namespace: this.namespace,
       gitRepo,
@@ -204,8 +199,14 @@ export class OpenshiftGeneratorComponent implements OnInit {
     if (gitRepoName) {
       body.gitRepoName = gitRepoName;
     }
+    const auth = this.generatorRef?.model?.authenticationType;
+    if (this.deployMethod === 'fabric8' && this.deployRhbk && auth === 'oauth2') {
+      body.deployRhbk = true;
+      body.rhbkAdminPassword = (this.rhbkAdminPassword || 'changeme').trim();
+    }
     this.http.post<any>('api/openshift/deploy', body).subscribe(
       (result: any) => {
+        this.deployHelmWarning = typeof result?.helmWarning === 'string' ? result.helmWarning : '';
         if (this.deployMethod === 'argocd') {
           this.deployStatus =
             'Argo CD Application ' +

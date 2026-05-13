@@ -172,6 +172,22 @@ class JdlServiceTest {
     }
 
     @Test
+    void stripApplicationBlock_removesTopLevelApplicationBlock() {
+        String in =
+            "application {\n" + "  config {\n" + "    baseName foo\n" + "  }\n" + "}\n" + "\n" + "entity A {\n" + "  name String\n" + "}\n";
+        String out = JdlService.stripApplicationBlock(in);
+        assertThat(out).doesNotContain("application {");
+        assertThat(out).contains("entity A");
+        assertThat(out).contains("name String");
+    }
+
+    @Test
+    void stripApplicationBlock_preservesWhenNoApplicationKeyword() {
+        String in = "entity Application {\n  name String\n}";
+        assertThat(JdlService.stripApplicationBlock(in)).contains("entity Application");
+    }
+
+    @Test
     void kebabCaseJdlName() {
         JdlMetadata jdlMetadata = new JdlMetadata();
         jdlMetadata.setName("My Name");

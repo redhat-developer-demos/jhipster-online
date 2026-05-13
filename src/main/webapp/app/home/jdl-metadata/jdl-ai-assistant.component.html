@@ -75,5 +75,26 @@
       <button type="button" class="btn btn-sm btn-secondary mt-1" (click)="copyRefineResult()">Copy result</button>
     </div>
     <div *ngIf="loadingRefine" class="text-muted small mt-2">Working…</div>
+
+    <hr class="my-4" />
+    <h6 class="text-muted">AI merge with existing app (no RAG)</h6>
+    <p class="small text-muted">
+      Paste your target repo’s <code>.yo-rc.json</code> (or an <code>application&#123; &#125;</code> block) and the new entity JDL. The model returns merged JDL for review before Apply.
+    </p>
+    <div class="mb-2">
+      <label class="form-label small">Existing config (JSON or JDL application block)</label>
+      <textarea class="form-control form-control-sm font-monospace" rows="5" [(ngModel)]="mergeExistingPaste" name="mergeExistingPaste"></textarea>
+    </div>
+    <div class="mb-2">
+      <label class="form-label small">New JDL to merge in</label>
+      <textarea class="form-control form-control-sm font-monospace" rows="5" [(ngModel)]="mergeNewJdlPaste" name="mergeNewJdlPaste"></textarea>
+      <button type="button" class="btn btn-sm btn-outline-primary mt-1" (click)="mergeWithAi()" [disabled]="loadingMerge">AI merge</button>
+    </div>
+    <div *ngIf="mergeResult" class="mt-2">
+      <label class="form-label small">Merged JDL</label>
+      <textarea class="form-control font-monospace small" rows="10" readonly [value]="mergeResult"></textarea>
+      <button type="button" class="btn btn-sm btn-secondary mt-1" (click)="copyMergeResult()">Copy merged JDL</button>
+    </div>
+    <div *ngIf="loadingMerge" class="text-muted small mt-2">Working…</div>
   </div>
 </div>

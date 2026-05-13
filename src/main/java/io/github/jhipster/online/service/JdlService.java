@@ -109,8 +109,16 @@ public class JdlService {
             this.logsService.addLog(applyJdlId, "Creating branch `" + branchName + "`");
             this.gitService.createBranch(git, branchName);
 
+            File yoRc = new File(workingDir, ".yo-rc.json");
+            if (yoRc.isFile()) {
+                this.logsService.addLog(
+                        applyJdlId,
+                        "Found existing `.yo-rc.json` — entity JDL will be written without `application{}` to preserve app config."
+                    );
+            }
+
             this.logsService.addLog(applyJdlId, "Adding JDL file into the project");
-            this.generateJdlFile(workingDir, jdlMetadata);
+            this.generateJdlFile(workingDir, jdlMetadata, applyJdlId);
             this.gitService.addAllFilesToRepository(git, workingDir);
             this.gitService.commit(
                     git,
@@ -208,18 +216,130 @@ public class JdlService {
         }
     }
 
-    private void generateJdlFile(File workingDir, JdlMetadata jdlMetadata) throws IOException {
+    private void generateJdlFile(File workingDir, JdlMetadata jdlMetadata, String applyJdlId) throws IOException {
         try {
             Optional<Jdl> jdl = this.jdlRepository.findOneByJdlMetadataId(jdlMetadata.getId());
             if (jdl.isEmpty()) {
                 throw new FileSystemException("Error creating file jhipster-jdl.jh, the JDL could not be found");
             }
+            String raw = Optional.ofNullable(jdl.get().getContent()).orElse("");
+            String toWrite = stripApplicationBlock(raw);
+            if (!raw.equals(toWrite) && applyJdlId != null) {
+                this.logsService.addLog(applyJdlId, "Removed `application { }` from JDL so import-jdl does not replace `.yo-rc.json`.");
+            }
+            if (!raw.equals(toWrite)) {
+                log.info("Stripped application block from JDL for metadata {}", jdlMetadata.getId());
+            }
             PrintWriter writer = new PrintWriter(workingDir + "/" + this.kebabCaseJdlName(jdlMetadata) + ".jh", StandardCharsets.UTF_8);
-            writer.print(jdl.get().getContent());
+            writer.print(toWrite);
             writer.close();
         } catch (IOException ioe) {
             throw new IOException("Error creating file jhipster-jdl.jh, could not write the file");
         }
+    }
+
+    /**
+     * Removes top-level {@code application { ... }} blocks so {@code jhipster import-jdl} does not overwrite
+     * {@code .yo-rc.json} when applying entity-only models from JDL Studio.
+     */
+    static String stripApplicationBlock(String jdlContent) {
+        if (jdlContent == null || jdlContent.isEmpty()) {
+            return "";
+        }
+        String s = jdlContent;
+        int searchFrom = 0;
+        StringBuilder out = new StringBuilder();
+        while (searchFrom < s.length()) {
+            int appIdx = findApplicationKeyword(s, searchFrom);
+            if (appIdx < 0) {
+                out.append(s.substring(searchFrom));
+                break;
+            }
+            out.append(s, searchFrom, appIdx);
+            int braceOpen = indexOfNonWhitespace(s, appIdx + "application".length());
+            if (braceOpen < 0 || s.charAt(braceOpen) != '{') {
+                out.append(s, appIdx, appIdx + "application".length());
+                searchFrom = appIdx + "application".length();
+                continue;
+            }
+            int end = findMatchingBraceEnd(s, braceOpen);
+            if (end < 0) {
+                out.append(s.substring(appIdx));
+                break;
+            }
+            searchFrom = end + 1;
+        }
+        return out.toString().trim();
+    }
+
+    private static int findApplicationKeyword(String s, int from) {
+        final String key = "application";
+        for (int i = from; i <= s.length() - key.length(); i++) {
+            if (!s.regionMatches(false, i, key, 0, key.length())) {
+                continue;
+            }
+            if (i > from && Character.isJavaIdentifierPart(s.charAt(i - 1))) {
+                continue;
+            }
+            int after = i + key.length();
+            if (after < s.length() && Character.isJavaIdentifierPart(s.charAt(after))) {
+                continue;
+            }
+            return i;
+        }
+        return -1;
+    }
+
+    private static int indexOfNonWhitespace(String s, int from) {
+        for (int i = from; i < s.length(); i++) {
+            if (!Character.isWhitespace(s.charAt(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /** {@code open} is index of '{'. Returns index of matching '}' or -1. */
+    private static int findMatchingBraceEnd(String s, int open) {
+        int depth = 0;
+        boolean inSingle = false;
+        boolean inDouble = false;
+        for (int i = open; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (inDouble) {
+                if (c == '\\' && i + 1 < s.length()) {
+                    i++;
+                    continue;
+                }
+                if (c == '"') {
+                    inDouble = false;
+                }
+                continue;
+            }
+            if (inSingle) {
+                if (c == '\'' && (i == 0 || s.charAt(i - 1) != '\\')) {
+                    inSingle = false;
+                }
+                continue;
+            }
+            if (c == '"') {
+                inDouble = true;
+                continue;
+            }
+            if (c == '\'') {
+                inSingle = true;
+                continue;
+            }
+            if (c == '{') {
+                depth++;
+            } else if (c == '}') {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
     public String kebabCaseJdlName(JdlMetadata jdlMetadata) {

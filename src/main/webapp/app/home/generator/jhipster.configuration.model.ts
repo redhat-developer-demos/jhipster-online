@@ -52,6 +52,8 @@ export class JHipsterConfigurationModel {
   public skipCommitHook = true;
   public blueprints: BlueprintModel[] = [];
   public iaCTools = ['bicep', 'terraform'];
+  /** Drives UI defaults for Quarkus vs Spring; server CLI still follows server-side jhipster-cmd. */
+  public backendFramework: 'spring-boot' | 'quarkus' = 'spring-boot';
 
   constructor(data?: Partial<JHipsterConfigurationModel>) {
     if (data) {
