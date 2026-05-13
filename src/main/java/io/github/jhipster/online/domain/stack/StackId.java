@@ -8,7 +8,6 @@ public enum StackId {
     QUARKUS,
     MICRONAUT,
     RUST,
-    PYTHON,
     /** Placeholder for future stacks pending JHipster 9 blueprint compatibility. */
     DOTNET,
     AZURE_ACA,

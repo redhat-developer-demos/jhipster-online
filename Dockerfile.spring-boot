@@ -55,8 +55,7 @@ RUN microdnf install -y tar xz gzip curl git && \
     npm install -g generator-jhipster@9.0.0 \
                    generator-jhipster-quarkus@4.0.0 \
                    generator-jhipster-micronaut@4.0.0 \
-                   generator-jhipster-rust@1.0.0 \
-                   generator-pyhipster@0.0.9 && \
+                   generator-jhipster-rust@1.0.0 && \
     microdnf clean all
 
 COPY --from=builder /build/target/jhonline-*.war /deployments/jhonline.war
