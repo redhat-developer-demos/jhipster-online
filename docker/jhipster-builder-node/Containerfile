@@ -1,4 +1,4 @@
 FROM registry.access.redhat.com/ubi8/nodejs-20:1
 USER root
-RUN microdnf install -y --setopt=tsflags=nodocs git && microdnf clean all
+RUN yum install -y --setopt=tsflags=nodocs git && yum clean all
 WORKDIR /workspace
