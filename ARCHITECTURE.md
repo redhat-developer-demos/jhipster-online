@@ -89,7 +89,11 @@ graph TD
 | `Dockerfile.spring-boot` | Multi-stage runtime image (Spring Boot WAR)                  | `ghcr.io/redhat-developer-demos/jhipster-online`, Quay.io |
 | `Dockerfile.quarkus`     | Multi-stage runtime image (Quarkus WAR)                      | Quay.io                                                   |
 | `Dockerfile.builder`     | Multi-stage build for WAR + runtime layers                   | Used with CI / `oc` image builds                          |
-| Builder base             | UBI8 OpenJDK 21 + Maven 3.9.15 + Node 22 (npm)               | `registry.redhat.io/ubi8/openjdk-21`                      |
+| Builder base             | UBI8 OpenJDK 21 + Maven 3.9.15 + Node 22 (npm)               | `registry.access.redhat.com/ubi8/openjdk-21`              |
+| Builder (.NET)           | UBI8 .NET 8.0 SDK + git                                      | `registry.access.redhat.com/ubi8/dotnet-80`               |
+| Builder (Node)           | UBI8 Node.js 20 + git                                        | `registry.access.redhat.com/ubi8/nodejs-20`               |
+| Builder (Rust)           | Official Rust 1.85 slim + git                                | `docker.io/library/rust`                                  |
+| Builder (Go)             | UBI8 + golang + git                                          | `registry.access.redhat.com/ubi8/ubi`                     |
 
 ## Deployment Topology
 
@@ -233,3 +237,22 @@ A custom blueprint `generator-jhipster-mcp` does not exist in the npm registry.
 ## Multi-stack generator and OpenShift charts
 
 Generated repositories resolve stack from `.yo-rc.json` blueprints (`StackProfileResolver`), pick Helm/Tekton/BuildConfig variants, and resolve the JHipster CLI via `application.jhipster-commands-by-stack`. See [docs/MULTI_STACK_OPENSHIFT.md](docs/MULTI_STACK_OPENSHIFT.md).
+
+### Stack compatibility matrix
+
+| Layer                   |    Spring Boot     |           Quarkus            |           Micronaut            |              .NET               |                 Azure ACA                 |              Node / Nest               |           Go            |           Rust            |
+| ----------------------- | :----------------: | :--------------------------: | :----------------------------: | :-----------------------------: | :---------------------------------------: | :------------------------------------: | :---------------------: | :-----------------------: |
+| **StackId enum**        |    SPRING_BOOT     |           QUARKUS            |           MICRONAUT            |             DOTNET              |                 AZURE_ACA                 |               NODE_NEST                |           GO            |           RUST            |
+| **Blueprint detection** |     (default)      | `generator-jhipster-quarkus` | `generator-jhipster-micronaut` | `generator-jhipster-dotnetcore` | `generator-jhipster-azure-container-apps` | `generator-jhipster-nodejs` / `nestjs` | `generator-jhipster-go` | `generator-jhipster-rust` |
+| **Helm token**          |   `spring-boot`    |          `quarkus`           |          `micronaut`           |            `dotnet`             |                `azure-aca`                |                 `node`                 |          `go`           |          `rust`           |
+| **CLI command**         |     `jhipster`     |          `jhipster`          |           `jhipster`           |      `jhipster-dotnetcore`      |                `jhipster`                 |               `jhipster`               |       `jhipster`        |        `jhipster`         |
+| **UI dropdown**         |        yes         |             yes              |              yes               |               yes               |                    yes                    |                  yes                   |      experimental       |       experimental        |
+| **deployment-app-\***   |       spring       |           quarkus            |           micronaut            |             dotnet              |                  spring                   |                  node                  |         spring          |          spring           |
+| **buildconfig-\***      |   java (default)   |        java (default)        |         java (default)         |             dotnet              |              java (default)               |                  node                  |     java (default)      |      java (default)       |
+| **tekton-pipeline-\***  |       spring       |           quarkus            |             spring             |             dotnet              |                  spring                   |                  node                  |         spring          |          spring           |
+| **Containerfile**       | `jhipster-builder` |      `jhipster-builder`      |       `jhipster-builder`       |    `jhipster-builder-dotnet`    |            `jhipster-builder`             |        `jhipster-builder-node`         |  `jhipster-builder-go`  |  `jhipster-builder-rust`  |
+| **CI matrix job**       | `jhipster-builder` |      `jhipster-builder`      |       `jhipster-builder`       |    `jhipster-builder-dotnet`    |            `jhipster-builder`             |        `jhipster-builder-node`         |  `jhipster-builder-go`  |  `jhipster-builder-rust`  |
+
+- **Micronaut** has its own `deployment-app-micronaut.yaml` but reuses the Spring Tekton pipeline (both are JVM-based).
+- **Azure ACA**, **Go**, and **Rust** fall back to Spring deployment and Tekton variants; controlled by `usesJvmJarPipeline()`.
+- **Go / Rust** are marked experimental in the UI and in `isExperimentalStack()`; their CLI defaults to `jhipster` since no official generator blueprints exist yet.

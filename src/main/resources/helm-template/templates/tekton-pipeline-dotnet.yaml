@@ -44,7 +44,7 @@ spec:
     - name: DOTNET_IMAGE
       type: string
       description: .NET SDK image (Red Hat catalog)
-      default: registry.redhat.io/ubi8/dotnet-80:8.0
+      default: registry.access.redhat.com/ubi8/dotnet-80:8.0
     - name: CONTEXT_DIR
       type: string
       description: Directory containing the .sln or .csproj

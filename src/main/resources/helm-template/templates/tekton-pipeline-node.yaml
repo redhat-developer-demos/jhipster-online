@@ -44,7 +44,7 @@ spec:
     - name: NODE_BUILD_IMAGE
       type: string
       description: Node.js builder image (Red Hat catalog)
-      default: registry.redhat.io/ubi8/nodejs-20:1-131.1743775676
+      default: registry.access.redhat.com/ubi8/nodejs-20:1
     - name: CONTEXT_DIR
       type: string
       description: Directory containing package.json

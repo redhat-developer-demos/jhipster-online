@@ -23,7 +23,7 @@ import { GitConfigurationModel } from 'app/core/git/git-configuration.model';
 import { GitConfigurationService } from 'app/core/git/git-configuration.service';
 import { AccountService } from 'app/core/auth/account.service';
 
-import { JHipsterConfigurationModel } from './jhipster.configuration.model';
+import { JHipsterConfigurationModel, BlueprintModel } from './jhipster.configuration.model';
 import { GeneratorService } from './generator.service';
 import { GeneratorOutputDialogComponent } from './generator.output.component';
 import {

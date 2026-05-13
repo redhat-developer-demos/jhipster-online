@@ -19,7 +19,7 @@ spec:
     sourceStrategy:
       from:
         kind: DockerImage
-        name: registry.redhat.io/ubi8/nodejs-20:1-131.1743775676
+        name: registry.access.redhat.com/ubi8/nodejs-20:1
       incremental: true
   source:
     type: Binary

@@ -19,7 +19,7 @@ spec:
     sourceStrategy:
       from:
         kind: DockerImage
-        name: registry.redhat.io/ubi8/dotnet-80:8.0
+        name: registry.access.redhat.com/ubi8/dotnet-80:8.0
       incremental: true
   source:
     type: Binary

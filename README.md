@@ -61,7 +61,7 @@ The Dev Spaces workspace image includes the following pre-installed generators:
 ## Podman, Quay, and multi-stack
 
 - **Local builds**: use `podman build` with the same `-f` / `-t` / context as in CI ([`Dockerfile.quarkus`](Dockerfile.quarkus), [`Dockerfile.spring-boot`](Dockerfile.spring-boot), [`Dockerfile`](Dockerfile), [`Dockerfile.builder`](Dockerfile.builder), and [`docker/*/Containerfile`](docker/jhipster-builder/Containerfile)). A successful local build is **not** a reason to `podman push` to Quay; publishing is done by **GitHub Actions** (or an explicit operator push).
-- **Red Hat runtimes**: prefer images documented on [catalog.redhat.com](https://catalog.redhat.com) for application runtimes; see [docs/MULTI_STACK_OPENSHIFT.md](docs/MULTI_STACK_OPENSHIFT.md) for how generated Helm/Tekton maps stacks.
+- **Red Hat runtimes**: prefer images from `registry.access.redhat.com` (no auth required) over `registry.redhat.io` (requires subscription) for CI and builder Containerfiles; see [docs/MULTI_STACK_OPENSHIFT.md](docs/MULTI_STACK_OPENSHIFT.md) for how generated Helm/Tekton maps stacks.
 - **Optional self-deploy chart**: [charts/jhipster-online](charts/jhipster-online) documents single vs multi-worker `values.yaml` patterns.
 
 ## Quick Start Guide

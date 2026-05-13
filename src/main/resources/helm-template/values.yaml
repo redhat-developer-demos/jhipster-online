@@ -27,11 +27,11 @@ builder:
 # Runtime images for non-JVM stacks (Red Hat catalog — verify tags in https://catalog.redhat.com before production).
 runtime:
   dotnet:
-    image: registry.redhat.io/ubi8/dotnet-80-runtime:8.0
-    sdkImage: registry.redhat.io/ubi8/dotnet-80:8.0
+    image: registry.access.redhat.com/ubi8/dotnet-80-runtime:8.0
+    sdkImage: registry.access.redhat.com/ubi8/dotnet-80:8.0
   node:
-    image: registry.redhat.io/ubi8/nodejs-20-minimal:1-131.1743775676
-    buildImage: registry.redhat.io/ubi8/nodejs-20:1-131.1743775676
+    image: registry.access.redhat.com/ubi8/nodejs-20-minimal:1
+    buildImage: registry.access.redhat.com/ubi8/nodejs-20:1
 # Toggle wiring in helm/templates/deployment.yaml (Spring / Quarkus) for optional extras from
 # src/main/kubernetes/jh-online-kubernetes-extras.yaml (Kafka, Redis, Keycloak issuer URI).
 rbac:
