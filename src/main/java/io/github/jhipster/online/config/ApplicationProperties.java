@@ -93,7 +93,7 @@ public class ApplicationProperties {
         m.put("spring-boot", "jhipster");
         m.put("quarkus", "jhipster");
         m.put("micronaut", "jhipster");
-        m.put("rust", "jhipster");
+        m.put("rust", "jhipster-rust");
         return m;
     }
 
