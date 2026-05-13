@@ -16,6 +16,18 @@ Builder and runtime images use **`registry.access.redhat.com`** (no authenticati
 
 See [catalog.redhat.com](https://catalog.redhat.com) for supported image names and tags. Generated `helm/values.yaml` pins `builder.image`, `runtime.dotnet.*`, and `runtime.node.*` — replace tags with current catalog versions for your environment.
 
+### Package manager per base image
+
+Not all UBI8 images ship the same package manager. Use the correct one in Containerfiles:
+
+| Base image | Package manager | Image type |
+| ---------- | --------------- | ---------- |
+| `ubi8/openjdk-21` | `microdnf` | Minimal |
+| `ubi8/dotnet-80` | `microdnf` | Minimal |
+| `ubi8/nodejs-20` | `yum` | S2I (full) |
+| `ubi8/ubi` | `yum` | Full UBI |
+| `rust` (Docker Hub) | `apt-get` | Debian-based |
+
 ## Supported stacks
 
 - **Spring Boot / Quarkus / Micronaut**: JVM jar + Red Hat OpenJDK S2I

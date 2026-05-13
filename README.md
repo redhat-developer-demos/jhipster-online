@@ -57,6 +57,9 @@ The Dev Spaces workspace image includes the following pre-installed generators:
 | `generator-jhipster-micronaut`            | 3.9.0   | Micronaut blueprint                                     |
 | `generator-jhipster-dotnetcore`           | 4.5.0   | .NET Core blueprint                                     |
 | `generator-jhipster-azure-container-apps` | latest  | Azure Container Apps blueprint                          |
+| `generator-jhipster-nodejs`               | 3.2.0   | Node.js / NestJS blueprint                              |
+| `generator-jhipster-go`                   | 1.0.0   | Go blueprint (experimental)                             |
+| `generator-jhipster-rust`                 | 1.0.0   | Rust blueprint (experimental)                           |
 
 ## Podman, Quay, and multi-stack
 
@@ -201,7 +204,8 @@ Use the Dockerfiles in the repository root (for example `Dockerfile.spring-boot`
 
 ## New Features in v2.40.1
 
-- **Quarkus monolith support**: **Backend framework** selector (Spring Boot / Quarkus) on the generator and OpenShift generator; Quarkus auto-selects **Vue**, disables Spring-only options, and adds **`generator-jhipster-quarkus`** to `blueprints`. Deployed Quarkus apps keep **`QUARKUS_PROFILE=prod,api-docs`** for Swagger UI at `/q/swagger-ui`.
+- **Multi-stack generator**: **Backend framework** selector expanded to **8 stacks** (Spring Boot, Quarkus, Micronaut, .NET, Azure ACA, Node/NestJS, Go, Rust). Each stack resolves to the correct JHipster CLI, Helm deployment template, Tekton pipeline, and BuildConfig variant via `StackProfileResolver`. See [ARCHITECTURE.md](ARCHITECTURE.md#stack-compatibility-matrix) for the full compatibility matrix.
+- **Quarkus monolith support**: Quarkus auto-selects **Vue**, disables Spring-only options, and adds **`generator-jhipster-quarkus`** to `blueprints`. Deployed Quarkus apps keep **`QUARKUS_PROFILE=prod,api-docs`** for Swagger UI at `/q/swagger-ui`.
 - **Database presets**: **`preset-postgresql-redhat.yaml`** (Red Hat `registry.redhat.io/rhel9/postgresql-15`) and **`preset-mongodb.yaml`** (Docker Hub `mongo:7`) are copied into generated repos with matching **devfile** `kubectl` / `oc apply` commands (alongside MariaDB).
 - **RHBK auto-deploy for OAuth2**: When **OAuth2** is selected on the OpenShift generator, optional **“Deploy RHBK (Keycloak)”** installs the **`rhbk-neuroface`** chart with NeuroFace disabled (requires **`openshift.deployment.use-helm-cli=true`** and `helm` on the server). The app Helm **`integrations.keycloak`** values are set from the discovered route or in-cluster issuer URL.
 - **Editor AI assist**: Helm/YAML and JDL **complete**, **explain**, **fix**, and **generate-from-prompt** in the admin Helm editor and JDL flows; **Ctrl+Shift+A** triggers completion in the YAML editor where wired.

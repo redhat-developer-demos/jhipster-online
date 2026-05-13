@@ -175,7 +175,7 @@ graph LR
    - Writes `.yo-rc.json`
    - Copies `devfile.yaml` and `catalog-info.yaml` from `repo-root-template/` on the classpath and replaces tokens (`__REPO_NAME__`, `__GIT_REPO_URL__`, etc.)
    - Copies optional MariaDB manifest from `kubernetes-snippets/preset-mariadb-standalone.yaml` to `src/main/kubernetes/preset-mariadb-standalone.yaml`
-   - Calls `JHipsterService.generateApplication()` which executes the `jhipster` CLI
+   - Calls `JHipsterService.generateApplication()` which resolves the CLI command per stack via `StackProfileResolver` (e.g. `jhipster` for most stacks, `jhipster-dotnetcore` for .NET)
    - Writes optional extras and Helm chart from `helm-template/` (Tekton pipelines live under `helm/templates/`, not at repo root)
    - Appends "Open in Dev Spaces" badge to README.md
 5. `GitService` pushes the generated project to GitHub/GitLab/Gitea
