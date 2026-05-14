@@ -134,9 +134,10 @@ export class McpGeneratorComponent implements OnInit {
           this.jdlToolsOutput = r.text ?? '';
           this.loadingJdlTools = false;
         },
-        error: () => {
+        error: err => {
           this.loadingJdlTools = false;
-          this.alertService.addAlert({ type: 'danger', msg: 'JDL → MCP tools request failed.' });
+          const detail = err.error?.detail || err.error?.message || err.message || 'Unknown error';
+          this.alertService.addAlert({ type: 'danger', msg: `JDL → MCP tools failed: ${detail}` });
         }
       });
   }
@@ -169,9 +170,10 @@ export class McpGeneratorComponent implements OnInit {
           this.expandOutput = r.text ?? '';
           this.loadingExpand = false;
         },
-        error: () => {
+        error: err => {
           this.loadingExpand = false;
-          this.alertService.addAlert({ type: 'danger', msg: 'AI expansion failed.' });
+          const detail = err.error?.detail || err.error?.message || err.message || 'Unknown error';
+          this.alertService.addAlert({ type: 'danger', msg: `AI expansion failed: ${detail}` });
         }
       });
   }

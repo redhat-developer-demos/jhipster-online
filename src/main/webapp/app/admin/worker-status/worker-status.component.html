@@ -1,0 +1,139 @@
+<div>
+  <h2>
+    <span id="worker-status-heading">Worker Status &amp; Metrics</span>
+    <span class="float-end">
+      <button class="btn btn-sm btn-outline-secondary me-2" (click)="toggleAutoRefresh()">
+        <fa-icon [icon]="isAutoRefreshing ? 'pause' : 'play'"></fa-icon>
+        <span>{{ isAutoRefreshing ? 'Stop' : 'Auto' }} (10s)</span>
+      </button>
+      <button class="btn btn-primary btn-sm" (click)="refresh()" [disabled]="loading">
+        <fa-icon icon="sync"></fa-icon> <span>Refresh</span>
+      </button>
+    </span>
+  </h2>
+  <p class="text-muted small" *ngIf="timestamp">Last checked: {{ timestamp }}</p>
+
+  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+
+  <h4 class="mt-4">Sidecar Workers</h4>
+  <div class="table-responsive">
+    <table class="table table-striped" aria-describedby="worker-status-heading">
+      <thead>
+        <tr>
+          <th scope="col">Worker</th>
+          <th scope="col" class="text-center">Status</th>
+          <th scope="col" class="text-center">Latency</th>
+          <th scope="col">Base URL</th>
+          <th scope="col" class="text-center">Timeout</th>
+          <th scope="col">Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let w of workers">
+          <td>
+            <fa-icon icon="server" class="me-1"></fa-icon>
+            <strong>{{ w.name }}</strong>
+          </td>
+          <td class="text-center">
+            <span class="badge" [ngClass]="badgeClass(w.status)">{{ w.status }}</span>
+          </td>
+          <td class="text-center" [ngClass]="latencyClass(w.latencyMs)">
+            <span *ngIf="w.latencyMs >= 0">{{ w.latencyMs }} ms</span>
+            <span *ngIf="w.latencyMs < 0" class="text-muted">&mdash;</span>
+          </td>
+          <td>
+            <code class="small">{{ w.baseUrl || '(not set)' }}</code>
+          </td>
+          <td class="text-center">{{ w.timeoutSeconds }}s</td>
+          <td class="small">
+            <span *ngIf="w.error" class="text-danger">{{ w.error }}</span>
+            <span *ngIf="w.healthBody && !w.error" class="text-muted">{{ w.healthBody }}</span>
+            <span *ngIf="w.status === 'DISABLED'" class="text-muted fst-italic">Disabled in config</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4 class="mt-4">AI Service</h4>
+  <div *ngIf="ai" class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Configuration</h5>
+          <table class="table table-sm mb-0">
+            <tbody>
+              <tr>
+                <td>Enabled</td>
+                <td>
+                  <span class="badge" [ngClass]="ai.enabled ? 'bg-success' : 'bg-secondary'">{{ ai.enabled ? 'Yes' : 'No' }}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Assistant available</td>
+                <td>
+                  <span class="badge" [ngClass]="ai.assistantAvailable ? 'bg-success' : 'bg-danger'">{{ ai.assistantAvailable ? 'Yes' : 'No' }}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>RAG enabled</td>
+                <td>{{ ai.ragEnabled ? 'Yes' : 'No' }}</td>
+              </tr>
+              <tr>
+                <td>RAG semantic</td>
+                <td>{{ ai.ragSemanticEnabled ? 'Yes' : 'No' }}</td>
+              </tr>
+              <tr>
+                <td>Default model</td>
+                <td><code>{{ ai.defaultModelId || '(none)' }}</code></td>
+              </tr>
+              <tr>
+                <td>Insecure TLS</td>
+                <td>
+                  <span *ngIf="ai.insecureTls" class="text-warning">Yes</span>
+                  <span *ngIf="!ai.insecureTls">No</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Connect timeout</td>
+                <td>{{ ai.connectTimeoutMs }} ms</td>
+              </tr>
+              <tr>
+                <td>Read timeout</td>
+                <td>{{ ai.readTimeoutMs }} ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Models ({{ ai.models.length }})</h5>
+          <div *ngIf="ai.models.length === 0" class="text-muted">No models configured.</div>
+          <table class="table table-sm mb-0" *ngIf="ai.models.length > 0">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Label</th>
+                <th scope="col">Model</th>
+                <th scope="col" class="text-center">Own URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let m of ai.models">
+                <td><code>{{ m.id }}</code></td>
+                <td>{{ m.label }}</td>
+                <td><code class="small">{{ m.model }}</code></td>
+                <td class="text-center">
+                  <span class="badge" [ngClass]="m.hasApiUrl === 'yes' ? 'bg-info' : 'bg-light text-dark'">{{ m.hasApiUrl }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

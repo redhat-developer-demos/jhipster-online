@@ -73,11 +73,11 @@ public class SecurityConfiguration {
             .headers(headers -> headers
                 .frameOptions(frame -> frame.deny())
                 .contentSecurityPolicy(csp -> csp.policyDirectives(
-                    "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com  https://static.cloudflareinsights.com; connect-src 'self' https://www.googletagmanager.com  https://*.analytics.google.com https://analytics.google.com https://stats.g.doubleclick.net; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.googletagmanager.com https://www.google.fr https://www.google.com data:; font-src 'self' https://cdn.linearicons.com data:; manifest-src 'self' https://static.cloudflareinsights.com data:;"
+                    "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' https://www.googletagmanager.com https://*.analytics.google.com https://analytics.google.com https://stats.g.doubleclick.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https://www.googletagmanager.com https://www.google.fr https://www.google.com data:; font-src 'self' https://cdn.linearicons.com https://fonts.gstatic.com data:; manifest-src 'self' https://static.cloudflareinsights.com data:;"
                 ))
                 .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                 .permissionsPolicy(permissions -> permissions.policy(
-                    "geolocation=(none), midi=(none), sync-xhr=(none), microphone=(none), camera=(none), magnetometer=(none), gyroscope=(none), speaker=(none), fullscreen=(none), speaker=(none), payment=(none)"
+                    "geolocation=(), midi=(), sync-xhr=(), microphone=(), camera=(), magnetometer=(), gyroscope=(), fullscreen=(), payment=()"
                 ))
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -102,6 +102,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/download-application").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/generate-mcp").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/mcp-preview").permitAll()
+                .requestMatchers("/api/mcp-ai/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/kubernetes-snippets/**").permitAll()
                 .requestMatchers("/api/s/link/*").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/s/**").permitAll()

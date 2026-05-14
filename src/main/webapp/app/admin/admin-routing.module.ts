@@ -62,6 +62,10 @@ import { RouterModule } from '@angular/router';
       {
         path: 'helm-template',
         loadChildren: () => import('./helm-template/helm-template.module').then(m => m.HelmTemplateModule)
+      },
+      {
+        path: 'worker-status',
+        loadChildren: () => import('./worker-status/worker-status.module').then(m => m.WorkerStatusModule)
       }
       /* jhipster-needle-add-admin-route - JHipster will add admin routes here */
     ])

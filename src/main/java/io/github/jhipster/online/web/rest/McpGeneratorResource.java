@@ -106,7 +106,9 @@ public class McpGeneratorResource {
     @PostMapping("/mcp-ai/expand")
     public ResponseEntity<?> expand(@Valid @RequestBody McpAiExpandRequestVM body) {
         if (!mcpAiService.isAssistantAvailable()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+            return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new JdlAiErrorVM("AI assistant is not configured on this server. Set application.jdl-ai properties."));
         }
         try {
             String text = mcpAiService.expandTemplate(
@@ -130,7 +132,9 @@ public class McpGeneratorResource {
     @PostMapping("/mcp-ai/jdl-to-tools")
     public ResponseEntity<?> jdlToTools(@Valid @RequestBody McpAiJdlToToolsRequestVM body) {
         if (!mcpAiService.isAssistantAvailable()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+            return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new JdlAiErrorVM("AI assistant is not configured on this server. Set application.jdl-ai properties."));
         }
         try {
             String text = mcpAiService.jdlToMcpMapping(body.getJdl(), body.getFramework(), body.getModelId());

@@ -40,6 +40,7 @@ import {
   faGlobe,
   faHdd,
   faHeart,
+  faHeartbeat,
   faHome,
   faInfoCircle,
   faLightbulb,
@@ -47,7 +48,9 @@ import {
   faList,
   faLock,
   faObjectGroup,
+  faPause,
   faPencilAlt,
+  faPlay,
   faPlus,
   faProjectDiagram,
   faRoad,
@@ -97,6 +100,7 @@ export const fontAwesomeIcons = [
   faRoad,
   faTachometerAlt,
   faHeart,
+  faHeartbeat,
   faList,
   faBell,
   faTasks,
@@ -137,6 +141,8 @@ export const fontAwesomeIcons = [
   faSkull,
   faExpand,
   faFileCode,
-  faProjectDiagram
+  faProjectDiagram,
+  faPause,
+  faPlay
   // jhipster-needle-add-icon-import
 ];
