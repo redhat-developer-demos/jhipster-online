@@ -8,6 +8,8 @@ on:
       - 'Dockerfile.spring-boot'
       - 'Dockerfile.quarkus'
       - 'Dockerfile'
+      - 'Dockerfile.jhipster8-worker'
+      - 'jhipster8-worker/**'
       - 'Dockerfile.builder'
       - 'docker/**'
       - 'charts/**'
@@ -28,6 +30,7 @@ env:
   BUILDER_NODE_REPO: quay.io/maximilianopizarro/jhipster-builder-node
   BUILDER_GO_REPO: quay.io/maximilianopizarro/jhipster-builder-go
   BUILDER_RUST_REPO: quay.io/maximilianopizarro/jhipster-builder-rust
+  JHIPSTER8_WORKER_REPO: quay.io/maximilianopizarro/jhipster-online-jhipster8-worker
 
 jobs:
   build-quarkus:
@@ -121,6 +124,45 @@ jobs:
             org.opencontainers.image.source=https://github.com/redhat-developer-demos/jhipster-online
           cache-from: type=gha,scope=spring-boot
           cache-to: type=gha,mode=max,scope=spring-boot
+
+  build-jhipster8-worker:
+    name: Build JHipster 8 worker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Extract version from pom.xml
+        id: version
+        run: |
+          VERSION=$(grep -m1 '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/' | sed 's/-SNAPSHOT//')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Build and push JHipster 8 worker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.jhipster8-worker
+          push: true
+          tags: |
+            ${{ env.JHIPSTER8_WORKER_REPO }}:${{ steps.version.outputs.version }}-jhipster8-worker
+          labels: |
+            org.opencontainers.image.title=JHipster Online JHipster 8 worker
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.source=https://github.com/redhat-developer-demos/jhipster-online
+          cache-from: type=gha,scope=jhipster8-worker
+          cache-to: type=gha,mode=max,scope=jhipster8-worker
 
   build-devspaces:
     name: Build Dev Spaces Workspace Image

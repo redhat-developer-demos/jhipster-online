@@ -189,3 +189,7 @@ application:
     package-chart-repository-on-generate: false
     chart-repository-index-base-url: ''
     helm-binary: helm
+  jhipster8-worker:
+    enabled: false
+    base-url: http://jhipster8-worker:8081
+    timeout-seconds: 600

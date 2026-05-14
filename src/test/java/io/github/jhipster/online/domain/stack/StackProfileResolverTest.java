@@ -8,6 +8,15 @@ import org.junit.jupiter.api.Test;
 class StackProfileResolverTest {
 
     @Test
+    void requiresJhipster8WorkerForDotnetNodeAzure() {
+        assertThat(StackProfileResolver.requiresJhipster8Worker(StackId.DOTNET)).isTrue();
+        assertThat(StackProfileResolver.requiresJhipster8Worker(StackId.NODE_NEST)).isTrue();
+        assertThat(StackProfileResolver.requiresJhipster8Worker(StackId.AZURE_ACA)).isTrue();
+        assertThat(StackProfileResolver.requiresJhipster8Worker(StackId.QUARKUS)).isFalse();
+        assertThat(StackProfileResolver.requiresJhipster8Worker(StackId.SPRING_BOOT)).isFalse();
+    }
+
+    @Test
     void resolvesQuarkusFromBlueprint() {
         String json = "{\"generator-jhipster\":{},\"blueprints\":[{\"name\":\"generator-jhipster-quarkus\"}]}";
         assertThat(StackProfileResolver.resolveHelmFrameworkToken(json, "jhipster")).isEqualTo("quarkus");

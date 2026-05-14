@@ -171,6 +171,12 @@ export class GeneratorComponent implements OnInit {
       this.model.blueprints = [{ name: 'generator-jhipster-micronaut' }];
     } else if (this.model.backendFramework === 'rust') {
       this.model.blueprints = [{ name: 'generator-jhipster-rust' }];
+    } else if (this.model.backendFramework === 'dotnet') {
+      this.model.blueprints = [{ name: 'generator-jhipster-dotnetcore' }];
+    } else if (this.model.backendFramework === 'azure-aca') {
+      this.model.blueprints = [{ name: 'generator-jhipster-azure-container-apps' }];
+    } else if (this.model.backendFramework === 'node') {
+      this.model.blueprints = [{ name: 'generator-jhipster-nodejs' }];
     } else {
       this.model.blueprints = [];
     }
@@ -319,6 +325,15 @@ export class GeneratorComponent implements OnInit {
       this.model.blueprints = bp('generator-jhipster-micronaut');
     } else if (this.model.backendFramework === 'rust') {
       this.model.blueprints = bp('generator-jhipster-rust');
+    } else if (this.model.backendFramework === 'dotnet') {
+      this.model.clientFramework = 'angularX';
+      this.model.blueprints = bp('generator-jhipster-dotnetcore');
+    } else if (this.model.backendFramework === 'azure-aca') {
+      this.model.clientFramework = 'angularX';
+      this.model.blueprints = bp('generator-jhipster-azure-container-apps');
+    } else if (this.model.backendFramework === 'node') {
+      this.model.clientFramework = 'angularX';
+      this.model.blueprints = bp('generator-jhipster-nodejs');
     }
   }
 

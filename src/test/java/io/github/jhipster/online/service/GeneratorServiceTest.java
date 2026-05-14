@@ -64,6 +64,9 @@ class GeneratorServiceTest {
     private JHipsterService jHipsterService;
 
     @Mock
+    private JHipster8WorkerClient jHipster8WorkerClient;
+
+    @Mock
     private LogsService logsService;
 
     @Mock
@@ -83,6 +86,7 @@ class GeneratorServiceTest {
                 applicationProperties,
                 gitService,
                 jHipsterService,
+                jHipster8WorkerClient,
                 logsService,
                 kubernetesManifestSnippetService,
                 openshiftScaffoldApplicationService,

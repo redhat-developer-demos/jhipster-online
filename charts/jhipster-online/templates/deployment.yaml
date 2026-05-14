@@ -25,3 +25,11 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod,api-docs
+            {{- if .Values.jhipster8Worker.enabled }}
+            - name: APPLICATION_JHIPSTER8WORKER_ENABLED
+              value: "true"
+            - name: APPLICATION_JHIPSTER8WORKER_BASE_URL
+              value: "http://{{ include "jhipster-online.name" . }}-jhipster8-worker:{{ .Values.jhipster8Worker.port }}"
+            - name: APPLICATION_JHIPSTER8WORKER_TIMEOUT_SECONDS
+              value: "{{ .Values.jhipster8Worker.timeoutSeconds }}"
+            {{- end }}

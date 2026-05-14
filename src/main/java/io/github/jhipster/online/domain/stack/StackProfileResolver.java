@@ -27,7 +27,7 @@ public final class StackProfileResolver {
             return defaultFromCmd(globalJhipsterCmd);
         }
         String cfg = applicationConfiguration;
-        if (containsBlueprint(cfg, "generator-jhipster-dotnetcore")) {
+        if (containsBlueprint(cfg, "generator-jhipster-dotnetcore") || containsBackendFramework(cfg, "dotnet")) {
             return StackId.DOTNET;
         }
         if (containsBlueprint(cfg, "generator-jhipster-quarkus")) {
@@ -36,10 +36,14 @@ public final class StackProfileResolver {
         if (containsBlueprint(cfg, "generator-jhipster-micronaut")) {
             return StackId.MICRONAUT;
         }
-        if (containsBlueprint(cfg, "generator-jhipster-azure-container-apps")) {
+        if (containsBlueprint(cfg, "generator-jhipster-azure-container-apps") || containsBackendFramework(cfg, "azure-aca")) {
             return StackId.AZURE_ACA;
         }
-        if (containsBlueprint(cfg, "generator-jhipster-nodejs") || containsBlueprint(cfg, "generator-jhipster-nestjs")) {
+        if (
+            containsBlueprint(cfg, "generator-jhipster-nodejs") ||
+            containsBlueprint(cfg, "generator-jhipster-nestjs") ||
+            containsBackendFramework(cfg, "node")
+        ) {
             return StackId.NODE_NEST;
         }
         if (containsBlueprint(cfg, "generator-jhipster-go")) {
@@ -53,6 +57,20 @@ public final class StackProfileResolver {
 
     private static boolean containsBlueprint(String json, String needle) {
         return json.contains(needle);
+    }
+
+    private static boolean containsBackendFramework(String json, String framework) {
+        return json.contains("\"backendFramework\":\"" + framework + "\"");
+    }
+
+    /**
+     * Stacks that must run on the JHipster 8 HTTP worker (JHipster 9 CLI cannot run these blueprints).
+     */
+    public static boolean requiresJhipster8Worker(StackId stackId) {
+        if (stackId == null) {
+            return false;
+        }
+        return stackId == StackId.DOTNET || stackId == StackId.AZURE_ACA || stackId == StackId.NODE_NEST;
     }
 
     private static StackId defaultFromCmd(String globalJhipsterCmd) {

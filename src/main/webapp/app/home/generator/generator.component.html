@@ -96,10 +96,10 @@
         <option value="quarkus">Quarkus (Vue + generator-jhipster-quarkus 4.0)</option>
         <option value="micronaut">Micronaut (generator-jhipster-micronaut 4.0)</option>
         <option value="rust">Rust (generator-jhipster-rust — experimental)</option>
-        <option value="dotnet" disabled>.NET Core — requires JHipster 8 (not available)</option>
-        <option value="azure-aca" disabled>Azure Container Apps — requires JHipster 8 (not available)</option>
-        <option value="node" disabled>Node / NestJS — requires JHipster 8 (not available)</option>
-        <option value="go" disabled>Go — no JHipster 9 blueprint (not available)</option>
+        <option value="dotnet">.NET Core (JHipster 8 worker + generator-jhipster-dotnetcore 4.5)</option>
+        <option value="azure-aca">Azure Container Apps (JHipster 8 worker + generator-jhipster-azure-container-apps)</option>
+        <option value="node">Node / NestJS (JHipster 8 worker + generator-jhipster-nodejs 3.2)</option>
+        <option value="go" disabled>Go — no maintained JHipster blueprint</option>
       </select>
       <div *ngIf="model.backendFramework === 'quarkus'" class="form-text text-muted small">
         Quarkus requires Vue; Hibernate 2nd level cache, Spring WebSocket, and OpenAPI-generator options are turned off for compatibility.

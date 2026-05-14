@@ -1,0 +1,16 @@
+{
+  "name": "jhipster8-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTTP worker for JHipster 8 + legacy blueprints (.NET, NestJS, Azure ACA)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.6.1"
+  },
+  "dependencies": {
+    "express": "4.21.2"
+  }
+}

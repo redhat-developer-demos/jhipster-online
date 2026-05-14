@@ -1,0 +1,18 @@
+{{- if .Values.jhipster8Worker.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jhipster-online.name" . }}-jhipster8-worker
+  labels:
+    app.kubernetes.io/name: {{ include "jhipster-online.name" . }}
+    app.kubernetes.io/component: jhipster8-worker
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ .Values.jhipster8Worker.port }}
+      targetPort: http
+  selector:
+    app.kubernetes.io/name: {{ include "jhipster-online.name" . }}
+    app.kubernetes.io/component: jhipster8-worker
+{{- end }}

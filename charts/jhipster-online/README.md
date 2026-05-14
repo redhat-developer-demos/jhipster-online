@@ -5,4 +5,4 @@ See root [README.md](../../README.md) for Podman-based image builds. Successful 
 ## Values
 
 - **Minimal**: `jhipsterOnline.generatorProfile: single`, `defaultStack: quarkus`, all `workers.*.enabled: false` (defaults in `values.yaml`).
-- **Multi example** (Quarkus + .NET): uncomment the block at the bottom of `values.yaml`; requires application changes to route generations to worker Services.
+- **JHipster 8 worker**: set `jhipster8Worker.enabled: true` and matching image tag; the main app receives `APPLICATION_JHIPSTER8WORKER_*` env vars to delegate .NET / NestJS / Azure ACA generations to the sidecar (`POST /generate`).

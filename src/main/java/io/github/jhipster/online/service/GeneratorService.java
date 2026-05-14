@@ -25,6 +25,7 @@ import com.jayway.jsonpath.PathNotFoundException;
 import io.github.jhipster.online.config.ApplicationProperties;
 import io.github.jhipster.online.domain.User;
 import io.github.jhipster.online.domain.enums.GitProvider;
+import io.github.jhipster.online.domain.stack.StackId;
 import io.github.jhipster.online.domain.stack.StackProfileResolver;
 import io.github.jhipster.online.service.helm.HelmBundlePaths;
 import io.github.jhipster.online.service.helm.HelmChartRepositoryPackager;
@@ -36,6 +37,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -75,6 +77,8 @@ public class GeneratorService {
 
     private final OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService;
 
+    private final JHipster8WorkerClient jHipster8WorkerClient;
+
     private final HelmTemplateSource helmTemplateSource;
 
     private final HelmChartRepositoryPackager helmChartRepositoryPackager;
@@ -83,6 +87,7 @@ public class GeneratorService {
         ApplicationProperties applicationProperties,
         GitService gitService,
         JHipsterService jHipsterService,
+        JHipster8WorkerClient jHipster8WorkerClient,
         LogsService logsService,
         KubernetesManifestSnippetService kubernetesManifestSnippetService,
         OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService,
@@ -92,6 +97,7 @@ public class GeneratorService {
         this.applicationProperties = applicationProperties;
         this.gitService = gitService;
         this.jHipsterService = jHipsterService;
+        this.jHipster8WorkerClient = jHipster8WorkerClient;
         this.logsService = logsService;
         this.kubernetesManifestSnippetService = kubernetesManifestSnippetService;
         this.openshiftScaffoldApplicationService = openshiftScaffoldApplicationService;
@@ -135,7 +141,18 @@ public class GeneratorService {
         log.info(".yo-rc.json created");
         this.generateRepoRootArtifacts(applicationId, workingDir, applicationConfiguration);
         log.info("devfile.yaml, catalog-info.yaml, and optional MariaDB preset created from classpath templates");
-        this.jHipsterService.generateApplication(applicationId, workingDir);
+        StackId stackId = StackProfileResolver.resolveStackId(applicationConfiguration, applicationProperties.getJhipsterCmd().getCmd());
+        if (StackProfileResolver.requiresJhipster8Worker(stackId)) {
+            if (!applicationProperties.getJhipster8Worker().isEnabled()) {
+                throw new IOException(
+                    "This backend requires the JHipster 8 worker. Set application.jhipster8-worker.enabled=true and deploy the jhipster8-worker service (see charts/jhipster-online)."
+                );
+            }
+            this.logsService.addLog(applicationId, "Delegating code generation to JHipster 8 worker for stack " + stackId);
+            this.jHipster8WorkerClient.generateIntoWorkingDir(applicationId, workingDir.toPath(), applicationConfiguration);
+        } else {
+            this.jHipsterService.generateApplication(applicationId, workingDir);
+        }
         this.writeKubernetesExtrasIfPresent(applicationId, workingDir, applicationConfiguration);
         this.copyDisabledKubernetesExamples(applicationId, workingDir);
         this.generateHelmBundle(applicationId, workingDir, applicationConfiguration);

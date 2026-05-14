@@ -37,6 +37,8 @@ public class ApplicationProperties {
 
     private Map<String, String> jhipsterCommandsByStack = defaultJhipsterCommandsByStack();
 
+    private Jhipster8Worker jhipster8Worker = new Jhipster8Worker();
+
     private NpmCmd npmCmd = new NpmCmd();
 
     private YqCmd yqCmd = new YqCmd();
@@ -88,12 +90,23 @@ public class ApplicationProperties {
             jhipsterCommandsByStack == null ? defaultJhipsterCommandsByStack() : new LinkedHashMap<>(jhipsterCommandsByStack);
     }
 
+    public Jhipster8Worker getJhipster8Worker() {
+        return jhipster8Worker;
+    }
+
+    public void setJhipster8Worker(Jhipster8Worker jhipster8Worker) {
+        this.jhipster8Worker = jhipster8Worker == null ? new Jhipster8Worker() : jhipster8Worker;
+    }
+
     private static Map<String, String> defaultJhipsterCommandsByStack() {
         Map<String, String> m = new LinkedHashMap<>();
         m.put("spring-boot", "jhipster");
         m.put("quarkus", "jhipster");
         m.put("micronaut", "jhipster");
         m.put("rust", "jhipster-rust");
+        m.put("dotnet", "jhipster-dotnetcore");
+        m.put("node", "nhipster");
+        m.put("azure-aca", "jhipster-azure-container-apps");
         return m;
     }
 
@@ -635,6 +648,44 @@ public class ApplicationProperties {
 
         public boolean isEnable() {
             return enable;
+        }
+    }
+
+    /**
+     * Optional sidecar that runs {@code generator-jhipster@8.x} with .NET / NestJS / Azure Container Apps blueprints.
+     */
+    public static class Jhipster8Worker {
+
+        private boolean enabled;
+
+        /** Base URL of the worker (no trailing slash), e.g. {@code http://jhipster-online-jhipster8-worker:8081}. */
+        private String baseUrl = "http://jhipster8-worker:8081";
+
+        /** HTTP timeout for POST /generate (includes generation + tar download). */
+        private int timeoutSeconds = 600;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getBaseUrl() {
+            return baseUrl;
+        }
+
+        public void setBaseUrl(String baseUrl) {
+            this.baseUrl = baseUrl == null ? "" : baseUrl;
+        }
+
+        public int getTimeoutSeconds() {
+            return timeoutSeconds;
+        }
+
+        public void setTimeoutSeconds(int timeoutSeconds) {
+            this.timeoutSeconds = timeoutSeconds;
         }
     }
 }

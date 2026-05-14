@@ -177,7 +177,8 @@ graph LR
    - Writes `.yo-rc.json`
    - Copies `devfile.yaml` and `catalog-info.yaml` from `repo-root-template/` on the classpath and replaces tokens (`__REPO_NAME__`, `__GIT_REPO_URL__`, etc.)
    - Copies optional MariaDB manifest from `kubernetes-snippets/preset-mariadb-standalone.yaml` to `src/main/kubernetes/preset-mariadb-standalone.yaml`
-   - Calls `JHipsterService.generateApplication()` which resolves the CLI command per stack via `StackProfileResolver` (e.g. `jhipster` for most stacks, `jhipster-dotnetcore` for .NET)
+   - For stacks that require **JHipster 8** (`.NET`, `Node/NestJS`, `Azure Container Apps`), when `application.jhipster8-worker.enabled=true`, calls `JHipster8WorkerClient` (`POST` to the sidecar `/generate`, response `tar.gz` merged into the workspace). Otherwise generation fails with a clear error until the worker is deployed.
+   - For all other stacks, calls `JHipsterService.generateApplication()` which resolves the CLI command per stack via `StackProfileResolver` (e.g. `jhipster` for Spring/Quarkus/Micronaut, `jhipster-rust` for Rust)
    - Writes optional extras and Helm chart from `helm-template/` (Tekton pipelines live under `helm/templates/`, not at repo root)
    - Appends "Open in Dev Spaces" badge to README.md
 5. `GitService` pushes the generated project to GitHub/GitLab/Gitea
@@ -252,9 +253,7 @@ A custom blueprint `generator-jhipster-mcp` does not exist in the npm registry.
 
 Generated repositories resolve stack from `.yo-rc.json` blueprints (`StackProfileResolver`), pick Helm/Tekton/BuildConfig variants, and resolve the JHipster CLI via `application.jhipster-commands-by-stack`. See [docs/MULTI_STACK_OPENSHIFT.md](docs/MULTI_STACK_OPENSHIFT.md).
 
-### Stack compatibility matrix (JHipster 9.0.0)
-
-Only stacks with JH9-compatible blueprints are **enabled** in the UI. Others remain as placeholders.
+### Stack compatibility matrix
 
 | Layer                  |  Spring Boot  |              Quarkus               |              Micronaut               |              Rust               |
 | ---------------------- | :-----------: | :--------------------------------: | :----------------------------------: | :-----------------------------: |
@@ -262,20 +261,24 @@ Only stacks with JH9-compatible blueprints are **enabled** in the UI. Others rem
 | **Blueprint (npm)**    |   (default)   | `generator-jhipster-quarkus@4.0.0` | `generator-jhipster-micronaut@4.0.0` | `generator-jhipster-rust@1.0.0` |
 | **JH dependency**      |    `9.0.0`    |              `9.0.0`               |               `9.0.0`                |            `^9.0.0`             |
 | **Helm token**         | `spring-boot` |             `quarkus`              |             `micronaut`              |             `rust`              |
-| **CLI command**        |  `jhipster`   |             `jhipster`             |              `jhipster`              |           `jhipster`            |
+| **CLI command**        |  `jhipster`   |             `jhipster`             |              `jhipster`              |         `jhipster-rust`         |
 | **UI dropdown**        |    enabled    |              enabled               |               enabled                |     enabled (experimental)      |
 | **deployment-app-\***  |    spring     |              quarkus               |              micronaut               |             spring              |
 | **tekton-pipeline-\*** |    spring     |              quarkus               |                spring                |             spring              |
 
-#### Disabled stacks (pending JH9 blueprints)
+#### JHipster 8 worker stacks (sidecar `Dockerfile.jhipster8-worker`)
 
-| Stack       | Blueprint                                 | Latest version | Depends on      | Status                   |
-| ----------- | ----------------------------------------- | -------------- | --------------- | ------------------------ |
-| .NET Core   | `generator-jhipster-dotnetcore`           | 4.5.0          | JHipster 8.10.0 | Waiting for JH9 release  |
-| Node/NestJS | `generator-jhipster-nodejs`               | 3.2.0          | JHipster 8.10.0 | Waiting for JH9 release  |
-| Azure ACA   | `generator-jhipster-azure-container-apps` | 1.0.9          | JHipster 8.6.0  | Waiting for JH9 release  |
-| Go          | `generator-jhipster-go`                   | 1.0.0          | (none)          | No JH9 support confirmed |
+These run **`generator-jhipster@8.11.0`** in a separate HTTP service (`POST /generate`); the main app pod delegates when `application.jhipster8-worker.enabled=true` (see Helm `jhipster8Worker`).
+
+| Stack       | Blueprint                                       | JH version | CLI on worker                   |
+| ----------- | ----------------------------------------------- | ---------- | ------------------------------- |
+| .NET Core   | `generator-jhipster-dotnetcore@4.5.0`           | 8.10.x     | `jhipster-dotnetcore`           |
+| Node/NestJS | `generator-jhipster-nodejs@3.2.0`               | 8.10.x     | `nhipster`                      |
+| Azure ACA   | `generator-jhipster-azure-container-apps@1.0.9` | 8.6+       | `jhipster-azure-container-apps` |
+
+| Stack (not supported) | Notes                                                                 |
+| --------------------- | --------------------------------------------------------------------- |
+| Go                    | `generator-jhipster-go@1.0.0` on npm is an empty placeholder package. |
 
 - **Micronaut** has its own `deployment-app-micronaut.yaml` but reuses the Spring Tekton pipeline (both are JVM-based).
 - **Rust** falls back to Spring deployment and Tekton variants; controlled by `usesJvmJarPipeline()`.
-- Disabled stacks are shown as `disabled` options in the dropdown and their `StackId` enums remain for future use.

@@ -61,6 +61,17 @@ jhipsterOnline:
   routing:
     mode: local-process
 
+# JHipster 8 HTTP sidecar: generator-jhipster@8.11 + dotnet / nodejs / azure-container-apps blueprints.
+# When enabled, deploys a second Deployment + Service and sets env on the main app to delegate those stacks.
+jhipster8Worker:
+  enabled: false
+  port: 8081
+  timeoutSeconds: 600
+  replicas: 1
+  image:
+    repository: quay.io/maximilianopizarro/jhipster-online-jhipster8-worker
+    tag: "2.40.1-jhipster8-worker"
+
 # Example (documented): multi profile with Quarkus + .NET workers enabled — requires app-side routing to workers.
 # jhipsterOnline:
 #   generatorProfile: multi

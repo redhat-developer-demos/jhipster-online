@@ -8,7 +8,7 @@ public enum StackId {
     QUARKUS,
     MICRONAUT,
     RUST,
-    /** Placeholder for future stacks pending JHipster 9 blueprint compatibility. */
+    /** Delegated to the JHipster 8 HTTP worker when {@code application.jhipster8-worker.enabled} is true. */
     DOTNET,
     AZURE_ACA,
     NODE_NEST,
