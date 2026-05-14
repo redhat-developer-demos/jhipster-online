@@ -409,17 +409,24 @@ spec:
       name: IMAGE
       type: string
   steps:
-    - args:
-        - $(params.ARGS)
-      command:
-        - npm
+    - name: npm-run
+      image: $(params.IMAGE)
       computeResources: {}
       env:
         - name: CI
           value: 'true'
-      image: $(params.IMAGE)
-      name: npm-run
-      workingDir: $(workspaces.source.path)/$(params.PATH_CONTEXT)
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+        WS="$(workspaces.source.path)"
+        PC="$(params.PATH_CONTEXT)"
+        PKG="$WS/$PC/package.json"
+        if [ ! -f "$PKG" ]; then
+          echo "No package.json at $WS/$PC, skipping npm"
+          exit 0
+        fi
+        cd "$WS/$PC"
+        npm $(params.ARGS[*])
   workspaces:
     - name: source
 ---

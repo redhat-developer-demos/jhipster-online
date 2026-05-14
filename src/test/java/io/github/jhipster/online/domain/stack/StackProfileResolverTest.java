@@ -75,20 +75,20 @@ class StackProfileResolverTest {
 
     @Test
     void resolvesDevfileImagePerStack() {
-        assertThat(StackProfileResolver.resolveDevfileImage(StackId.SPRING_BOOT, "2.41.0"))
-            .isEqualTo("quay.io/devfile/jhipster-online:2.41.0");
-        assertThat(StackProfileResolver.resolveDevfileImage(StackId.QUARKUS, "2.41.0")).isEqualTo("quay.io/devfile/jhipster-online:2.41.0");
-        assertThat(StackProfileResolver.resolveDevfileImage(StackId.DOTNET, "2.41.0"))
-            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-dotnet:2.41.0");
-        assertThat(StackProfileResolver.resolveDevfileImage(StackId.NODE_NEST, "2.41.0"))
-            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-node:2.41.0");
-        assertThat(StackProfileResolver.resolveDevfileImage(StackId.RUST, "2.41.0"))
-            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-rust:2.41.0");
-        assertThat(StackProfileResolver.resolveDevfileImage(StackId.GO, "2.41.0"))
-            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-go:2.41.0");
-        assertThat(StackProfileResolver.resolveDevfileImage(StackId.PYTHON, "2.41.0"))
-            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-node:2.41.0");
-        assertThat(StackProfileResolver.resolveDevfileImage(null, "2.41.0")).isEqualTo("quay.io/devfile/jhipster-online:2.41.0");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.SPRING_BOOT, "2.41.1"))
+            .isEqualTo("quay.io/devfile/jhipster-online:2.41.1");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.QUARKUS, "2.41.1")).isEqualTo("quay.io/devfile/jhipster-online:2.41.1");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.DOTNET, "2.41.1"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-dotnet:2.41.1");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.NODE_NEST, "2.41.1"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-node:2.41.1");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.RUST, "2.41.1"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-rust:2.41.1");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.GO, "2.41.1"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-go:2.41.1");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.PYTHON, "2.41.1"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-node:2.41.1");
+        assertThat(StackProfileResolver.resolveDevfileImage(null, "2.41.1")).isEqualTo("quay.io/devfile/jhipster-online:2.41.1");
     }
 
     @Test

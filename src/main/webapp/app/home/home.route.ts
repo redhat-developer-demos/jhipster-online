@@ -21,6 +21,7 @@ import { Route } from '@angular/router';
 import { HomeComponent } from './home.component';
 import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
 import { GENERATOR_ROUTE } from 'app/home/generator/generator.route';
+import { MCP_GENERATOR_ROUTE } from 'app/home/mcp-generator/mcp-generator.route';
 import { AZURE_ROUTE } from 'app/home/azure-generator/azure-generator.route';
 import { OPENSHIFT_ROUTE } from 'app/home/openshift-generator/openshift-generator.route';
 import { DEPLOYED_APPS_ROUTE } from 'app/home/deployed-apps/deployed-apps.route';
@@ -41,6 +42,7 @@ export const HOME_ROUTE: Route = {
   canActivate: [UserRouteAccessService],
   children: [
     GENERATOR_ROUTE,
+    MCP_GENERATOR_ROUTE,
     AZURE_ROUTE,
     OPENSHIFT_ROUTE,
     DEPLOYED_APPS_ROUTE,

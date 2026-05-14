@@ -17,13 +17,13 @@ deploy:
   method: fabric8
 tekton:
   defaultBranch: main
-  pathContext: /
+  pathContext: __TEKTON_PATH_CONTEXT__
   timeout: 1h0m0s
 database:
   prodType: __PROD_DATABASE_TYPE__
 # Tekton / dev workspaces builder (align with CI image tags; avoid floating latest in production).
 builder:
-  image: quay.io/maximilianopizarro/jhipster-universal-developer-image:2.40.1
+  image: __BUILDER_IMAGE__
 # Runtime images for non-JVM stacks (Red Hat catalog — verify tags in https://catalog.redhat.com before production).
 runtime:
   dotnet:

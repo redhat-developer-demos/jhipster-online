@@ -14,5 +14,10 @@ public enum StackId {
     NODE_NEST,
     GO,
     /** Delegated to the PyHipster HTTP worker when {@code application.pyhipster-worker.enabled} is true. */
-    PYTHON
+    PYTHON,
+    /** Template-based MCP server (no Yeoman). */
+    MCP_SPRING,
+    MCP_QUARKUS,
+    MCP_DOTNET,
+    MCP_PYTHON
 }

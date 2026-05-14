@@ -1,0 +1,16 @@
+{
+  "name": "mcp-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTTP worker for MCP server template generation (JHipster Online)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.6.1"
+  },
+  "dependencies": {
+    "express": "4.21.2"
+  }
+}

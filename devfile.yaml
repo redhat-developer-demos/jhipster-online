@@ -1,7 +1,7 @@
 schemaVersion: 2.3.0
 metadata:
   name: jhipster-online
-  version: 2.40.1
+  version: 2.41.1
   description: 'Stack with JHipster Online on Red Hat OpenShift Dev Spaces (JDK 21).
     This stack include:
     - JHipster 9.0.0 for generate Spring Boot 3.4+ projects.
@@ -33,7 +33,7 @@ projects:
 components:
   - name: tools
     container:
-      image: 'quay.io/devfile/jhipster-online:2.40.1'
+      image: 'quay.io/devfile/jhipster-online:2.41.1'
       mountSources: true
       cpuLimit: '4'
       cpuRequest: '1'

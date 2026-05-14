@@ -38,6 +38,10 @@ application:
     enabled: true
     base-url: http://pyhipster-worker:8082
     timeout-seconds: 600
+  mcp-worker:
+    enabled: true
+    base-url: http://mcp-worker:8083
+    timeout-seconds: 120
 
 openshift:
   deployment:

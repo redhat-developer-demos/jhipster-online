@@ -41,6 +41,8 @@ public class ApplicationProperties {
 
     private PyhipsterWorker pyhipsterWorker = new PyhipsterWorker();
 
+    private McpWorker mcpWorker = new McpWorker();
+
     private NpmCmd npmCmd = new NpmCmd();
 
     private YqCmd yqCmd = new YqCmd();
@@ -106,6 +108,14 @@ public class ApplicationProperties {
 
     public void setPyhipsterWorker(PyhipsterWorker pyhipsterWorker) {
         this.pyhipsterWorker = pyhipsterWorker == null ? new PyhipsterWorker() : pyhipsterWorker;
+    }
+
+    public McpWorker getMcpWorker() {
+        return mcpWorker;
+    }
+
+    public void setMcpWorker(McpWorker mcpWorker) {
+        this.mcpWorker = mcpWorker == null ? new McpWorker() : mcpWorker;
     }
 
     private static Map<String, String> defaultJhipsterCommandsByStack() {
@@ -712,6 +722,44 @@ public class ApplicationProperties {
 
         /** HTTP timeout for POST /generate (includes generation + tar download). */
         private int timeoutSeconds = 600;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getBaseUrl() {
+            return baseUrl;
+        }
+
+        public void setBaseUrl(String baseUrl) {
+            this.baseUrl = baseUrl == null ? "" : baseUrl;
+        }
+
+        public int getTimeoutSeconds() {
+            return timeoutSeconds;
+        }
+
+        public void setTimeoutSeconds(int timeoutSeconds) {
+            this.timeoutSeconds = timeoutSeconds;
+        }
+    }
+
+    /**
+     * Optional sidecar that scaffolds MCP server projects from templates (Node {@code mcp-worker}).
+     */
+    public static class McpWorker {
+
+        private boolean enabled;
+
+        /** Base URL of the worker (no trailing slash), e.g. {@code http://mcp-worker:8083}. */
+        private String baseUrl = "http://mcp-worker:8083";
+
+        /** HTTP timeout for POST /generate (includes tar download). */
+        private int timeoutSeconds = 120;
 
         public boolean isEnabled() {
             return enabled;

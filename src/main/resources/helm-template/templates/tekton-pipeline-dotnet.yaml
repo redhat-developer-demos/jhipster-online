@@ -67,12 +67,24 @@ spec:
         #!/usr/bin/env bash
         set -euo pipefail
         dotnet --info
-        dotnet publish -c Release -o "$(workspaces.source.path)/$(params.CONTEXT_DIR)/publish"
+        PUBLISH_OUT="$(workspaces.source.path)/$(params.CONTEXT_DIR)/publish"
+        mkdir -p "$PUBLISH_OUT"
+        SLN=$(find . -maxdepth 4 -name '*.sln' 2>/dev/null | head -1)
+        if [ -n "$SLN" ]; then
+          echo "Publishing solution: $SLN"
+          dotnet publish "$SLN" -c Release -o "$PUBLISH_OUT"
+        else
+          CSPROJ=$(find . -maxdepth 5 -name '*.csproj' 2>/dev/null | grep -viE 'Test|Tests' | head -1)
+          if [ -z "$CSPROJ" ]; then
+            echo "ERROR: No .sln or .csproj found under $(pwd)" >&2
+            exit 1
+          fi
+          echo "Publishing project: $CSPROJ"
+          dotnet publish "$CSPROJ" -c Release -o "$PUBLISH_OUT"
+        fi
         echo -n dotnet > $(results.group-id.path)
         echo -n app > $(results.artifact-id.path)
         echo -n 0.0.1 > $(results.version.path)
----
-
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
@@ -407,17 +419,25 @@ spec:
       name: IMAGE
       type: string
   steps:
-    - args:
-        - $(params.ARGS)
-      command:
-        - npm
+    - name: npm-run
+      image: $(params.IMAGE)
       computeResources: {}
       env:
         - name: CI
           value: 'true'
-      image: $(params.IMAGE)
-      name: npm-run
       workingDir: $(workspaces.source.path)/$(params.PATH_CONTEXT)
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+        WS="$(workspaces.source.path)"
+        PC="$(params.PATH_CONTEXT)"
+        PKG="$WS/$PC/package.json"
+        if [ ! -f "$PKG" ]; then
+          echo "No package.json at $WS/$PC, skipping npm"
+          exit 0
+        fi
+        cd "$WS/$PC"
+        npm $(params.ARGS[*])
   workspaces:
     - name: source
 ---

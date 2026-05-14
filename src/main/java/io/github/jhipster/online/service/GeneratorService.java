@@ -86,6 +86,8 @@ public class GeneratorService {
 
     private final PyhipsterWorkerClient pyhipsterWorkerClient;
 
+    private final McpWorkerClient mcpWorkerClient;
+
     private final HelmTemplateSource helmTemplateSource;
 
     private final HelmChartRepositoryPackager helmChartRepositoryPackager;
@@ -96,6 +98,7 @@ public class GeneratorService {
         JHipsterService jHipsterService,
         JHipster8WorkerClient jHipster8WorkerClient,
         PyhipsterWorkerClient pyhipsterWorkerClient,
+        McpWorkerClient mcpWorkerClient,
         LogsService logsService,
         KubernetesManifestSnippetService kubernetesManifestSnippetService,
         OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService,
@@ -107,6 +110,7 @@ public class GeneratorService {
         this.jHipsterService = jHipsterService;
         this.jHipster8WorkerClient = jHipster8WorkerClient;
         this.pyhipsterWorkerClient = pyhipsterWorkerClient;
+        this.mcpWorkerClient = mcpWorkerClient;
         this.logsService = logsService;
         this.kubernetesManifestSnippetService = kubernetesManifestSnippetService;
         this.openshiftScaffoldApplicationService = openshiftScaffoldApplicationService;
@@ -146,6 +150,12 @@ public class GeneratorService {
         final String tempDir = StringUtils.isBlank(fromConfig) ? OS_TEMP_DIR : fromConfig;
         final File workingDir = new File(String.join(FILE_SEPARATOR, tempDir, JHIPSTER, APPLICATIONS, applicationId));
         FileUtils.forceMkdir(workingDir);
+        if (isMcpServerRequest(applicationConfiguration)) {
+            this.logsService.addLog(applicationId, "MCP server template generation (no Yeoman)");
+            generateMcpServerProject(applicationId, workingDir, applicationConfiguration);
+            log.info("MCP server project generated");
+            return workingDir;
+        }
         String effectiveConfiguration = applyYoRcShims(applicationConfiguration);
         this.generateYoRc(applicationId, workingDir, effectiveConfiguration);
         log.info(".yo-rc.json created");
@@ -332,11 +342,13 @@ public class GeneratorService {
         );
         String appVersion = getClass().getPackage().getImplementationVersion();
         if (appVersion == null || appVersion.isEmpty()) {
-            appVersion = "2.41.0";
+            appVersion = "2.41.1";
         }
         appVersion = appVersion.replace("-SNAPSHOT", "");
         tokenReplacements.put("__DEVFILE_IMAGE__", StackProfileResolver.resolveDevfileImage(stackId, appVersion));
         tokenReplacements.put("__PROD_DATABASE_TYPE__", readProdDatabaseType(document));
+        tokenReplacements.put("__TEKTON_PATH_CONTEXT__", StackProfileResolver.resolveTektonPathContext(stackId));
+        tokenReplacements.put("__BUILDER_IMAGE__", StackProfileResolver.resolveTektonBuilderImage(appVersion));
         return tokenReplacements;
     }
 
@@ -592,5 +604,22 @@ public class GeneratorService {
 
     private void zipResult(File workingDir) {
         ZipUtil.pack(workingDir, new File(workingDir + ".zip"));
+    }
+
+    private static boolean isMcpServerRequest(String applicationConfiguration) {
+        return StringUtils.isNotBlank(applicationConfiguration) && applicationConfiguration.contains("\"generatorType\":\"mcp-server\"");
+    }
+
+    private void generateMcpServerProject(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
+        if (!applicationProperties.getMcpWorker().isEnabled()) {
+            throw new IOException(
+                "MCP server generation requires the mcp-worker sidecar. Set application.mcp-worker.enabled=true and deploy mcp-worker (see podman-compose.yml / charts/jhipster-online)."
+            );
+        }
+        this.mcpWorkerClient.generateIntoWorkingDir(applicationId, workingDir.toPath(), applicationConfiguration);
+        this.logsService.addLog(
+                applicationId,
+                "MCP server project written via mcp-worker (templates, README, mcp-server-config.json, .cursor/skills/). See https://www.redhat.com/en/agentic-skills for agent skill patterns."
+            );
     }
 }

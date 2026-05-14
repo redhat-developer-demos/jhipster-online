@@ -1,0 +1,155 @@
+<div class="container-fluid py-3">
+  <h1 id="mcp-page-title">MCP Server Generator</h1>
+  <p class="text-muted">
+    Scaffold a Model Context Protocol server (Spring AI MCP, Quarkus, .NET, or Python), preview files from the
+    <code>mcp-worker</code> sidecar, optionally layer AI-generated tool classes from your JDL, then download a ZIP.
+  </p>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card border-primary h-100">
+        <div class="card-header bg-primary text-white">Configuration</div>
+        <div class="card-body">
+          <div class="mb-2">
+            <label class="form-label" for="mcpFramework">Framework</label>
+            <select id="mcpFramework" class="form-select" name="mcpFramework" [(ngModel)]="framework">
+              <option value="spring">Spring Boot (Spring AI MCP)</option>
+              <option value="quarkus">Quarkus (SmallRye MCP)</option>
+              <option value="dotnet">.NET</option>
+              <option value="python">Python</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="mcpProjectName">Project name</label>
+            <input id="mcpProjectName" class="form-control" name="mcpProjectName" [(ngModel)]="projectName" />
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="mcpPackage">Base package / namespace</label>
+            <input id="mcpPackage" class="form-control" name="mcpPackage" [(ngModel)]="packageName" />
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="mcpToolName">Sample tool name</label>
+            <input id="mcpToolName" class="form-control" name="mcpToolName" [(ngModel)]="toolName" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="mcpToolDesc">Sample tool description</label>
+            <textarea id="mcpToolDesc" class="form-control" rows="2" name="mcpToolDesc" [(ngModel)]="toolDescription"></textarea>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="mcpExtraPath">Extra file path (optional)</label>
+            <input
+              id="mcpExtraPath"
+              class="form-control font-monospace small"
+              name="mcpExtraPath"
+              [(ngModel)]="extraFilePath"
+              placeholder="e.g. src/main/java/.../tools/EntityTools.java"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="mcpExtraContent">Extra file content (optional)</label>
+            <textarea
+              id="mcpExtraContent"
+              class="form-control font-monospace small"
+              rows="6"
+              name="mcpExtraContent"
+              [(ngModel)]="extraFileContent"
+              placeholder="Paste AI-generated tool classes here, or use “Apply to extra file” from JDL tools output."
+            ></textarea>
+          </div>
+          <button type="button" class="btn btn-outline-primary me-2 mb-2" (click)="refreshPreview()" [disabled]="loadingPreview">
+            <span *ngIf="!loadingPreview">Preview</span>
+            <span *ngIf="loadingPreview">Loading…</span>
+          </button>
+          <button type="button" class="btn btn-primary mb-2" (click)="downloadZip()" [disabled]="loadingDownload">
+            <span *ngIf="!loadingDownload">Download ZIP</span>
+            <span *ngIf="loadingDownload">Building…</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8 d-flex flex-column gap-3">
+      <div class="card border-secondary flex-grow-1">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>Generated files preview</strong>
+          <span class="text-muted small" *ngIf="previewKeys.length">{{ previewKeys.length }} files</span>
+        </div>
+        <div class="card-body p-0 d-flex flex-column" style="min-height: 280px">
+          <div *ngIf="previewKeys.length === 0" class="p-3 text-muted">Click <em>Preview</em> to load the template tree from the MCP worker.</div>
+          <div *ngIf="previewKeys.length > 0" class="d-flex flex-grow-1" style="min-height: 240px">
+            <div class="border-end bg-light" style="width: 220px; max-height: 420px; overflow-y: auto">
+              <button
+                type="button"
+                class="btn btn-link btn-sm text-start d-block w-100 text-truncate"
+                *ngFor="let k of previewKeys"
+                [class.fw-bold]="k === activePreviewKey"
+                (click)="selectPreviewKey(k)"
+              >
+                {{ k }}
+              </button>
+            </div>
+            <pre class="flex-grow-1 m-0 p-2 small font-monospace" style="overflow: auto; max-height: 420px; white-space: pre-wrap">{{
+              activePreviewContent()
+            }}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-secondary">
+        <div class="card-header">
+          <strong>AI: JDL → MCP tools</strong>
+          <span class="text-muted small ms-2" *ngIf="!assistantEnabled">(not configured)</span>
+        </div>
+        <div class="card-body">
+          <div class="mb-2" *ngIf="assistantEnabled && models.length > 0">
+            <label class="form-label" for="mcpAiModel">Model</label>
+            <select id="mcpAiModel" class="form-select form-select-sm" name="mcpAiModel" [(ngModel)]="selectedModelId">
+              <option *ngFor="let m of models" [value]="m.id">{{ m.label }}</option>
+            </select>
+          </div>
+          <label class="form-label" for="mcpJdlPaste">JDL entities</label>
+          <textarea
+            id="mcpJdlPaste"
+            class="form-control font-monospace small mb-2"
+            rows="5"
+            name="mcpJdlPaste"
+            [(ngModel)]="jdlPaste"
+            placeholder="entity Book { title String, isbn String }"
+          ></textarea>
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            <button type="button" class="btn btn-sm btn-primary" (click)="generateToolsFromJdl()" [disabled]="loadingJdlTools || !assistantEnabled">
+              <span *ngIf="!loadingJdlTools">Generate MCP tools from JDL</span>
+              <span *ngIf="loadingJdlTools">Calling model…</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="applyJdlToolsToExtraFile()" [disabled]="!jdlToolsOutput">
+              Apply to extra file
+            </button>
+          </div>
+          <label class="form-label" for="mcpJdlOut">AI output</label>
+          <textarea id="mcpJdlOut" class="form-control font-monospace small" rows="8" name="mcpJdlOut" [(ngModel)]="jdlToolsOutput"></textarea>
+        </div>
+      </div>
+
+      <div class="card border-secondary mb-4">
+        <div class="card-header"><strong>AI: expand / refine</strong></div>
+        <div class="card-body">
+          <label class="form-label" for="mcpExpandPrompt">Prompt</label>
+          <textarea
+            id="mcpExpandPrompt"
+            class="form-control mb-2"
+            rows="3"
+            name="mcpExpandPrompt"
+            [(ngModel)]="expandPrompt"
+            placeholder="e.g. Add a searchBooks tool that filters by title substring."
+          ></textarea>
+          <button type="button" class="btn btn-sm btn-primary mb-2" (click)="expandWithAi()" [disabled]="loadingExpand || !assistantEnabled">
+            <span *ngIf="!loadingExpand">Expand with AI</span>
+            <span *ngIf="loadingExpand">Working…</span>
+          </button>
+          <label class="form-label" for="mcpExpandOut">Result</label>
+          <textarea id="mcpExpandOut" class="form-control font-monospace small" rows="8" name="mcpExpandOut" [(ngModel)]="expandOutput"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

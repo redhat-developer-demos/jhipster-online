@@ -61,6 +61,12 @@
             </a>
           </li>
           <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" *ngSwitchCase="true">
+            <a class="nav-link text-primary d-inline-flex align-items-center gap-2" routerLink="/generate-mcp-server">
+              <fa-icon icon="file-code" fixedWidth="true"></fa-icon>
+              <span>MCP Server</span>
+            </a>
+          </li>
+          <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" *ngSwitchCase="true">
             <a class="nav-link text-primary d-inline-flex align-items-center gap-2" routerLink="/deployed-applications">
               <fa-icon icon="server" fixedWidth="true"></fa-icon>
               <span>Deployed Applications</span>

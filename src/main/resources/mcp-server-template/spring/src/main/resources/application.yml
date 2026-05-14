@@ -1,0 +1,6 @@
+server:
+  port: __MCP_PORT__
+
+spring:
+  application:
+    name: __PROJECT_NAME__

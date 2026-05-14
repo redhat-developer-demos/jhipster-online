@@ -21,6 +21,14 @@ public final class StackProfileResolver {
     public static final String TOKEN_RUST = "rust";
     public static final String TOKEN_PYTHON = "python";
 
+    public static final String TOKEN_MCP_SPRING = "mcp-spring";
+
+    public static final String TOKEN_MCP_QUARKUS = "mcp-quarkus";
+
+    public static final String TOKEN_MCP_DOTNET = "mcp-dotnet";
+
+    public static final String TOKEN_MCP_PYTHON = "mcp-python";
+
     private StackProfileResolver() {}
 
     public static StackId resolveStackId(String applicationConfiguration, String globalJhipsterCmd) {
@@ -28,6 +36,18 @@ public final class StackProfileResolver {
             return defaultFromCmd(globalJhipsterCmd);
         }
         String cfg = applicationConfiguration;
+        if (cfg.contains("\"generatorType\":\"mcp-server\"")) {
+            if (cfg.contains("\"mcpFramework\":\"quarkus\"")) {
+                return StackId.MCP_QUARKUS;
+            }
+            if (cfg.contains("\"mcpFramework\":\"dotnet\"")) {
+                return StackId.MCP_DOTNET;
+            }
+            if (cfg.contains("\"mcpFramework\":\"python\"")) {
+                return StackId.MCP_PYTHON;
+            }
+            return StackId.MCP_SPRING;
+        }
         if (containsBlueprint(cfg, "generator-pyhipster") || containsBackendFramework(cfg, "python")) {
             return StackId.PYTHON;
         }
@@ -126,7 +146,40 @@ public final class StackProfileResolver {
         if (id == StackId.PYTHON) {
             return TOKEN_PYTHON;
         }
+        if (id == StackId.MCP_SPRING) {
+            return TOKEN_MCP_SPRING;
+        }
+        if (id == StackId.MCP_QUARKUS) {
+            return TOKEN_MCP_QUARKUS;
+        }
+        if (id == StackId.MCP_DOTNET) {
+            return TOKEN_MCP_DOTNET;
+        }
+        if (id == StackId.MCP_PYTHON) {
+            return TOKEN_MCP_PYTHON;
+        }
         return TOKEN_SPRING_BOOT;
+    }
+
+    /**
+     * Tekton {@code PATH_CONTEXT} / working directory segment relative to the cloned repo root.
+     */
+    public static String resolveTektonPathContext(StackId stackId) {
+        if (stackId == null) {
+            return ".";
+        }
+        return ".";
+    }
+
+    /**
+     * Node/npm builder image used by Tekton npm tasks (align tag with JHipster Online release).
+     */
+    public static String resolveTektonBuilderImage(String appVersion) {
+        String v = StringUtils.trimToEmpty(appVersion).replace("-SNAPSHOT", "");
+        if (v.isEmpty()) {
+            v = "2.41.1";
+        }
+        return "quay.io/maximilianopizarro/jhipster-universal-developer-image:" + v;
     }
 
     /**

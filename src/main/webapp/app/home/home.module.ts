@@ -39,6 +39,7 @@ import { DataDeletionDialogComponent } from 'app/home/your-generators/data-delet
 import { AzureGeneratorComponent } from './azure-generator/azure-generator.component';
 import { OpenshiftGeneratorComponent } from './openshift-generator/openshift-generator.component';
 import { DeployedAppsComponent } from './deployed-apps/deployed-apps.component';
+import { McpGeneratorComponent } from 'app/home/mcp-generator/mcp-generator.component';
 
 @NgModule({
   imports: [JhonlineSharedModule, RouterModule.forRoot([HOME_ROUTE])],
@@ -61,7 +62,8 @@ import { DeployedAppsComponent } from './deployed-apps/deployed-apps.component';
     YourGeneratorsComponent,
     CiCdOutputDialogComponent,
     RemoveGeneratorDialogComponent,
-    DataDeletionDialogComponent
+    DataDeletionDialogComponent,
+    McpGeneratorComponent
   ]
 })
 export class JhonlineHomeModule {}

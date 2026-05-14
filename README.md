@@ -33,6 +33,7 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
   - [GitLab configuration](#gitlab-configuration)
   - [Gitea configuration](#gitea-configuration)
   - [JDL AI assistant (models, RAG, embeddings)](#jdl-ai-assistant-models-rag-embeddings)
+- [New Features in v2.41.1](#new-features-in-v2411)
 - [New Features in v2.41.0](#new-features-in-v2410)
 - [New Features in v2.40.1](#new-features-in-v2401)
 - [New Features in v2.40.0](#new-features-in-v2400)
@@ -95,7 +96,7 @@ Generators run either on the **main app** (JHipster 9 CLI) or on dedicated **wor
 
 - **Local builds**: use `podman build` with the same `-f` / `-t` / context as in CI ([`Dockerfile.quarkus`](Dockerfile.quarkus), [`Dockerfile.spring-boot`](Dockerfile.spring-boot), [`Dockerfile`](Dockerfile), [`Dockerfile.builder`](Dockerfile.builder), and [`docker/*/Containerfile`](docker/jhipster-builder/Containerfile)). A successful local build is **not** a reason to `podman push` to Quay; publishing is done by **GitHub Actions** (or an explicit operator push).
 - **Red Hat runtimes**: prefer images from `registry.access.redhat.com` (no auth required) over `registry.redhat.io` (requires subscription) for CI and builder Containerfiles; see [docs/MULTI_STACK_OPENSHIFT.md](docs/MULTI_STACK_OPENSHIFT.md) for how generated Helm/Tekton maps stacks.
-- **Optional self-deploy chart**: [charts/jhipster-online](charts/jhipster-online) documents single vs multi-worker `values.yaml` patterns.
+- **Optional self-deploy chart**: use the published Helm chart repository (for example `https://maximilianopizarro.github.io/jhipster-online-helm-chart/`) for single vs multi-worker `values.yaml` patterns; the chart source may live in a separate Git repository.
 
 ## Quick Start Guide
 
@@ -208,7 +209,7 @@ helm repo add jhipster-online https://maximilianopizarro.github.io/jhipster-onli
 helm install jhipster-online jhipster-online/jhipster-online --version 1.1.0
 ```
 
-Use `helm search repo jhipster-online/jhipster-online --versions` to confirm the latest published chart version for that Helm repository (the in-repo chart under [`charts/jhipster-online`](charts/jhipster-online) uses its own `Chart.yaml` version, typically `0.1.0`, for local `./charts/...` installs).
+Use `helm search repo jhipster-online/jhipster-online --versions` to confirm the latest published chart version for that Helm repository (chart source and `Chart.yaml` versioning are maintained in the chart publication repo, not in this application tree).
 
 For **Developer Sandbox** from a local clone of the chart repo, use the overlay (enables in-cluster deploy + `edit` RoleBinding for the pod ServiceAccount):
 
@@ -253,6 +254,12 @@ To generate a production build, like any normal JHipster application, please run
 #### Build container images (CI / Dockerfile)
 
 Use the Dockerfiles in the repository root (for example `Dockerfile.spring-boot`, `Dockerfile.quarkus`, `Dockerfile.builder`) and GitHub Actions, or your cluster's build strategy, instead of the removed in-repo `jh-online-builder.yaml` BuildConfig.
+
+## New Features in v2.41.1
+
+- **MCP worker sidecar**: Node `mcp-worker` (port **8083**) packages `mcp-server-template/` into generated MCP server ZIPs; Spring app uses `application.mcp-worker.*` (`Dockerfile.mcp-worker`, `podman-compose.yml`).
+- **MCP Server UI**: Route **`/generate-mcp-server`** — preview, optional **extra** tool file, **JDL → MCP tools** and **expand** via the same OpenAI-compatible stack as JDL AI (`McpGeneratorResource`, `McpAiService`).
+- **Helm / OpenShift**: optional **`mcpWorker`** (and other workers) in the **published** Helm chart repository that deploys this app; align image tags with **2.41.1**.
 
 ## New Features in v2.41.0
 

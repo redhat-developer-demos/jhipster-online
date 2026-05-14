@@ -172,6 +172,10 @@ application:
     enabled: ${APPLICATION_PYHIPSTERWORKER_ENABLED:false}
     base-url: ${APPLICATION_PYHIPSTERWORKER_BASE_URL:http://pyhipster-worker:8082}
     timeout-seconds: ${APPLICATION_PYHIPSTERWORKER_TIMEOUT_SECONDS:600}
+  mcp-worker:
+    enabled: ${APPLICATION_MCPWORKER_ENABLED:false}
+    base-url: ${APPLICATION_MCPWORKER_BASE_URL:http://mcp-worker:8083}
+    timeout-seconds: ${APPLICATION_MCPWORKER_TIMEOUT_SECONDS:120}
 
 #application:
 #    tmp-folder: /tmp

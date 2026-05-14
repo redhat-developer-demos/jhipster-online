@@ -70,6 +70,9 @@ class GeneratorServiceTest {
     private PyhipsterWorkerClient pyhipsterWorkerClient;
 
     @Mock
+    private McpWorkerClient mcpWorkerClient;
+
+    @Mock
     private LogsService logsService;
 
     @Mock
@@ -91,6 +94,7 @@ class GeneratorServiceTest {
                 jHipsterService,
                 jHipster8WorkerClient,
                 pyhipsterWorkerClient,
+                mcpWorkerClient,
                 logsService,
                 kubernetesManifestSnippetService,
                 openshiftScaffoldApplicationService,

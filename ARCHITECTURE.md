@@ -1,4 +1,4 @@
-# Architecture Specification -- JHipster Online v2.41.0
+# Architecture Specification -- JHipster Online v2.41.1
 
 This document describes the solution architecture of JHipster Online, designed for consumption by developers and AI models.
 
@@ -117,7 +117,7 @@ All three images install only the generator packages that are compatible with JH
 
 > **Note:** .NET (`generator-jhipster-dotnetcore`), Node/NestJS (`generator-jhipster-nodejs`), Azure Container Apps, and Go blueprints are **not yet compatible with JHipster 9.0.0** (they depend on JHipster 8.x). They are disabled in the UI and will be re-enabled when upstream publishes JH9-compatible versions.
 
-All blueprints use the `jhipster` CLI command. The `application.jhipster-commands-by-stack` map routes generations to the correct CLI. For future per-stack **workers**, see `charts/jhipster-online/values.yaml`.
+All blueprints use the `jhipster` CLI command. The `application.jhipster-commands-by-stack` map routes generations to the correct CLI. For optional per-stack **workers** (JHipster 8, PyHipster, MCP) and image tags, see the published Helm chart `values.yaml` or `application-*.yml` in this repository.
 
 ## Deployment Topology
 
@@ -196,7 +196,7 @@ graph LR
    - Appends "Open in Dev Spaces" badge to README.md
 5. `GitService` pushes the generated project to GitHub/GitLab/Gitea
 
-## OpenShift Deployment Flow (v2.41.0)
+## OpenShift Deployment Flow (v2.41.1)
 
 1. User selects namespace in OpenShift generator form
 2. Frontend calls `POST /api/openshift/deploy`
@@ -254,7 +254,7 @@ Frontend OAuth URLs follow the pattern `{host}/login/oauth/authorize?client_id=â
 
 ## MCP (Model Context Protocol) Ecosystem Status
 
-As of v2.41.0, there is **no official JHipster generator/blueprint for MCP servers**. Related ecosystem tools:
+As of v2.41.1, there is **no official JHipster generator/blueprint for MCP servers**. Related ecosystem tools:
 
 - **Spring AI MCP** (`spring-ai-mcp`): Spring framework integration for MCP, not a JHipster blueprint
 - **mcp-scaffold**: Maven plugin that generates `@McpTool` wrappers from Spring Data repositories (v0.1.3)

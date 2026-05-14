@@ -1,6 +1,0 @@
-apiVersion: v2
-name: jhipster-online
-description: Optional Helm chart for deploying JHipster Online (single or multi-stack workers)
-type: application
-version: 0.1.0
-appVersion: "2.41.0"

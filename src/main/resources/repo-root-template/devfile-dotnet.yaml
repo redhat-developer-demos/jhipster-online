@@ -1,7 +1,7 @@
 schemaVersion: 2.3.0
 metadata:
   name: __REPO_NAME__
-  version: 2.41.0
+  version: 2.41.1
   description: 'JHipster .NET Core stack on Red Hat OpenShift Dev Spaces.'
   displayName: __REPO_NAME__
   icon: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/jhipster-icon.png

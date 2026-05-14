@@ -100,6 +100,8 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/admin/helm-template/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .requestMatchers("/api/crash-reports/*").permitAll()
                 .requestMatchers("/api/download-application").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/generate-mcp").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/mcp-preview").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/kubernetes-snippets/**").permitAll()
                 .requestMatchers("/api/s/link/*").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/s/**").permitAll()

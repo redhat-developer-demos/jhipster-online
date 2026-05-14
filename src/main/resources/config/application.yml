@@ -197,3 +197,7 @@ application:
     enabled: false
     base-url: http://pyhipster-worker:8082
     timeout-seconds: 600
+  mcp-worker:
+    enabled: false
+    base-url: http://mcp-worker:8083
+    timeout-seconds: 120
