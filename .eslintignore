@@ -11,3 +11,4 @@ node/
 postcss.config.js
 jhipster8-worker/
 pyhipster-worker/
+mcp-worker/
