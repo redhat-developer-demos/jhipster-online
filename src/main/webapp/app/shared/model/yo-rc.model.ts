@@ -50,6 +50,7 @@ export interface IYoRC {
   buildTool?: string;
   enableSwaggerCodegen?: boolean;
   clientFramework?: string;
+  backendFramework?: string;
   withAdminUi?: boolean;
   useSass?: boolean;
   clientPackageManager?: string;
@@ -95,6 +96,7 @@ export class YoRC implements IYoRC {
     public buildTool?: string,
     public enableSwaggerCodegen?: boolean,
     public clientFramework?: string,
+    public backendFramework?: string,
     public withAdminUi?: boolean,
     public useSass?: boolean,
     public clientPackageManager?: string,

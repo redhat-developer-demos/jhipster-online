@@ -53,6 +53,8 @@ export class StatisticsComponent implements AfterViewInit {
   @ViewChild('chartAppTypePie') chartAppTypePie: ElementRef | undefined;
   @ViewChild('chartJDLLine') chartJDLLine: ElementRef | undefined;
   @ViewChild('chartJDLPie') chartJDLPie: ElementRef | undefined;
+  @ViewChild('chartBackendFwLine') chartBackendFwLine: ElementRef | undefined;
+  @ViewChild('chartBackendFwPie') chartBackendFwPie: ElementRef | undefined;
 
   countYoRcByDate: Observable<string> | undefined;
   countYos: number | undefined;
@@ -107,6 +109,10 @@ export class StatisticsComponent implements AfterViewInit {
       case 'buildTool':
         this.overview = true;
         this.displayOverview('buildTool');
+        break;
+      case 'backendFramework':
+        this.overview = true;
+        this.displayOverview('backendFramework');
         break;
       case 'default':
       default:
@@ -186,6 +192,7 @@ export class StatisticsComponent implements AfterViewInit {
     this.displayChart(frequency, 'cacheProvider', this.chartCacheLine, this.chartCachePie);
     this.displayChart(frequency, 'jhipsterVersion', this.chartVersionLine, this.chartVersionPie);
     this.displayChart(frequency, 'applicationType', this.chartAppTypeLine, this.chartAppTypePie);
+    this.displayChart(frequency, 'backendFramework', this.chartBackendFwLine, this.chartBackendFwPie);
     this.displayEntityGenerationStats(frequency, 'fields', this.chartJDLLine, this.chartJDLPie);
   }
 
@@ -219,6 +226,7 @@ export class StatisticsComponent implements AfterViewInit {
         this.prettifyCacheProvider(lowerCaseKey, prev, currentProperty, current);
         this.prettifyCloudDeployment(lowerCaseKey, prev, currentProperty, current);
         this.prettifyApplicationTypeData(lowerCaseKey, prev, currentProperty, current);
+        this.prettifyBackendFrameworkData(lowerCaseKey, prev, currentProperty, current);
 
         // jhipster versions
         if (/\d\.\d\.\d/.test(lowerCaseKey)) {
@@ -235,7 +243,7 @@ export class StatisticsComponent implements AfterViewInit {
   }
 
   private prettifyClientFrameworkData(lowerCaseKey: string, prev: Record<string, number>, currentProperty: string, current: any): void {
-    if (!['react', 'vue', 'angular', 'none'].some(k => lowerCaseKey.includes(k))) {
+    if (!['react', 'vue', 'angular', 'svelte', 'none', 'no'].some(k => lowerCaseKey === k || lowerCaseKey.includes(k))) {
       return;
     }
 
@@ -246,6 +254,10 @@ export class StatisticsComponent implements AfterViewInit {
       key = displayNames.vuejs;
     } else if (lowerCaseKey.includes('angular')) {
       key = computeAngularKey(lowerCaseKey);
+    } else if (lowerCaseKey.includes('svelte')) {
+      key = displayNames.svelte;
+    } else if (lowerCaseKey === 'no' || lowerCaseKey === 'none') {
+      key = displayNames.noClient;
     } else {
       key = displayNames.default;
     }
@@ -351,6 +363,36 @@ export class StatisticsComponent implements AfterViewInit {
       key = displayNames.monolithic;
     } else {
       key = displayNames.default;
+    }
+
+    prev[key] = (prev[key] || 0) + current.values[currentProperty];
+  }
+
+  private prettifyBackendFrameworkData(lowerCaseKey: string, prev: Record<string, number>, currentProperty: string, current: any): void {
+    const backendKeywords = ['spring', 'quarkus', 'micronaut', 'rust', 'dotnet', 'azure', 'node', 'python'];
+    if (!backendKeywords.some(k => lowerCaseKey.includes(k)) && lowerCaseKey !== '') {
+      return;
+    }
+
+    let key;
+    if (lowerCaseKey.includes('spring')) {
+      key = displayNames.springBoot;
+    } else if (lowerCaseKey.includes('quarkus')) {
+      key = displayNames.quarkus;
+    } else if (lowerCaseKey.includes('micronaut')) {
+      key = displayNames.micronaut;
+    } else if (lowerCaseKey.includes('rust')) {
+      key = displayNames.rust;
+    } else if (lowerCaseKey.includes('dotnet')) {
+      key = displayNames.dotnet;
+    } else if (lowerCaseKey.includes('azure')) {
+      key = displayNames.azureAca;
+    } else if (lowerCaseKey.includes('node')) {
+      key = displayNames.node;
+    } else if (lowerCaseKey.includes('python')) {
+      key = displayNames.python;
+    } else {
+      key = displayNames.notReported;
     }
 
     prev[key] = (prev[key] || 0) + current.values[currentProperty];

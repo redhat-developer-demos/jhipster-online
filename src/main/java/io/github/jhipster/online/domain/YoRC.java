@@ -134,6 +134,9 @@ public class YoRC implements Serializable, CompleteDate {
     @Column(name = "client_framework")
     private String clientFramework;
 
+    @Column(name = "backend_framework", length = 64)
+    private String backendFramework;
+
     @Column(name = "with_admin_ui")
     private Boolean withAdminUi;
 
@@ -558,6 +561,19 @@ public class YoRC implements Serializable, CompleteDate {
         this.clientFramework = clientFramework;
     }
 
+    public String getBackendFramework() {
+        return backendFramework;
+    }
+
+    public YoRC backendFramework(String backendFramework) {
+        this.backendFramework = backendFramework;
+        return this;
+    }
+
+    public void setBackendFramework(String backendFramework) {
+        this.backendFramework = backendFramework;
+    }
+
     public Boolean isWithAdminUi() {
         return withAdminUi;
     }
@@ -833,6 +849,9 @@ public class YoRC implements Serializable, CompleteDate {
             "'" +
             ", clientFramework='" +
             getClientFramework() +
+            "'" +
+            ", backendFramework='" +
+            getBackendFramework() +
             "'" +
             ", withAdminUi='" +
             isWithAdminUi() +

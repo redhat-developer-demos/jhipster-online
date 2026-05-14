@@ -34,6 +34,7 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
   - [Gitea configuration](#gitea-configuration)
   - [JDL AI assistant (models, RAG, embeddings)](#jdl-ai-assistant-models-rag-embeddings)
 - [New Features in v2.41.1](#new-features-in-v2411)
+  - [Roadmap](#roadmap)
 - [New Features in v2.41.0](#new-features-in-v2410)
 - [New Features in v2.40.1](#new-features-in-v2401)
 - [New Features in v2.40.0](#new-features-in-v2400)
@@ -260,6 +261,17 @@ Use the Dockerfiles in the repository root (for example `Dockerfile.spring-boot`
 - **MCP worker sidecar**: Node `mcp-worker` (port **8083**) packages `mcp-server-template/` into generated MCP server ZIPs; Spring app uses `application.mcp-worker.*` (`Dockerfile.mcp-worker`, `podman-compose.yml`).
 - **MCP Server UI**: Route **`/generate-mcp-server`** — preview, optional **extra** tool file, **JDL → MCP tools** and **expand** via the same OpenAI-compatible stack as JDL AI (`McpGeneratorResource`, `McpAiService`).
 - **Helm / OpenShift**: optional **`mcpWorker`** (and other workers) in the **published** Helm chart repository that deploys this app; align image tags with **2.41.1**.
+- **Statistics — backend framework**: new `backend_framework` column in `yo_rc` (Liquibase migration), `YoRCColumn.BACKEND_FRAMEWORK`, and a "Backend frameworks" overview + line/pie charts in the Statistics UI. Supports Spring Boot, Quarkus, Micronaut, Rust, .NET, Azure ACA, Node/NestJS, Python.
+- **Statistics — client framework fixes**: `prettifyClientFrameworkData` now recognizes `no` (JHipster 8 "skip client") and `svelte` alongside the existing React/Angular/Vue buckets.
+- **Dark mode theming**: CSS custom properties (`--jho-*`) for body, cards, inputs, tables, modals, dropdowns, inline `<code>`, and `.alert-primary`; `ThemeService` with `localStorage` persistence and `prefers-color-scheme` detection; sun/moon toggle in the navbar.
+
+### Roadmap
+
+The following items are planned for upcoming releases (order and timeline TBD):
+
+1. **Backend migration to Quarkus** — migrate JHipster Online itself from Spring Boot to Quarkus as the primary runtime.
+2. **OpenID Connect login** — authenticate users via an external OIDC provider, complementing or replacing the current session-based flow.
+3. **Pipelines and deployment with Fabric8 MCP** — CI/CD pipeline integration and Kubernetes/OpenShift deployment orchestration powered by Fabric8 in the MCP context.
 
 ## New Features in v2.41.0
 

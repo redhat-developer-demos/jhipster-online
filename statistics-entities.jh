@@ -33,6 +33,7 @@ entity YoRC {
     buildTool String,
     enableSwaggerCodegen Boolean,
     clientFramework String,
+    backendFramework String,
     useSass Boolean,
     clientPackageManager String,
     applicationType String,

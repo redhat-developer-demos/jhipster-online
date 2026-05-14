@@ -28,4 +28,5 @@
     <include file="config/liquibase/changelog/20260511190000_git_provider_runtime_config.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260511210000_gitea_git_provider.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260512120000_openshift_scaffold_application.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260514160000_add_backend_framework_to_YoRC.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

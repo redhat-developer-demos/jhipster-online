@@ -117,6 +117,8 @@ class YoRCResourceIntTest {
 
     private static final String DEFAULT_CLIENT_FRAMEWORK = "AAAAAAAAAA";
 
+    private static final String DEFAULT_BACKEND_FRAMEWORK = "";
+
     private static final Boolean DEFAULT_WITH_ADMIN_UI = true;
 
     private static final Boolean DEFAULT_USE_SASS = false;
@@ -210,6 +212,7 @@ class YoRCResourceIntTest {
             .buildTool(DEFAULT_BUILD_TOOL)
             .enableSwaggerCodegen(DEFAULT_ENABLE_SWAGGER_CODEGEN)
             .clientFramework(DEFAULT_CLIENT_FRAMEWORK)
+            .backendFramework(DEFAULT_BACKEND_FRAMEWORK)
             .withAdminUi(DEFAULT_WITH_ADMIN_UI)
             .useSass(DEFAULT_USE_SASS)
             .clientPackageManager(DEFAULT_CLIENT_PACKAGE_MANAGER)

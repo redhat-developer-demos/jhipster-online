@@ -194,6 +194,9 @@ Theme (light / dark) — CSS custom properties
   --jho-readonly-bg: #e9ecef;
   --jho-entity-dd-border: #e2e8f0;
   --jho-shadow: 0 0.125rem 0.25rem rgba(15, 23, 42, 0.06);
+  --jho-placeholder: #6c757d;
+  --jho-inline-code-bg: #eef2f6;
+  --jho-inline-code-color: #212529;
 }
 
 html[data-theme='dark'] {
@@ -216,6 +219,9 @@ html[data-theme='dark'] {
   --jho-readonly-bg: #2d333b;
   --jho-entity-dd-border: #30363d;
   --jho-shadow: 0 0.125rem 0.35rem rgba(0, 0, 0, 0.35);
+  --jho-placeholder: #aeb8c1;
+  --jho-inline-code-bg: #2d333b;
+  --jho-inline-code-color: #e1e4e8;
 }
 
 body {
@@ -262,6 +268,67 @@ hr {
 .form-select:focus {
   background-color: var(--jho-input-bg);
   color: var(--jho-input-color);
+}
+
+textarea.form-control,
+input.form-control,
+select.form-select {
+  color: var(--jho-input-color);
+}
+
+.form-control::placeholder,
+textarea.form-control::placeholder,
+input.form-control::placeholder {
+  color: var(--jho-placeholder);
+  opacity: 1;
+}
+
+.form-control::-webkit-input-placeholder {
+  color: var(--jho-placeholder);
+  opacity: 1;
+}
+
+.form-control::-moz-placeholder {
+  color: var(--jho-placeholder);
+  opacity: 1;
+}
+
+.form-control:-ms-input-placeholder {
+  color: var(--jho-placeholder);
+}
+
+code:not(pre code) {
+  background-color: var(--jho-inline-code-bg);
+  color: var(--jho-inline-code-color);
+  padding: 0.125rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+html[data-theme='dark'] .alert-primary {
+  background-color: rgba(88, 166, 255, 0.14);
+  border-color: rgba(88, 166, 255, 0.45);
+  color: var(--jho-text);
+}
+
+html[data-theme='dark'] .alert-primary a {
+  color: var(--jho-link);
+  font-weight: 600;
+}
+
+html[data-theme='dark'] .alert-primary a:hover {
+  color: #b6d9ff;
+}
+
+html[data-theme='dark'] textarea.form-control,
+html[data-theme='dark'] input.form-control:not([type='checkbox']):not([type='radio']):not([type='file']) {
+  color: var(--jho-input-color) !important;
+}
+
+html[data-theme='dark'] .form-control::placeholder,
+html[data-theme='dark'] textarea.form-control::placeholder {
+  color: var(--jho-placeholder) !important;
+  opacity: 1 !important;
 }
 
 .readonly {

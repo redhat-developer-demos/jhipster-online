@@ -75,6 +75,7 @@ public class DataGenerationFixture {
             .buildTool("maven")
             .enableSwaggerCodegen(true)
             .clientFramework(clientFramework)
+            .backendFramework("")
             .withAdminUi(true)
             .useSass(true)
             .clientPackageManager("npm")

@@ -54,6 +54,7 @@ public class YoRCDeserializer extends StdDeserializer<YoRC> {
         String buildTool = getDefaultIfNull(node.get("buildTool"), "");
         boolean enableSwaggerCodegen = getDefaultIfNull(node.get("enableSwaggerCodegen"), false);
         String clientFramework = getDefaultIfNull(node.get("clientFramework"), "none");
+        String backendFramework = getDefaultIfNull(node.get("backendFramework"), "");
         boolean useSass = getDefaultIfNull(node.get("useSass"), false);
         String clientPackageManager = getDefaultIfNull(node.get("clientPackageManager"), "");
         String applicationType = getDefaultIfNull(node.get("applicationType"), "");
@@ -101,6 +102,7 @@ public class YoRCDeserializer extends StdDeserializer<YoRC> {
             .buildTool(buildTool)
             .enableSwaggerCodegen(enableSwaggerCodegen)
             .clientFramework(clientFramework)
+            .backendFramework(backendFramework)
             .useSass(useSass)
             .clientPackageManager(clientPackageManager)
             .applicationType(applicationType)

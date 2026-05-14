@@ -18,11 +18,13 @@
  */
 import { Injectable } from '@angular/core';
 
-export const displayNames = {
+export const displayNames: Record<string, string> = {
   react: 'React',
   angularX: 'Angular',
   angularJS: 'AngularJS',
   vuejs: 'Vue.js',
+  svelte: 'Svelte',
+  noClient: 'No client',
 
   heroku: 'Heroku',
   kubernetes: 'Kubernetes',
@@ -50,6 +52,16 @@ export const displayNames = {
   monolithic: 'Monolithic',
   gateway: 'Gateway',
   microservice: 'Microservice',
+
+  springBoot: 'Spring Boot',
+  quarkus: 'Quarkus',
+  micronaut: 'Micronaut',
+  rust: 'Rust',
+  dotnet: '.NET',
+  azureAca: 'Azure Container Apps',
+  node: 'Node.js / NestJS',
+  python: 'Python / Flask',
+  notReported: 'Not reported',
 
   default: 'None/Other'
 };

@@ -37,7 +37,8 @@ public enum YoRCColumn implements DatabaseColumn {
     CLIENT_PACKAGE_MANAGER("clientPackageManager"),
     APPLICATION_TYPE("applicationType"),
     ENABLE_TRANSLATION("enableTranslation"),
-    NATIVE_LANGUAGE("nativeLanguage");
+    NATIVE_LANGUAGE("nativeLanguage"),
+    BACKEND_FRAMEWORK("backendFramework");
 
     private final String value;
 

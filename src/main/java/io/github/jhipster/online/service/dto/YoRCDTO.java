@@ -86,6 +86,8 @@ public class YoRCDTO implements Serializable {
 
     private String clientFramework;
 
+    private String backendFramework;
+
     private Boolean withAdminUi;
 
     private Boolean useSass;
@@ -346,6 +348,14 @@ public class YoRCDTO implements Serializable {
         this.clientFramework = clientFramework;
     }
 
+    public String getBackendFramework() {
+        return backendFramework;
+    }
+
+    public void setBackendFramework(String backendFramework) {
+        this.backendFramework = backendFramework;
+    }
+
     public Boolean getWithAdminUi() {
         return withAdminUi;
     }
@@ -506,6 +516,9 @@ public class YoRCDTO implements Serializable {
             enableSwaggerCodegen +
             ", clientFramework='" +
             clientFramework +
+            '\'' +
+            ", backendFramework='" +
+            backendFramework +
             '\'' +
             ", withAdminUi='" +
             withAdminUi +
