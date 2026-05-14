@@ -1,9 +1,14 @@
 
-     ,--.,--.  ,--. ,--.               ,--.
-     |  ||  '--'  |  `--' ,---.  ,---. ,-'  '-. ,---. ,--.--.
-,--. |  ||  .--.  |  ,--.| .-. |(  .-' '-.  .-'| .-. :|  .--'
-|  '-'  /|  |  |  |  |  || '-' '.-'  `) |  |  \   --.|  |
- `-----' `--'  `--'  `--'|  |-' `----'  `--'   `----'`--'
-                          `--'
-  :: JHipster Online :: Spring Boot ${spring-boot.version} ::
-  :: https://github.com/redhat-developer-demos/jhipster-online ::
+${AnsiColor.BRIGHT_BLACK}  +--------------------------------------------------------------------------+
+${AnsiColor.BRIGHT_BLACK}  |                                                                          |
+${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}      ██╗${AnsiColor.RED} ██╗   ██╗ ████████╗ ███████╗   ██████╗ ████████╗ ████████╗ ███████╗  ${AnsiColor.BRIGHT_BLACK}|
+${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}      ██║${AnsiColor.RED} ██║   ██║ ╚══██╔══╝ ██╔═══██╗ ██╔════╝ ╚══██╔══╝ ██╔═════╝ ██╔═══██╗ ${AnsiColor.BRIGHT_BLACK}|
+${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}      ██║${AnsiColor.RED} ████████║    ██║    ███████╔╝ ╚█████╗     ██║    ██████╗   ███████╔╝ ${AnsiColor.BRIGHT_BLACK}|
+${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}██╗   ██║${AnsiColor.RED} ██╔═══██║    ██║    ██╔════╝   ╚═══██╗    ██║    ██╔═══╝   ██╔══██║  ${AnsiColor.BRIGHT_BLACK}|
+${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}╚██████╔╝${AnsiColor.RED} ██║   ██║ ████████╗ ██║       ██████╔╝    ██║    ████████╗ ██║  ╚██╗ ${AnsiColor.BRIGHT_BLACK}|
+${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN} ╚═════╝ ${AnsiColor.RED} ╚═╝   ╚═╝ ╚═══════╝ ╚═╝       ╚═════╝     ╚═╝    ╚═══════╝ ╚═╝   ╚═╝ ${AnsiColor.BRIGHT_BLACK}|
+${AnsiColor.BRIGHT_BLACK}  |                                                                          |
+${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.BRIGHT_CYAN}:: JHipster Online ::${AnsiColor.DEFAULT}  Spring Boot ${spring-boot.version}                           ${AnsiColor.BRIGHT_BLACK}|
+${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.BRIGHT_CYAN}:: https://github.com/redhat-developer-demos/jhipster-online ::${AnsiColor.DEFAULT}           ${AnsiColor.BRIGHT_BLACK}|
+${AnsiColor.BRIGHT_BLACK}  |                                                                          |
+${AnsiColor.BRIGHT_BLACK}  +--------------------------------------------------------------------------+${AnsiColor.DEFAULT}
