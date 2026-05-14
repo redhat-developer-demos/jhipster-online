@@ -11,8 +11,19 @@ WORKDIR /app
 COPY pyhipster-worker/package.json pyhipster-worker/package-lock.json ./
 RUN npm ci --omit=dev
 COPY pyhipster-worker/server.js ./
-RUN chown -R node:node /app
-ENV PORT=8082
+
+# OpenShift runs with an arbitrary UID in the root group (0).
+# Create a writable home so conf/Yeoman/npm can write their config/cache.
+RUN mkdir -p /opt/app-home/.config /opt/app-home/.cache /opt/app-home/.npm \
+    && chown -R 1001:0 /opt/app-home /app \
+    && chmod -R g=u /opt/app-home /app
+
+ENV HOME=/opt/app-home \
+    XDG_CONFIG_HOME=/opt/app-home/.config \
+    XDG_CACHE_HOME=/opt/app-home/.cache \
+    NPM_CONFIG_CACHE=/opt/app-home/.npm \
+    PORT=8082
+
 EXPOSE 8082
-USER node
+USER 1001
 CMD ["node", "server.js"]
