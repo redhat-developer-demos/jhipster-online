@@ -8,7 +8,7 @@ Navbar
 .navbar-version {
   font-size: 0.6em;
   font-weight: 300;
-  color: #{$navbar-light-color};
+  color: var(--jho-navbar-text, #{$navbar-light-color});
   opacity: 0.55;
   margin-left: 0.3em;
   letter-spacing: 0.02em;
@@ -24,6 +24,34 @@ Navbar
     font-weight: 500;
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
+  }
+}
+
+.jho-navbar.navbar {
+  background-color: var(--jho-navbar-bg) !important;
+  color: var(--jho-navbar-text);
+
+  .navbar-brand,
+  .navbar-title {
+    color: var(--jho-navbar-text);
+  }
+
+  .navbar-version {
+    color: var(--jho-navbar-text);
+    opacity: 0.65;
+  }
+
+  .nav-link {
+    color: var(--jho-navbar-text);
+  }
+
+  .navbar-toggler {
+    border-color: var(--jho-border);
+    color: var(--jho-navbar-text);
+  }
+
+  .btn-link.nav-link {
+    color: var(--jho-navbar-text);
   }
 }
 

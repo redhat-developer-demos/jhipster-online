@@ -1,4 +1,4 @@
-<nav class="navbar navbar-light navbar-expand-md bg-light shadow-sm">
+<nav class="navbar jho-navbar navbar-expand-md shadow-sm">
   <a class="navbar-brand logo d-inline-flex align-items-center" routerLink="/" (click)="collapseNavbar()">
     <img
       class="jh-navbar-logo me-2"
@@ -21,10 +21,21 @@
   >
     <fa-icon icon="bars"></fa-icon>
   </a>
-  <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed" [ngSwitch]="isAuthenticated()">
+  <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed">
     <ul class="navbar-nav ms-auto">
-      <li class="nav-item" *ngSwitchCase="false">
+      <li class="nav-item" *ngIf="!isAuthenticated()">
         <a class="nav-link" href="jdl-studio/">JDL Studio</a>
+      </li>
+      <li class="nav-item d-flex align-items-center" *ngIf="darkMode$ | async as dark">
+        <button
+          type="button"
+          class="btn btn-sm btn-link nav-link py-0"
+          (click)="toggleTheme()"
+          [attr.aria-label]="dark ? 'Switch to light theme' : 'Switch to dark theme'"
+          [title]="dark ? 'Light mode' : 'Dark mode'"
+        >
+          <fa-icon [icon]="dark ? 'sun' : 'moon'"></fa-icon>
+        </button>
       </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
         <a class="nav-link" routerLink="/statistics">JHipster Statistics</a>
@@ -126,7 +137,7 @@
             <img [src]="getImageUrl()" class="profile-image rounded-circle" alt="Avatar" />
           </span>
         </a>
-        <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="account-menu">
+        <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="account-menu" [ngSwitch]="isAuthenticated()">
           <li *ngSwitchCase="true">
             <a class="dropdown-item" routerLink="/account/settings" routerLinkActive="active" (click)="collapseNavbar()">
               <fa-icon icon="wrench" fixedWidth="true"></fa-icon>

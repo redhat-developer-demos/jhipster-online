@@ -150,3 +150,15 @@
   -webkit-animation-delay: 0s;
   animation-delay: 0s;
 }
+
+html[data-theme='dark'] .app-loading {
+  color: #c9d1d9;
+}
+
+html[data-theme='dark'] .app-loading .lds-pacman > div:nth-child(2) div {
+  background: #30363d;
+}
+
+html[data-theme='dark'] body {
+  background-color: #1a1d23;
+}

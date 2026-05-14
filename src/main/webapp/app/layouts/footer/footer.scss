@@ -14,7 +14,7 @@ Footer
   font-size: 1rem;
 
   & a {
-    color: $black;
+    color: var(--jho-text);
     padding: 0.5rem;
   }
 }

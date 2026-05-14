@@ -170,4 +170,212 @@ ui bootstrap tweaks
   white-space: nowrap;
 }
 
+/* ==========================================================================
+Theme (light / dark) — CSS custom properties
+========================================================================== */
+
+:root {
+  --jho-body-bg: #f0f4f8;
+  --jho-text: #212529;
+  --jho-text-muted: #5c6570;
+  --jho-primary: #236fa4;
+  --jho-card-bg: #ffffff;
+  --jho-card-border: #d8e4ef;
+  --jho-navbar-bg: #f8f9fa;
+  --jho-navbar-text: #212529;
+  --jho-border: #dee2e6;
+  --jho-input-bg: #ffffff;
+  --jho-input-color: #212529;
+  --jho-dropdown-bg: #ffffff;
+  --jho-table-stripe: rgba(0, 0, 0, 0.03);
+  --jho-code-bg: #f5f7f9;
+  --jho-preview-sidebar-bg: #f8f9fa;
+  --jho-link: #0f5b90;
+  --jho-readonly-bg: #e9ecef;
+  --jho-entity-dd-border: #e2e8f0;
+  --jho-shadow: 0 0.125rem 0.25rem rgba(15, 23, 42, 0.06);
+}
+
+html[data-theme='dark'] {
+  --jho-body-bg: #1a1d23;
+  --jho-text: #e1e4e8;
+  --jho-text-muted: #8b949e;
+  --jho-primary: #58a6ff;
+  --jho-card-bg: #22262e;
+  --jho-card-border: #30363d;
+  --jho-navbar-bg: #161b22;
+  --jho-navbar-text: #e1e4e8;
+  --jho-border: #30363d;
+  --jho-input-bg: #2d333b;
+  --jho-input-color: #e1e4e8;
+  --jho-dropdown-bg: #22262e;
+  --jho-table-stripe: rgba(255, 255, 255, 0.04);
+  --jho-code-bg: #161b22;
+  --jho-preview-sidebar-bg: #1c2128;
+  --jho-link: #79b8ff;
+  --jho-readonly-bg: #2d333b;
+  --jho-entity-dd-border: #30363d;
+  --jho-shadow: 0 0.125rem 0.35rem rgba(0, 0, 0, 0.35);
+}
+
+body {
+  background-color: var(--jho-body-bg) !important;
+  color: var(--jho-text);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+hr {
+  border-top-color: var(--jho-border);
+  opacity: 1;
+}
+
+.text-muted {
+  color: var(--jho-text-muted) !important;
+}
+
+.jh-card {
+  background-color: var(--jho-card-bg);
+  border: 1px solid var(--jho-card-border);
+  box-shadow: var(--jho-shadow);
+}
+
+.card:not(.text-white) {
+  background-color: var(--jho-card-bg);
+  color: var(--jho-text);
+  border-color: var(--jho-card-border);
+}
+
+.card-header:not(.bg-primary):not(.bg-success):not(.bg-danger):not(.bg-warning):not(.bg-info) {
+  background-color: var(--jho-card-bg);
+  color: var(--jho-text);
+  border-bottom-color: var(--jho-border);
+}
+
+.form-control,
+.form-select {
+  background-color: var(--jho-input-bg);
+  color: var(--jho-input-color);
+  border-color: var(--jho-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--jho-input-bg);
+  color: var(--jho-input-color);
+}
+
+.readonly {
+  background-color: var(--jho-readonly-bg);
+}
+
+.dropdown-menu {
+  background-color: var(--jho-dropdown-bg);
+  border-color: var(--jho-border);
+}
+
+.dropdown-item {
+  color: var(--jho-text);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--jho-table-stripe);
+  color: var(--jho-text);
+}
+
+.table {
+  color: var(--jho-text);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--jho-table-stripe);
+}
+
+.table thead th {
+  border-bottom-color: var(--jho-border);
+}
+
+.table td,
+.table th {
+  border-top-color: var(--jho-border);
+}
+
+.modal-content {
+  background-color: var(--jho-card-bg);
+  color: var(--jho-text);
+  border-color: var(--jho-border);
+}
+
+.list-group-item {
+  background-color: var(--jho-card-bg);
+  color: var(--jho-text);
+  border-color: var(--jho-border);
+}
+
+.border,
+.border-top,
+.border-end,
+.border-bottom,
+.border-start {
+  border-color: var(--jho-border) !important;
+}
+
+.border-secondary {
+  border-color: var(--jho-border) !important;
+}
+
+.bg-light {
+  background-color: var(--jho-preview-sidebar-bg) !important;
+}
+
+.jho-preview-sidebar {
+  background-color: var(--jho-preview-sidebar-bg);
+}
+
+pre,
+.jho-code-block {
+  background-color: var(--jho-code-bg);
+  color: var(--jho-text);
+}
+
+.btn-outline-secondary {
+  color: var(--jho-text);
+  border-color: var(--jho-border);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--jho-table-stripe);
+  color: var(--jho-text);
+  border-color: var(--jho-border);
+}
+
+.btn-link {
+  color: var(--jho-link);
+}
+
+html[data-theme='dark'] .btn-outline-primary {
+  color: var(--jho-primary);
+  border-color: var(--jho-primary);
+}
+
+html[data-theme='dark'] .btn-outline-primary:hover {
+  background-color: rgba(88, 166, 255, 0.12);
+  color: #b6d9ff;
+  border-color: var(--jho-primary);
+}
+
+a.nav-link {
+  color: inherit;
+}
+
+@media screen and (min-width: 768px) {
+  .row.jh-entity-details > dd {
+    border-bottom-color: var(--jho-entity-dd-border);
+  }
+}
+
+html[data-theme='dark'] .stepper-icon {
+  background-color: rgba(88, 166, 255, 0.14);
+}
+
 /* jhipster-needle-scss-add-main JHipster will add new css style */

@@ -18,6 +18,7 @@
  */
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
 import { VERSION } from 'app/app.constants';
 import { AccountService } from 'app/core/auth/account.service';
@@ -25,6 +26,7 @@ import { LoginModalService } from 'app/core/login/login-modal.service';
 import { LoginService } from 'app/core/login/login.service';
 import { GitConfigurationService } from 'app/core/git/git-configuration.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
+import { ThemeService } from 'app/core/theme/theme.service';
 
 @Component({
   standalone: false,
@@ -37,6 +39,7 @@ export class NavbarComponent implements OnInit {
   isNavbarCollapsed = true;
   swaggerEnabled?: boolean;
   version: string;
+  readonly darkMode$: Observable<boolean>;
 
   constructor(
     private loginService: LoginService,
@@ -44,8 +47,10 @@ export class NavbarComponent implements OnInit {
     private loginModalService: LoginModalService,
     private profileService: ProfileService,
     private router: Router,
-    private gitConfigurationService: GitConfigurationService
+    private gitConfigurationService: GitConfigurationService,
+    private themeService: ThemeService
   ) {
+    this.darkMode$ = themeService.darkMode$;
     const ver = VERSION ? VERSION.replace(/-SNAPSHOT$/i, '') : '';
     this.version = ver ? (ver.toLowerCase().startsWith('v') ? ver : 'v' + ver) : '';
   }
@@ -78,6 +83,10 @@ export class NavbarComponent implements OnInit {
 
   toggleNavbar(): void {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleLightDark();
   }
 
   getImageUrl(): string {

@@ -7,6 +7,21 @@
     <title>JHipster Online</title>
     <meta name="description" content="JHipster Online" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <script>
+      (function () {
+        try {
+          var k = 'jho-theme';
+          var s = localStorage.getItem(k);
+          var dark;
+          if (s === 'dark') dark = true;
+          else if (s === 'light') dark = false;
+          else dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        } catch (e) {
+          /* ignore */
+        }
+      })();
+    </script>
     <meta name="theme-color" content="#000000" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="manifest" href="manifest.webapp" />

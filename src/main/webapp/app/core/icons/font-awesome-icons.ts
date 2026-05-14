@@ -47,6 +47,7 @@ import {
   faLink,
   faList,
   faLock,
+  faMoon,
   faObjectGroup,
   faPause,
   faPencilAlt,
@@ -64,6 +65,7 @@ import {
   faSort,
   faSortDown,
   faSortUp,
+  faSun,
   faSync,
   faTachometerAlt,
   faTasks,
@@ -143,6 +145,8 @@ export const fontAwesomeIcons = [
   faFileCode,
   faProjectDiagram,
   faPause,
-  faPlay
+  faPlay,
+  faMoon,
+  faSun
   // jhipster-needle-add-icon-import
 ];

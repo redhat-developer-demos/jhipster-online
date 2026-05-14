@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { ThemeService } from 'app/core/theme/theme.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { JhonlineSharedModule } from 'app/shared/shared.module';
@@ -38,6 +39,10 @@ export function setupGitConfiguration(gitConfigurationService: GitConfigurationS
   return () => gitConfigurationService.setupGitConfiguration();
 }
 
+export function initTheme(themeService: ThemeService): () => void {
+  return () => themeService.init();
+}
+
 @NgModule({
   imports: [
     BrowserModule,
@@ -55,6 +60,12 @@ export function setupGitConfiguration(gitConfigurationService: GitConfigurationS
       provide: APP_INITIALIZER,
       useFactory: setupGitConfiguration,
       deps: [GitConfigurationService],
+      multi: true
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initTheme,
+      deps: [ThemeService],
       multi: true
     }
   ],
