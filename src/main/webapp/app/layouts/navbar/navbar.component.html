@@ -26,15 +26,15 @@
       <li class="nav-item" *ngIf="!isAuthenticated()">
         <a class="nav-link" href="jdl-studio/">JDL Studio</a>
       </li>
-      <li class="nav-item d-flex align-items-center" *ngIf="darkMode$ | async as dark">
+      <li class="nav-item d-flex align-items-center" *ngIf="{ dark: darkMode$ | async } as theme">
         <button
           type="button"
           class="btn btn-sm btn-link nav-link py-0"
           (click)="toggleTheme()"
-          [attr.aria-label]="dark ? 'Switch to light theme' : 'Switch to dark theme'"
-          [title]="dark ? 'Light mode' : 'Dark mode'"
+          [attr.aria-label]="theme.dark ? 'Switch to light theme' : 'Switch to dark theme'"
+          [title]="theme.dark ? 'Light mode' : 'Dark mode'"
         >
-          <fa-icon [icon]="dark ? 'sun' : 'moon'"></fa-icon>
+          <fa-icon [icon]="theme.dark ? 'sun' : 'moon'"></fa-icon>
         </button>
       </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
