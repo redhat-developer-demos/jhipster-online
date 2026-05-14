@@ -21,7 +21,7 @@ export interface BlueprintModel {
   name: string;
 }
 
-export type BackendFrameworkId = 'spring-boot' | 'quarkus' | 'micronaut' | 'rust' | 'dotnet' | 'azure-aca' | 'node';
+export type BackendFrameworkId = 'spring-boot' | 'quarkus' | 'micronaut' | 'rust' | 'dotnet' | 'azure-aca' | 'node' | 'python';
 
 export class JHipsterConfigurationModel {
   public applicationType = 'monolith';

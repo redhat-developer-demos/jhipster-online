@@ -1,0 +1,18 @@
+# PyHipster (Yeoman 5) — HTTP worker incompatible with JHipster 8 worker Node/Yeoman stack
+FROM node:18-bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g generator-pyhipster@0.0.9
+
+WORKDIR /app
+COPY pyhipster-worker/package.json pyhipster-worker/package-lock.json ./
+RUN npm ci --omit=dev
+COPY pyhipster-worker/server.js ./
+RUN chown -R node:node /app
+ENV PORT=8082
+EXPOSE 8082
+USER node
+CMD ["node", "server.js"]

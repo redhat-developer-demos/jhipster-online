@@ -118,6 +118,10 @@ application:
     enabled: false
     base-url: http://127.0.0.1:18081
     timeout-seconds: 600
+  pyhipster-worker:
+    enabled: false
+    base-url: http://127.0.0.1:18082
+    timeout-seconds: 600
 
 openshift:
   argocd:

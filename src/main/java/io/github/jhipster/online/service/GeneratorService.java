@@ -79,6 +79,8 @@ public class GeneratorService {
 
     private final JHipster8WorkerClient jHipster8WorkerClient;
 
+    private final PyhipsterWorkerClient pyhipsterWorkerClient;
+
     private final HelmTemplateSource helmTemplateSource;
 
     private final HelmChartRepositoryPackager helmChartRepositoryPackager;
@@ -88,6 +90,7 @@ public class GeneratorService {
         GitService gitService,
         JHipsterService jHipsterService,
         JHipster8WorkerClient jHipster8WorkerClient,
+        PyhipsterWorkerClient pyhipsterWorkerClient,
         LogsService logsService,
         KubernetesManifestSnippetService kubernetesManifestSnippetService,
         OpenshiftScaffoldApplicationService openshiftScaffoldApplicationService,
@@ -98,6 +101,7 @@ public class GeneratorService {
         this.gitService = gitService;
         this.jHipsterService = jHipsterService;
         this.jHipster8WorkerClient = jHipster8WorkerClient;
+        this.pyhipsterWorkerClient = pyhipsterWorkerClient;
         this.logsService = logsService;
         this.kubernetesManifestSnippetService = kubernetesManifestSnippetService;
         this.openshiftScaffoldApplicationService = openshiftScaffoldApplicationService;
@@ -142,7 +146,15 @@ public class GeneratorService {
         this.generateRepoRootArtifacts(applicationId, workingDir, applicationConfiguration);
         log.info("devfile.yaml, catalog-info.yaml, and optional MariaDB preset created from classpath templates");
         StackId stackId = StackProfileResolver.resolveStackId(applicationConfiguration, applicationProperties.getJhipsterCmd().getCmd());
-        if (StackProfileResolver.requiresJhipster8Worker(stackId)) {
+        if (StackProfileResolver.requiresPyhipsterWorker(stackId)) {
+            if (!applicationProperties.getPyhipsterWorker().isEnabled()) {
+                throw new IOException(
+                    "This backend requires the PyHipster worker. Set application.pyhipster-worker.enabled=true and deploy the pyhipster-worker service (see charts/jhipster-online)."
+                );
+            }
+            this.logsService.addLog(applicationId, "Delegating code generation to PyHipster worker for stack " + stackId);
+            this.pyhipsterWorkerClient.generateIntoWorkingDir(applicationId, workingDir.toPath(), applicationConfiguration);
+        } else if (StackProfileResolver.requiresJhipster8Worker(stackId)) {
             if (!applicationProperties.getJhipster8Worker().isEnabled()) {
                 throw new IOException(
                     "This backend requires the JHipster 8 worker. Set application.jhipster8-worker.enabled=true and deploy the jhipster8-worker service (see charts/jhipster-online)."
@@ -218,7 +230,7 @@ public class GeneratorService {
             copyClasspathResource("kubernetes-snippets/go-rust-experimental.md", new File(k8sDir, "go-rust-experimental.md"));
             this.logsService.addLog(
                     applicationId,
-                    "Added experimental Go/Rust OpenShift notes at src/main/kubernetes/go-rust-experimental.md"
+                    "Added experimental stack OpenShift notes at src/main/kubernetes/go-rust-experimental.md (Go/Rust/Python: validate Tekton/build for your runtime)."
                 );
         }
     }

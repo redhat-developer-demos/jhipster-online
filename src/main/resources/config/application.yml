@@ -193,3 +193,7 @@ application:
     enabled: false
     base-url: http://jhipster8-worker:8081
     timeout-seconds: 600
+  pyhipster-worker:
+    enabled: false
+    base-url: http://pyhipster-worker:8082
+    timeout-seconds: 600

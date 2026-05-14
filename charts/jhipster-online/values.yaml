@@ -1,4 +1,4 @@
-# Minimal install: set generatorProfile: single, defaultStack: quarkus, and all workers.enabled: false.
+# Minimal install: set generatorProfile: single, defaultStack: quarkus, jhipster8Worker.enabled: false, pyhipsterWorker.enabled: false, and all workers.*.enabled: false.
 # Example multi (Quarkus + .NET workers): see commented block at bottom of this file.
 nameOverride: ''
 
@@ -71,6 +71,16 @@ jhipster8Worker:
   image:
     repository: quay.io/maximilianopizarro/jhipster-online-jhipster8-worker
     tag: "2.40.1-jhipster8-worker"
+
+# PyHipster HTTP sidecar (Yeoman 5). Separate from jhipster8-worker due to incompatible Yeoman major versions.
+pyhipsterWorker:
+  enabled: false
+  port: 8082
+  timeoutSeconds: 600
+  replicas: 1
+  image:
+    repository: quay.io/maximilianopizarro/jhipster-online-pyhipster-worker
+    tag: "2.40.1-pyhipster-worker"
 
 # Example (documented): multi profile with Quarkus + .NET workers enabled — requires app-side routing to workers.
 # jhipsterOnline:

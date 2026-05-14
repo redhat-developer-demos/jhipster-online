@@ -15,30 +15,30 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Delegates JHipster 8-only stacks to a sidecar HTTP worker that runs {@code generator-jhipster@8.x} and blueprints.
+ * Delegates PyHipster (Yeoman 5) generation to a dedicated HTTP worker (incompatible with JHipster 8 worker Node/Yeoman stack).
  */
 @Service
-public class JHipster8WorkerClient {
+public class PyhipsterWorkerClient {
 
-    private static final Logger log = LoggerFactory.getLogger(JHipster8WorkerClient.class);
+    private static final Logger log = LoggerFactory.getLogger(PyhipsterWorkerClient.class);
 
     private final ApplicationProperties applicationProperties;
 
     private final LogsService logsService;
 
-    public JHipster8WorkerClient(ApplicationProperties applicationProperties, LogsService logsService) {
+    public PyhipsterWorkerClient(ApplicationProperties applicationProperties, LogsService logsService) {
         this.applicationProperties = applicationProperties;
         this.logsService = logsService;
     }
 
     public void generateIntoWorkingDir(String generationId, Path workingDir, String applicationConfiguration) throws IOException {
-        ApplicationProperties.Jhipster8Worker cfg = applicationProperties.getJhipster8Worker();
+        ApplicationProperties.PyhipsterWorker cfg = applicationProperties.getPyhipsterWorker();
         if (!cfg.isEnabled()) {
-            throw new IOException("JHipster 8 worker is disabled (application.jhipster8-worker.enabled=false).");
+            throw new IOException("PyHipster worker is disabled (application.pyhipster-worker.enabled=false).");
         }
         String base = trimTrailingSlash(cfg.getBaseUrl());
         if (base.isBlank()) {
-            throw new IOException("JHipster 8 worker base URL is not configured (application.jhipster8-worker.base-url).");
+            throw new IOException("PyHipster worker base URL is not configured (application.pyhipster-worker.base-url).");
         }
         URI uri = URI.create(base + "/generate");
         int timeoutSec = Math.max(60, cfg.getTimeoutSeconds());
@@ -50,27 +50,27 @@ public class JHipster8WorkerClient {
             .POST(HttpRequest.BodyPublishers.ofString(applicationConfiguration, StandardCharsets.UTF_8))
             .build();
 
-        this.logsService.addLog(generationId, "Calling JHipster 8 worker at " + uri);
+        this.logsService.addLog(generationId, "Calling PyHipster worker at " + uri);
         try {
             HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
             try (InputStream raw = response.body()) {
                 if (response.statusCode() != 200) {
                     String err = new String(raw.readAllBytes(), StandardCharsets.UTF_8);
-                    throw new IOException("JHipster 8 worker HTTP " + response.statusCode() + ": " + err);
+                    throw new IOException("PyHipster worker HTTP " + response.statusCode() + ": " + err);
                 }
                 WorkerTarExtractor.extractTarGz(raw, workingDir);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IOException("JHipster 8 worker request interrupted", e);
+            throw new IOException("PyHipster worker request interrupted", e);
         }
-        this.logsService.addLog(generationId, "JHipster 8 worker generation finished; files merged into workspace.");
-        log.info("JHipster 8 worker merged generated files into {}", workingDir);
+        this.logsService.addLog(generationId, "PyHipster worker generation finished; files merged into workspace.");
+        log.info("PyHipster worker merged generated files into {}", workingDir);
     }
 
     private static String trimTrailingSlash(String url) {
         if (url == null || url.isBlank()) {
-            return "http://jhipster8-worker:8081";
+            return "http://pyhipster-worker:8082";
         }
         String u = url.trim();
         while (u.endsWith("/")) {

@@ -33,3 +33,11 @@ spec:
             - name: APPLICATION_JHIPSTER8WORKER_TIMEOUT_SECONDS
               value: "{{ .Values.jhipster8Worker.timeoutSeconds }}"
             {{- end }}
+            {{- if .Values.pyhipsterWorker.enabled }}
+            - name: APPLICATION_PYHIPSTERWORKER_ENABLED
+              value: "true"
+            - name: APPLICATION_PYHIPSTERWORKER_BASE_URL
+              value: "http://{{ include "jhipster-online.name" . }}-pyhipster-worker:{{ .Values.pyhipsterWorker.port }}"
+            - name: APPLICATION_PYHIPSTERWORKER_TIMEOUT_SECONDS
+              value: "{{ .Values.pyhipsterWorker.timeoutSeconds }}"
+            {{- end }}

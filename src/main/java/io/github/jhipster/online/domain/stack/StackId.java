@@ -12,5 +12,7 @@ public enum StackId {
     DOTNET,
     AZURE_ACA,
     NODE_NEST,
-    GO
+    GO,
+    /** Delegated to the PyHipster HTTP worker when {@code application.pyhipster-worker.enabled} is true. */
+    PYTHON
 }

@@ -177,6 +177,12 @@ export class GeneratorComponent implements OnInit {
       this.model.blueprints = [{ name: 'generator-jhipster-azure-container-apps' }];
     } else if (this.model.backendFramework === 'node') {
       this.model.blueprints = [{ name: 'generator-jhipster-nodejs' }];
+    } else if (this.model.backendFramework === 'python') {
+      this.model.blueprints = [];
+      this.model.cacheProvider = 'no';
+      this.model.enableHibernateCache = false;
+      this.model.websocket = false;
+      this.model.enableSwaggerCodegen = false;
     } else {
       this.model.blueprints = [];
     }
@@ -334,6 +340,11 @@ export class GeneratorComponent implements OnInit {
     } else if (this.model.backendFramework === 'node') {
       this.model.clientFramework = 'angularX';
       this.model.blueprints = bp('generator-jhipster-nodejs');
+    } else if (this.model.backendFramework === 'python') {
+      this.model.clientFramework = 'angularX';
+      this.model.cacheProvider = 'no';
+      this.model.enableHibernateCache = false;
+      this.model.blueprints = [];
     }
   }
 

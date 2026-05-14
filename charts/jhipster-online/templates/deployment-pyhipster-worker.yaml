@@ -1,0 +1,41 @@
+{{- if .Values.pyhipsterWorker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jhipster-online.name" . }}-pyhipster-worker
+  labels:
+    app.kubernetes.io/name: {{ include "jhipster-online.name" . }}
+    app.kubernetes.io/component: pyhipster-worker
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.pyhipsterWorker.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "jhipster-online.name" . }}
+      app.kubernetes.io/component: pyhipster-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "jhipster-online.name" . }}
+        app.kubernetes.io/component: pyhipster-worker
+    spec:
+      containers:
+        - name: pyhipster-worker
+          image: "{{ .Values.pyhipsterWorker.image.repository }}:{{ .Values.pyhipsterWorker.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: {{ .Values.pyhipsterWorker.port }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+{{- end }}

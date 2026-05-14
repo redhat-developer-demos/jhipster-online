@@ -17,6 +17,25 @@ class StackProfileResolverTest {
     }
 
     @Test
+    void requiresPyhipsterWorkerForPythonOnly() {
+        assertThat(StackProfileResolver.requiresPyhipsterWorker(StackId.PYTHON)).isTrue();
+        assertThat(StackProfileResolver.requiresPyhipsterWorker(StackId.DOTNET)).isFalse();
+        assertThat(StackProfileResolver.requiresPyhipsterWorker(StackId.SPRING_BOOT)).isFalse();
+    }
+
+    @Test
+    void resolvesPythonFromBackendFramework() {
+        String json = "{\"generator-jhipster\":{\"baseName\":\"demo\",\"backendFramework\":\"python\"}}";
+        assertThat(StackProfileResolver.resolveHelmFrameworkToken(json, "jhipster")).isEqualTo("python");
+    }
+
+    @Test
+    void resolvesPythonFromBlueprint() {
+        String json = "{\"generator-jhipster\":{\"blueprints\":[{\"name\":\"generator-pyhipster\"}]}}";
+        assertThat(StackProfileResolver.resolveHelmFrameworkToken(json, "jhipster")).isEqualTo("python");
+    }
+
+    @Test
     void resolvesQuarkusFromBlueprint() {
         String json = "{\"generator-jhipster\":{},\"blueprints\":[{\"name\":\"generator-jhipster-quarkus\"}]}";
         assertThat(StackProfileResolver.resolveHelmFrameworkToken(json, "jhipster")).isEqualTo("quarkus");
@@ -33,6 +52,13 @@ class StackProfileResolverTest {
         String json = "{\"generator-jhipster\":{},\"blueprints\":[{\"name\":\"generator-jhipster-dotnetcore\"}]}";
         Map<String, String> map = Map.of("dotnet", "jhipster-dotnetcore", "spring-boot", "jhipster");
         assertThat(StackProfileResolver.resolveJhipsterCliCommand(json, map, "jhipster")).isEqualTo("jhipster-dotnetcore");
+    }
+
+    @Test
+    void resolvesCliCommandForPython() {
+        String json = "{\"generator-jhipster\":{\"backendFramework\":\"python\"}}";
+        Map<String, String> map = Map.of("python", "pyhipster", "spring-boot", "jhipster");
+        assertThat(StackProfileResolver.resolveJhipsterCliCommand(json, map, "jhipster")).isEqualTo("pyhipster");
     }
 
     @Test

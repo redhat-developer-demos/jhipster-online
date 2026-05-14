@@ -178,6 +178,7 @@ graph LR
    - Copies `devfile.yaml` and `catalog-info.yaml` from `repo-root-template/` on the classpath and replaces tokens (`__REPO_NAME__`, `__GIT_REPO_URL__`, etc.)
    - Copies optional MariaDB manifest from `kubernetes-snippets/preset-mariadb-standalone.yaml` to `src/main/kubernetes/preset-mariadb-standalone.yaml`
    - For stacks that require **JHipster 8** (`.NET`, `Node/NestJS`, `Azure Container Apps`), when `application.jhipster8-worker.enabled=true`, calls `JHipster8WorkerClient` (`POST` to the sidecar `/generate`, response `tar.gz` merged into the workspace). Otherwise generation fails with a clear error until the worker is deployed.
+   - For **Python / PyHipster** (`StackId.PYTHON`), when `application.pyhipster-worker.enabled=true`, calls `PyhipsterWorkerClient` against the **separate** PyHipster sidecar (`Dockerfile.pyhipster-worker`, Yeoman 5 — incompatible with the JHipster 8 worker image).
    - For all other stacks, calls `JHipsterService.generateApplication()` which resolves the CLI command per stack via `StackProfileResolver` (e.g. `jhipster` for Spring/Quarkus/Micronaut, `jhipster-rust` for Rust)
    - Writes optional extras and Helm chart from `helm-template/` (Tekton pipelines live under `helm/templates/`, not at repo root)
    - Appends "Open in Dev Spaces" badge to README.md
@@ -276,9 +277,18 @@ These run **`generator-jhipster@8.11.0`** in a separate HTTP service (`POST /gen
 | Node/NestJS | `generator-jhipster-nodejs@3.2.0`               | 8.10.x     | `nhipster`                      |
 | Azure ACA   | `generator-jhipster-azure-container-apps@1.0.9` | 8.6+       | `jhipster-azure-container-apps` |
 
+#### PyHipster worker (sidecar `Dockerfile.pyhipster-worker`)
+
+Runs **`generator-pyhipster@0.0.9`** on **Node 18** (Yeoman 5) in a separate HTTP service. The main app delegates when `application.pyhipster-worker.enabled=true` (Helm `pyhipsterWorker`). This is **not** bundled into `Dockerfile.jhipster8-worker` because Yeoman 5 and Yeoman 7 conflict at the global npm level.
+
+| Stack  | Blueprint                   | CLI on worker |
+| ------ | --------------------------- | ------------- |
+| Python | `generator-pyhipster@0.0.9` | `pyhipster`   |
+
 | Stack (not supported) | Notes                                                                 |
 | --------------------- | --------------------------------------------------------------------- |
 | Go                    | `generator-jhipster-go@1.0.0` on npm is an empty placeholder package. |
 
 - **Micronaut** has its own `deployment-app-micronaut.yaml` but reuses the Spring Tekton pipeline (both are JVM-based).
 - **Rust** falls back to Spring deployment and Tekton variants; controlled by `usesJvmJarPipeline()`.
+- **Python** uses Helm token `python`; bundled OpenShift/Tekton defaults still target JVM-style flows until you customize them (see experimental stack notes in generation logs).

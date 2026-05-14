@@ -39,6 +39,8 @@ public class ApplicationProperties {
 
     private Jhipster8Worker jhipster8Worker = new Jhipster8Worker();
 
+    private PyhipsterWorker pyhipsterWorker = new PyhipsterWorker();
+
     private NpmCmd npmCmd = new NpmCmd();
 
     private YqCmd yqCmd = new YqCmd();
@@ -98,6 +100,14 @@ public class ApplicationProperties {
         this.jhipster8Worker = jhipster8Worker == null ? new Jhipster8Worker() : jhipster8Worker;
     }
 
+    public PyhipsterWorker getPyhipsterWorker() {
+        return pyhipsterWorker;
+    }
+
+    public void setPyhipsterWorker(PyhipsterWorker pyhipsterWorker) {
+        this.pyhipsterWorker = pyhipsterWorker == null ? new PyhipsterWorker() : pyhipsterWorker;
+    }
+
     private static Map<String, String> defaultJhipsterCommandsByStack() {
         Map<String, String> m = new LinkedHashMap<>();
         m.put("spring-boot", "jhipster");
@@ -107,6 +117,7 @@ public class ApplicationProperties {
         m.put("dotnet", "jhipster-dotnetcore");
         m.put("node", "nhipster");
         m.put("azure-aca", "jhipster-azure-container-apps");
+        m.put("python", "pyhipster");
         return m;
     }
 
@@ -660,6 +671,44 @@ public class ApplicationProperties {
 
         /** Base URL of the worker (no trailing slash), e.g. {@code http://jhipster-online-jhipster8-worker:8081}. */
         private String baseUrl = "http://jhipster8-worker:8081";
+
+        /** HTTP timeout for POST /generate (includes generation + tar download). */
+        private int timeoutSeconds = 600;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getBaseUrl() {
+            return baseUrl;
+        }
+
+        public void setBaseUrl(String baseUrl) {
+            this.baseUrl = baseUrl == null ? "" : baseUrl;
+        }
+
+        public int getTimeoutSeconds() {
+            return timeoutSeconds;
+        }
+
+        public void setTimeoutSeconds(int timeoutSeconds) {
+            this.timeoutSeconds = timeoutSeconds;
+        }
+    }
+
+    /**
+     * Optional sidecar that runs {@code generator-pyhipster} (Yeoman 5) for Python/Flask apps.
+     */
+    public static class PyhipsterWorker {
+
+        private boolean enabled;
+
+        /** Base URL of the worker (no trailing slash), e.g. {@code http://pyhipster-worker:8082}. */
+        private String baseUrl = "http://pyhipster-worker:8082";
 
         /** HTTP timeout for POST /generate (includes generation + tar download). */
         private int timeoutSeconds = 600;

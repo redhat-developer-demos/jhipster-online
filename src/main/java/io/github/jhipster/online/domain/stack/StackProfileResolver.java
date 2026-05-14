@@ -19,6 +19,7 @@ public final class StackProfileResolver {
     public static final String TOKEN_NODE = "node";
     public static final String TOKEN_GO = "go";
     public static final String TOKEN_RUST = "rust";
+    public static final String TOKEN_PYTHON = "python";
 
     private StackProfileResolver() {}
 
@@ -27,6 +28,9 @@ public final class StackProfileResolver {
             return defaultFromCmd(globalJhipsterCmd);
         }
         String cfg = applicationConfiguration;
+        if (containsBlueprint(cfg, "generator-pyhipster") || containsBackendFramework(cfg, "python")) {
+            return StackId.PYTHON;
+        }
         if (containsBlueprint(cfg, "generator-jhipster-dotnetcore") || containsBackendFramework(cfg, "dotnet")) {
             return StackId.DOTNET;
         }
@@ -73,6 +77,13 @@ public final class StackProfileResolver {
         return stackId == StackId.DOTNET || stackId == StackId.AZURE_ACA || stackId == StackId.NODE_NEST;
     }
 
+    /**
+     * Stacks that must run on the PyHipster HTTP worker (Yeoman 5; incompatible with JHipster 8 worker).
+     */
+    public static boolean requiresPyhipsterWorker(StackId stackId) {
+        return stackId == StackId.PYTHON;
+    }
+
     private static StackId defaultFromCmd(String globalJhipsterCmd) {
         if ("jhipster-quarkus".equals(StringUtils.trimToEmpty(globalJhipsterCmd))) {
             return StackId.QUARKUS;
@@ -111,6 +122,9 @@ public final class StackProfileResolver {
         }
         if (id == StackId.RUST) {
             return TOKEN_RUST;
+        }
+        if (id == StackId.PYTHON) {
+            return TOKEN_PYTHON;
         }
         return TOKEN_SPRING_BOOT;
     }
@@ -151,6 +165,6 @@ public final class StackProfileResolver {
     }
 
     public static boolean isExperimentalStack(String helmFrameworkToken) {
-        return TOKEN_GO.equals(helmFrameworkToken) || TOKEN_RUST.equals(helmFrameworkToken);
+        return (TOKEN_GO.equals(helmFrameworkToken) || TOKEN_RUST.equals(helmFrameworkToken) || TOKEN_PYTHON.equals(helmFrameworkToken));
     }
 }

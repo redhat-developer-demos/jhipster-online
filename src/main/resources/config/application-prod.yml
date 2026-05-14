@@ -168,6 +168,10 @@ application:
     enabled: ${APPLICATION_JHIPSTER8WORKER_ENABLED:false}
     base-url: ${APPLICATION_JHIPSTER8WORKER_BASE_URL:http://jhipster8-worker:8081}
     timeout-seconds: ${APPLICATION_JHIPSTER8WORKER_TIMEOUT_SECONDS:600}
+  pyhipster-worker:
+    enabled: ${APPLICATION_PYHIPSTERWORKER_ENABLED:false}
+    base-url: ${APPLICATION_PYHIPSTERWORKER_BASE_URL:http://pyhipster-worker:8082}
+    timeout-seconds: ${APPLICATION_PYHIPSTERWORKER_TIMEOUT_SECONDS:600}
 
 #application:
 #    tmp-folder: /tmp

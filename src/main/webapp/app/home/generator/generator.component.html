@@ -99,6 +99,7 @@
         <option value="dotnet">.NET Core (JHipster 8 worker + generator-jhipster-dotnetcore 4.5)</option>
         <option value="azure-aca">Azure Container Apps (JHipster 8 worker + generator-jhipster-azure-container-apps)</option>
         <option value="node">Node / NestJS (JHipster 8 worker + generator-jhipster-nodejs 3.2)</option>
+        <option value="python">Python / Flask (PyHipster worker + generator-pyhipster 0.0.9)</option>
         <option value="go" disabled>Go — no maintained JHipster blueprint</option>
       </select>
       <div *ngIf="model.backendFramework === 'quarkus'" class="form-text text-muted small">
@@ -106,6 +107,9 @@
       </div>
       <div *ngIf="model.backendFramework === 'rust'" class="form-text text-muted small">
         Rust is experimental — verify generator packages exist on the server image; OpenShift defaults may still use JVM-oriented Tekton until customized.
+      </div>
+      <div *ngIf="model.backendFramework === 'python'" class="form-text text-muted small">
+        PyHipster runs on a separate sidecar (Yeoman 5). Enable <code>application.pyhipster-worker</code> and deploy the PyHipster worker (see Helm chart).
       </div>
     </div>
   </div>
