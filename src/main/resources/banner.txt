@@ -1,14 +1,14 @@
 
-${AnsiColor.BRIGHT_BLACK}  +--------------------------------------------------------------------------+
-${AnsiColor.BRIGHT_BLACK}  |                                                                          |
-${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}      ██╗${AnsiColor.RED} ██╗   ██╗ ████████╗ ███████╗   ██████╗ ████████╗ ████████╗ ███████╗  ${AnsiColor.BRIGHT_BLACK}|
-${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}      ██║${AnsiColor.RED} ██║   ██║ ╚══██╔══╝ ██╔═══██╗ ██╔════╝ ╚══██╔══╝ ██╔═════╝ ██╔═══██╗ ${AnsiColor.BRIGHT_BLACK}|
-${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}      ██║${AnsiColor.RED} ████████║    ██║    ███████╔╝ ╚█████╗     ██║    ██████╗   ███████╔╝ ${AnsiColor.BRIGHT_BLACK}|
-${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}██╗   ██║${AnsiColor.RED} ██╔═══██║    ██║    ██╔════╝   ╚═══██╗    ██║    ██╔═══╝   ██╔══██║  ${AnsiColor.BRIGHT_BLACK}|
-${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN}╚██████╔╝${AnsiColor.RED} ██║   ██║ ████████╗ ██║       ██████╔╝    ██║    ████████╗ ██║  ╚██╗ ${AnsiColor.BRIGHT_BLACK}|
-${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.GREEN} ╚═════╝ ${AnsiColor.RED} ╚═╝   ╚═╝ ╚═══════╝ ╚═╝       ╚═════╝     ╚═╝    ╚═══════╝ ╚═╝   ╚═╝ ${AnsiColor.BRIGHT_BLACK}|
-${AnsiColor.BRIGHT_BLACK}  |                                                                          |
-${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.BRIGHT_CYAN}:: JHipster Online ::${AnsiColor.DEFAULT}  Spring Boot ${spring-boot.version}                           ${AnsiColor.BRIGHT_BLACK}|
-${AnsiColor.BRIGHT_BLACK}  |  ${AnsiColor.BRIGHT_CYAN}:: https://github.com/redhat-developer-demos/jhipster-online ::${AnsiColor.DEFAULT}           ${AnsiColor.BRIGHT_BLACK}|
-${AnsiColor.BRIGHT_BLACK}  |                                                                          |
-${AnsiColor.BRIGHT_BLACK}  +--------------------------------------------------------------------------+${AnsiColor.DEFAULT}
+${AnsiColor.BRIGHT_CYAN}  ============================================================================
+${AnsiColor.BRIGHT_CYAN}  ============================================================================
+${AnsiColor.WHITE}  ===========  ${AnsiColor.GREEN}      ██╗${AnsiColor.RED} ██╗   ██╗ ████████╗ ███████╗   ██████╗ ████████╗ ████████╗ ███████╗  ${AnsiColor.WHITE}==
+${AnsiColor.WHITE}  ===========  ${AnsiColor.GREEN}      ██║${AnsiColor.RED} ██║   ██║ ╚══██╔══╝ ██╔═══██╗ ██╔════╝ ╚══██╔══╝ ██╔═════╝ ██╔═══██╗ ${AnsiColor.WHITE}==
+${AnsiColor.WHITE}  ===========  ${AnsiColor.GREEN}      ██║${AnsiColor.RED} ████████║    ██║    ███████╔╝ ╚█████╗     ██║    ██████╗   ███████╔╝ ${AnsiColor.WHITE}==
+${AnsiColor.WHITE}  ===========  ${AnsiColor.GREEN}██╗   ██║${AnsiColor.RED} ██╔═══██║    ██║    ██╔════╝   ╚═══██╗    ██║    ██╔═══╝   ██╔══██║  ${AnsiColor.WHITE}==
+${AnsiColor.WHITE}  ===========  ${AnsiColor.GREEN}╚██████╔╝${AnsiColor.RED} ██║   ██║ ████████╗ ██║       ██████╔╝    ██║    ████████╗ ██║  ╚██╗ ${AnsiColor.WHITE}==
+${AnsiColor.WHITE}  ===========  ${AnsiColor.GREEN} ╚═════╝ ${AnsiColor.RED} ╚═╝   ╚═╝ ╚═══════╝ ╚═╝       ╚═════╝     ╚═╝    ╚═══════╝ ╚═╝   ╚═╝ ${AnsiColor.WHITE}==
+${AnsiColor.BRIGHT_CYAN}  ============================================================================
+${AnsiColor.BRIGHT_CYAN}  ============================================================================${AnsiColor.DEFAULT}
+
+  :: JHipster Online :: Spring Boot ${spring-boot.version} ::
+  :: https://github.com/redhat-developer-demos/jhipster-online ::
