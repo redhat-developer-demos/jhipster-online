@@ -122,6 +122,10 @@ export class McpGeneratorComponent implements OnInit {
       this.alertService.addAlert({ type: 'warning', msg: 'AI is not configured on this server.' });
       return;
     }
+    if (!this.jdlPaste.trim()) {
+      this.alertService.addAlert({ type: 'warning', msg: 'Paste JDL entity definitions first.' });
+      return;
+    }
     this.loadingJdlTools = true;
     this.mcpGeneratorService
       .jdlToTools({

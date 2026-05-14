@@ -117,7 +117,7 @@
             placeholder="entity Book { title String, isbn String }"
           ></textarea>
           <div class="d-flex flex-wrap gap-2 mb-2">
-            <button type="button" class="btn btn-sm btn-primary" (click)="generateToolsFromJdl()" [disabled]="loadingJdlTools || !assistantEnabled">
+            <button type="button" class="btn btn-sm btn-primary" (click)="generateToolsFromJdl()" [disabled]="loadingJdlTools || !assistantEnabled || !jdlPaste.trim()">
               <span *ngIf="!loadingJdlTools">Generate MCP tools from JDL</span>
               <span *ngIf="loadingJdlTools">Calling model…</span>
             </button>

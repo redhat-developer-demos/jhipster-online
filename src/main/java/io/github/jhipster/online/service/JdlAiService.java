@@ -153,7 +153,15 @@ public class JdlAiService {
                 log.warn("JDL AI upstream returned HTTP {}: {}", response.statusCode(), abbreviate(body, 500));
                 String hint = abbreviate(parseUpstreamErrorHint(body), 240);
                 String msg = "Model endpoint returned HTTP " + response.statusCode();
-                if (StringUtils.isNotBlank(hint)) {
+                if (response.statusCode() == 302 || response.statusCode() == 301) {
+                    String location = response.headers().firstValue("Location").orElse("(unknown)");
+                    msg =
+                        "Model endpoint redirected (HTTP " +
+                        response.statusCode() +
+                        ") to " +
+                        location +
+                        " — check application.jdl-ai.api-url or model api-url configuration";
+                } else if (StringUtils.isNotBlank(hint)) {
                     msg = msg + ": " + hint;
                 }
                 throw new IllegalStateException(msg);
@@ -210,7 +218,10 @@ public class JdlAiService {
     }
 
     private HttpClient buildHttpClient(ApplicationProperties.JdlAi cfg) {
-        HttpClient.Builder b = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(cfg.getConnectTimeoutMs()));
+        HttpClient.Builder b = HttpClient
+            .newBuilder()
+            .connectTimeout(Duration.ofMillis(cfg.getConnectTimeoutMs()))
+            .followRedirects(HttpClient.Redirect.NORMAL);
         if (cfg.isInsecureTls()) {
             try {
                 b.sslContext(insecureSslContext());
