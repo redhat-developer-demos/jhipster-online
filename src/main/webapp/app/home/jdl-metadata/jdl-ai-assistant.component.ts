@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
+import { EventManager } from 'app/core/event-manager.service';
+import { JhiAlertService } from 'app/shared/alert/alert.service';
 
 import { EditorAiService } from 'app/shared/editor-ai/editor-ai.service';
 import { JdlMetadataService } from './jdl-metadata.service';
@@ -69,7 +70,7 @@ export class JdlAiAssistantComponent implements OnInit {
     private editorAiService: EditorAiService,
     private jdlMetadataService: JdlMetadataService,
     private alertService: JhiAlertService,
-    private eventManager: JhiEventManager
+    private eventManager: EventManager
   ) {}
 
   ngOnInit(): void {

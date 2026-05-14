@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { JhiAlertService, JhiAlert } from 'ng-jhipster';
+import { JhiAlertService, JhiAlert } from 'app/shared/alert/alert.service';
 
 import { SpyObject } from './spyobject';
 

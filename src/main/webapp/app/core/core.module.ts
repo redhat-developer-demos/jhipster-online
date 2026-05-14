@@ -23,7 +23,6 @@ import { Title } from '@angular/platform-browser';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { CookieModule } from 'ngx-cookie';
 import { NgxWebstorageModule } from 'ngx-webstorage';
-import { NgJhipsterModule } from 'ng-jhipster';
 import locale from '@angular/common/locales/en';
 
 import dayjs from 'dayjs/esm';
@@ -41,12 +40,7 @@ import { fontAwesomeIcons } from './icons/font-awesome-icons';
   imports: [
     HttpClientModule,
     CookieModule.withOptions(),
-    NgxWebstorageModule.forRoot({ prefix: 'jhi', separator: '-' }),
-    NgJhipsterModule.forRoot({
-      // set below to true to make alerts look like toast
-      alertAsToast: false,
-      alertTimeout: 5000
-    })
+    NgxWebstorageModule.forRoot({ prefix: 'jhi', separator: '-' })
   ],
   providers: [
     Title,

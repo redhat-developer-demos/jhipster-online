@@ -16,19 +16,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Route } from '@angular/router';
-import { JhiResolvePagingParams } from 'app/shared/resolve-paging-params';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
-import { AuditsComponent } from './audits.component';
+import { SortDirective } from './sort.directive';
+import { SortByDirective } from './sort-by.directive';
+import { ItemCountComponent } from './item-count.component';
 
-export const auditsRoute: Route = {
-  path: '',
-  component: AuditsComponent,
-  resolve: {
-    pagingParams: JhiResolvePagingParams
-  },
-  data: {
-    pageTitle: 'Audits',
-    defaultSort: 'auditEventDate,desc'
-  }
-};
+@NgModule({
+  imports: [CommonModule, FontAwesomeModule],
+  declarations: [SortDirective, SortByDirective, ItemCountComponent],
+  exports: [SortDirective, SortByDirective, ItemCountComponent]
+})
+export class JhSortModule {}

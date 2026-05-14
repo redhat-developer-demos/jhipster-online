@@ -35,7 +35,6 @@
     "dayjs": "^1.11.7",
     "echarts": "^5.4.0",
     "jquery": "3.6.1",
-    "ng-jhipster": "0.16.0",
     "ngx-cookie": "6.0.1",
     "ngx-infinite-scroll": "14.0.1",
     "ngx-webstorage": "10.0.1",

@@ -22,7 +22,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JhiEventManager } from 'ng-jhipster';
+import { EventManager } from 'app/core/event-manager.service';
 
 import { ITEMS_PER_PAGE } from 'app/shared/constants/pagination.constants';
 import { AccountService } from 'app/core/auth/account.service';
@@ -52,7 +52,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     private accountService: AccountService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private eventManager: JhiEventManager,
+    private eventManager: EventManager,
     private modalService: NgbModal
   ) {}
 

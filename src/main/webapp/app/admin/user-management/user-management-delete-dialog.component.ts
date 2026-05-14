@@ -18,7 +18,7 @@
  */
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { JhiEventManager } from 'ng-jhipster';
+import { EventManager } from 'app/core/event-manager.service';
 
 import { User } from 'app/core/user/user.model';
 import { UserService } from 'app/core/user/user.service';
@@ -30,7 +30,7 @@ import { UserService } from 'app/core/user/user.service';
 export class UserManagementDeleteDialogComponent {
   user?: User;
 
-  constructor(private userService: UserService, public activeModal: NgbActiveModal, private eventManager: JhiEventManager) {}
+  constructor(private userService: UserService, public activeModal: NgbActiveModal, private eventManager: EventManager) {}
 
   cancel(): void {
     this.activeModal.dismiss();

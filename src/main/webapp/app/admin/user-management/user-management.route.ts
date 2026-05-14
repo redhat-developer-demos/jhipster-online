@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, Routes } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { JhiResolvePagingParams } from 'ng-jhipster';
+import { JhiResolvePagingParams } from 'app/shared/resolve-paging-params';
 
 import { User, IUser } from 'app/core/user/user.model';
 import { UserService } from 'app/core/user/user.service';

@@ -19,7 +19,7 @@
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { JhiEventManager } from 'ng-jhipster';
+import { EventManager, EventWithContent } from 'app/core/event-manager.service';
 
 import { GeneratorIdentityService } from './generator-identity.service';
 
@@ -32,17 +32,14 @@ export class RemoveGeneratorDialogComponent {
 
   constructor(
     private generatorIdentityService: GeneratorIdentityService,
-    private eventManager: JhiEventManager,
+    private eventManager: EventManager,
     private activeModal: NgbActiveModal
   ) {}
 
   confirmUnbind(): void {
     if (this.generatorId) {
       this.generatorIdentityService.unbind(this.generatorId).subscribe(() => {
-        this.eventManager.broadcast({
-          name: 'generatorIdentityListModification',
-          content: 'Remove a generatorIdentity'
-        });
+        this.eventManager.broadcast(new EventWithContent('generatorIdentityListModification', 'Remove a generatorIdentity'));
         this.activeModal.close();
       });
     }

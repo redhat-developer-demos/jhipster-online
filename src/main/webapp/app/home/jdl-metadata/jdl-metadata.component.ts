@@ -17,7 +17,8 @@
  * limitations under the License.
  */
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
+import { EventManager } from 'app/core/event-manager.service';
+import { JhiAlertService } from 'app/shared/alert/alert.service';
 
 import { JdlMetadata } from './jdl-metadata.model';
 import { JdlMetadataService } from './jdl-metadata.service';
@@ -39,7 +40,7 @@ export class JdlMetadataComponent implements OnInit, OnDestroy {
   constructor(
     private jdlMetadataService: JdlMetadataService,
     private alertService: JhiAlertService,
-    private eventManager: JhiEventManager,
+    private eventManager: EventManager,
     private accountService: AccountService
   ) {
     this.predicate = 'name';

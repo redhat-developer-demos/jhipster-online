@@ -69,5 +69,14 @@
       }
     ],
     "@typescript-eslint/no-non-null-assertion": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/main/webapp/app/shared/ng-jhipster-compat/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/ban-ts-comment": "off",
+        "spaced-comment": "off"
+      }
+    }
+  ]
 }

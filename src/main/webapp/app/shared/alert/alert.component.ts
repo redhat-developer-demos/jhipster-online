@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { JhiAlertService, JhiAlert } from 'ng-jhipster';
+import { JhiAlertService, JhiAlert } from './alert.service';
 
 @Component({
   selector: 'jhi-alert',

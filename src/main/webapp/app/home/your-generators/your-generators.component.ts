@@ -20,7 +20,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
+import { EventManager } from 'app/core/event-manager.service';
+import { JhiAlertService } from 'app/shared/alert/alert.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { IGeneratorIdentity } from 'app/shared/model/generator-identity.model';
@@ -41,7 +42,7 @@ export class YourGeneratorsComponent implements OnInit, OnDestroy {
   constructor(
     private generatorIdentityService: GeneratorIdentityService,
     private jhiAlertService: JhiAlertService,
-    private eventManager: JhiEventManager,
+    private eventManager: EventManager,
     private accountService: AccountService,
     private modalService: NgbModal
   ) {}

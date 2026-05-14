@@ -18,7 +18,8 @@
  */
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
+import { EventManager } from 'app/core/event-manager.service';
+import { JhiAlertService } from 'app/shared/alert/alert.service';
 
 import { JhonlineTestModule } from '../../../test.module';
 import { AlertErrorComponent } from 'app/shared/alert/alert-error.component';
@@ -28,7 +29,7 @@ describe('Component Tests', () => {
   describe('Alert Error Component', () => {
     let comp: AlertErrorComponent;
     let fixture: ComponentFixture<AlertErrorComponent>;
-    let eventManager: JhiEventManager;
+    let eventManager: EventManager;
 
     beforeEach(
       waitForAsync(() => {
@@ -36,7 +37,7 @@ describe('Component Tests', () => {
           imports: [JhonlineTestModule],
           declarations: [AlertErrorComponent],
           providers: [
-            JhiEventManager,
+            EventManager,
             {
               provide: JhiAlertService,
               useClass: MockAlertService
@@ -51,7 +52,7 @@ describe('Component Tests', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(AlertErrorComponent);
       comp = fixture.componentInstance;
-      eventManager = fixture.debugElement.injector.get(JhiEventManager);
+      eventManager = fixture.debugElement.injector.get(EventManager);
     });
 
     describe('Error Handling', () => {

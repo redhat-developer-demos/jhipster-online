@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { JhiAlert, JhiAlertService } from 'ng-jhipster';
+import { JhiAlert, JhiAlertService } from 'app/shared/alert/alert.service';
 
 import { EditorAiModelOption, EditorAiService } from './editor-ai.service';
 

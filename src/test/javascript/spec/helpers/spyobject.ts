@@ -30,15 +30,16 @@ export interface GuinessCompatibleSpy extends jasmine.Spy {
 export class SpyObject {
   constructor(type?: any) {
     if (type) {
-      Object.keys(type.prototype).forEach(prop => {
+      const props = Object.getOwnPropertyNames(type.prototype);
+      props.forEach(prop => {
+        if (prop === 'constructor') {
+          return;
+        }
         let m = null;
         try {
           m = type.prototype[prop];
         } catch (e) {
-          // As we are creating spys for abstract classes,
-          // these classes might have getters that throw when they are accessed.
-          // As we are only auto creating spys for methods, this
-          // should not matter.
+          // ignore getters that throw when accessed during spy setup (e.g. abstract bases)
         }
         if (typeof m === 'function') {
           this.spy(prop);

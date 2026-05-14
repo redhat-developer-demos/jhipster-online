@@ -22,7 +22,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { JhiDataUtils, JhiDateUtils, JhiEventManager, JhiAlertService, JhiParseLinks } from 'ng-jhipster';
+import { EventManager } from 'app/core/event-manager.service';
+import { JhiAlertService } from 'app/shared/alert/alert.service';
+import { JhiDataUtils } from 'app/shared/util/data-util.service';
+import { JhiDateUtils } from 'app/shared/util/date-util.service';
+import { JhiParseLinks } from 'app/shared/util/parse-links.service';
 
 import { AccountService } from 'app/core/auth/account.service';
 import { LoginModalService } from 'app/core/login/login-modal.service';
@@ -38,7 +42,7 @@ import { MockEventManager } from './helpers/mock-event-manager.service';
     JhiDateUtils,
     JhiParseLinks,
     {
-      provide: JhiEventManager,
+      provide: EventManager,
       useClass: MockEventManager
     },
     {

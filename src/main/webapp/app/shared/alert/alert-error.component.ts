@@ -18,7 +18,8 @@
  */
 import { Component, OnDestroy } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { JhiEventManager, JhiAlert, JhiAlertService, JhiEventWithContent } from 'ng-jhipster';
+import { EventManager, EventWithContent } from 'app/core/event-manager.service';
+import { JhiAlert, JhiAlertService } from './alert.service';
 import { Subscription } from 'rxjs';
 
 import { AlertError } from './alert-error.model';
@@ -41,7 +42,7 @@ export class AlertErrorComponent implements OnDestroy {
   httpErrorListener: Subscription;
   caseMap: Map<number, Function>;
 
-  constructor(private alertService: JhiAlertService, private eventManager: JhiEventManager) {
+  constructor(private alertService: JhiAlertService, private eventManager: EventManager) {
     this.caseMap = new Map<number, Function>();
     /* eslint-disable */
     this.caseMap.set(0, (context: AlertErrorComponent, httpErrorResponse: HttpErrorResponse) => {
@@ -79,12 +80,12 @@ export class AlertErrorComponent implements OnDestroy {
       }
     });
 
-    this.errorListener = eventManager.subscribe('jhonlineApp.error', (response: JhiEventWithContent<AlertError>) => {
+    this.errorListener = eventManager.subscribe('jhonlineApp.error', (response: EventWithContent<AlertError>) => {
       const errorResponse = response.content;
       this.addErrorAlert(errorResponse.message);
     });
 
-    this.httpErrorListener = eventManager.subscribe('jhonlineApp.httpError', (response: JhiEventWithContent<HttpErrorResponse>) => {
+    this.httpErrorListener = eventManager.subscribe('jhonlineApp.httpError', (response: EventWithContent<HttpErrorResponse>) => {
       const httpErrorResponse = response.content;
       const lambda = this.caseMap.get(httpErrorResponse.status);
       if (lambda) {

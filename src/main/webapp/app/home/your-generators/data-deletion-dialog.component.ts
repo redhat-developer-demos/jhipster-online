@@ -19,7 +19,7 @@
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { JhiEventManager } from 'ng-jhipster';
+import { EventManager, EventWithContent } from 'app/core/event-manager.service';
 
 import { GeneratorIdentityService } from './generator-identity.service';
 
@@ -30,16 +30,13 @@ import { GeneratorIdentityService } from './generator-identity.service';
 export class DataDeletionDialogComponent {
   constructor(
     private generatorIdentityService: GeneratorIdentityService,
-    private eventManager: JhiEventManager,
+    private eventManager: EventManager,
     private activeModal: NgbActiveModal
   ) {}
 
   confirmDeletion(): void {
     this.generatorIdentityService.deleteStatistics().subscribe(() => {
-      this.eventManager.broadcast({
-        name: 'statisticsModification',
-        content: 'Delete all user related statistics'
-      });
+      this.eventManager.broadcast(new EventWithContent('statisticsModification', 'Delete all user related statistics'));
       this.activeModal.close();
     });
   }
