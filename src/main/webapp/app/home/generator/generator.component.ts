@@ -177,6 +177,7 @@ export class GeneratorComponent implements OnInit {
       this.model.blueprints = [{ name: 'generator-jhipster-azure-container-apps' }];
     } else if (this.model.backendFramework === 'node') {
       this.model.blueprints = [{ name: 'generator-jhipster-nodejs' }];
+      this.coerceNodeDevDatabaseForTypeorm();
     } else if (this.model.backendFramework === 'python') {
       this.model.blueprints = [];
       this.model.cacheProvider = 'no';
@@ -340,6 +341,7 @@ export class GeneratorComponent implements OnInit {
     } else if (this.model.backendFramework === 'node') {
       this.model.clientFramework = 'angularX';
       this.model.blueprints = bp('generator-jhipster-nodejs');
+      this.coerceNodeDevDatabaseForTypeorm();
     } else if (this.model.backendFramework === 'python') {
       this.model.clientFramework = 'angularX';
       this.model.cacheProvider = 'no';
@@ -369,6 +371,7 @@ export class GeneratorComponent implements OnInit {
       this.model.devDatabaseType = AllDevDatabaseTypes.find(type => !this.isDevDatabaseOptionHidden('sql', type)) ?? 'h2Disk';
       this.model.cacheProvider = 'ehcache';
       this.model.enableHibernateCache = true;
+      this.coerceNodeDevDatabaseForTypeorm();
     } else if (this.model.databaseType === 'mongodb') {
       this.model.prodDatabaseType = 'mongodb';
       this.model.devDatabaseType = 'mongodb';
@@ -403,6 +406,7 @@ export class GeneratorComponent implements OnInit {
     if (this.model.databaseType === 'sql') {
       // Find first allowed dev database type
       this.model.devDatabaseType = AllDevDatabaseTypes.find(type => !this.isDevDatabaseOptionHidden('sql', type)) ?? 'h2Disk';
+      this.coerceNodeDevDatabaseForTypeorm();
     } else if (this.model.prodDatabaseType === 'mongodb') {
       this.model.devDatabaseType = 'mongodb';
       this.model.cacheProvider = 'no';
@@ -431,10 +435,31 @@ export class GeneratorComponent implements OnInit {
   }
 
   isDevDatabaseOptionHidden(validDatabaseType: string, databaseName: DevDatabaseType): boolean {
+    if (this.model.backendFramework === 'node' && (databaseName === 'h2Disk' || databaseName === 'h2Memory')) {
+      return true;
+    }
     return (
       this.model.databaseType !== validDatabaseType ||
       Boolean(this.config?.hideDevDatabaseTypeOptions?.includes(databaseName)) ||
       (databaseName !== 'h2Disk' && databaseName !== 'h2Memory' && this.model.prodDatabaseType !== databaseName)
     );
+  }
+
+  /** NestJS + TypeORM do not support Java H2; align dev DB with a real SQL driver. */
+  private coerceNodeDevDatabaseForTypeorm(): void {
+    if (this.model.backendFramework !== 'node' || this.model.databaseType !== 'sql') {
+      return;
+    }
+    if (this.model.devDatabaseType === 'h2Disk' || this.model.devDatabaseType === 'h2Memory') {
+      this.model.devDatabaseType = this.resolveNodeDevDatabaseType();
+    }
+  }
+
+  private resolveNodeDevDatabaseType(): DevDatabaseType {
+    const p = this.model.prodDatabaseType;
+    if (p === 'mysql' || p === 'mariadb' || p === 'postgresql' || p === 'oracle' || p === 'mssql') {
+      return p;
+    }
+    return 'mysql';
   }
 }

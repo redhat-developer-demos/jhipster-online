@@ -30,6 +30,41 @@ function shimYoRcForJh8(yoRcText) {
   return JSON.stringify(obj, null, 2);
 }
 
+const TYPEORM_SQL_TYPES = new Set(['mysql', 'mariadb', 'postgresql', 'oracle', 'mssql']);
+
+/**
+ * NestJS blueprint uses TypeORM; devDatabaseType must be a real driver type (not Java H2).
+ */
+function typeormCompatibleDevDatabase(gen) {
+  const p = gen && gen.prodDatabaseType;
+  if (p && TYPEORM_SQL_TYPES.has(p)) {
+    return p;
+  }
+  return 'mysql';
+}
+
+function shimNodeDevDatabaseForTypeorm(yoRcText) {
+  const obj = JSON.parse(yoRcText);
+  const gen = obj['generator-jhipster'];
+  if (!gen) {
+    return yoRcText;
+  }
+  const s = typeof yoRcText === 'string' ? yoRcText : JSON.stringify(yoRcText);
+  const isNode =
+    s.includes('generator-jhipster-nodejs') ||
+    s.includes('generator-jhipster-nestjs') ||
+    gen.backendFramework === 'node';
+  if (!isNode) {
+    return yoRcText;
+  }
+  if (gen.devDatabaseType === 'h2Disk' || gen.devDatabaseType === 'h2Memory') {
+    const next = typeormCompatibleDevDatabase(gen);
+    logLine('Shim: Node devDatabaseType ' + gen.devDatabaseType + ' -> ' + next + ' (TypeORM)');
+    gen.devDatabaseType = next;
+  }
+  return JSON.stringify(obj, null, 2);
+}
+
 function resolveCli(yoRcText) {
   const s = typeof yoRcText === 'string' ? yoRcText : JSON.stringify(yoRcText);
   if (s.includes('generator-jhipster-dotnetcore')) {
@@ -91,6 +126,7 @@ app.post('/generate', (req, res) => {
     let yoRcText;
     try {
       yoRcText = shimYoRcForJh8(rawBody);
+      yoRcText = shimNodeDevDatabaseForTypeorm(yoRcText);
     } catch (e) {
       logLine('WARN: yo-rc shim parse failed, using raw body: ' + e.message);
       yoRcText = rawBody;

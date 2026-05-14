@@ -108,6 +108,9 @@
       <div *ngIf="model.backendFramework === 'rust'" class="form-text text-muted small">
         Rust is experimental — verify generator packages exist on the server image; OpenShift defaults may still use JVM-oriented Tekton until customized.
       </div>
+      <div *ngIf="model.backendFramework === 'node'" class="form-text text-muted small">
+        NestJS uses TypeORM: development database must be a real SQL driver (same family as production). H2 is not available for this stack.
+      </div>
       <div *ngIf="model.backendFramework === 'python'" class="form-text text-muted small">
         PyHipster runs on a separate sidecar (Yeoman 5). Enable <code>application.pyhipster-worker</code> and deploy the PyHipster worker (see Helm chart).
       </div>
