@@ -50,10 +50,12 @@ export class SpyObject {
 
   spy(name: string): GuinessCompatibleSpy {
     const bag = (this as unknown) as Record<string, GuinessCompatibleSpy | undefined>;
-    if (!bag[name]) {
-      bag[name] = this.createGuinnessCompatibleSpy(name);
+    let result = bag[name];
+    if (!result) {
+      result = this.createGuinnessCompatibleSpy(name);
+      bag[name] = result;
     }
-    return bag[name] as GuinessCompatibleSpy;
+    return result;
   }
 
   private createGuinnessCompatibleSpy(name: string): GuinessCompatibleSpy {

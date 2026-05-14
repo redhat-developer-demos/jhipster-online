@@ -38,12 +38,12 @@
         "default": ["static-field", "instance-field", "constructor", "static-method", "instance-method"]
       }
     ],
-    "@typescript-eslint/no-parameter-properties": ["warn", { "allows": ["public", "private", "protected"] }],
+    "@typescript-eslint/parameter-properties": ["warn", { "allow": ["public", "private", "protected"] }],
     "@typescript-eslint/explicit-member-accessibility": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/ban-types": "off",
-    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/no-restricted-types": "off",
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/unbound-method": "off",
     "spaced-comment": ["warn", "always"],
@@ -68,7 +68,8 @@
         "ignoreRestSiblings": false
       }
     ],
-    "@typescript-eslint/no-non-null-assertion": "off"
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@angular-eslint/prefer-standalone": "off"
   },
   "overrides": [
     {
