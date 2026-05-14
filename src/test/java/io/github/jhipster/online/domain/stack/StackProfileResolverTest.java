@@ -72,4 +72,32 @@ class StackProfileResolverTest {
     void jhipsterQuarkusCmdDefaultsToQuarkus() {
         assertThat(StackProfileResolver.resolveHelmFrameworkToken("{}", "jhipster-quarkus")).isEqualTo("quarkus");
     }
+
+    @Test
+    void resolvesDevfileImagePerStack() {
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.SPRING_BOOT, "2.41.0"))
+            .isEqualTo("quay.io/devfile/jhipster-online:2.41.0");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.QUARKUS, "2.41.0")).isEqualTo("quay.io/devfile/jhipster-online:2.41.0");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.DOTNET, "2.41.0"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-dotnet:2.41.0");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.NODE_NEST, "2.41.0"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-node:2.41.0");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.RUST, "2.41.0"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-rust:2.41.0");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.GO, "2.41.0"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-go:2.41.0");
+        assertThat(StackProfileResolver.resolveDevfileImage(StackId.PYTHON, "2.41.0"))
+            .isEqualTo("quay.io/maximilianopizarro/jhipster-builder-node:2.41.0");
+        assertThat(StackProfileResolver.resolveDevfileImage(null, "2.41.0")).isEqualTo("quay.io/devfile/jhipster-online:2.41.0");
+    }
+
+    @Test
+    void resolvesDevfileTemplatePerStack() {
+        assertThat(StackProfileResolver.resolveDevfileTemplate(StackId.SPRING_BOOT)).isEqualTo("repo-root-template/devfile.yaml");
+        assertThat(StackProfileResolver.resolveDevfileTemplate(StackId.DOTNET)).isEqualTo("repo-root-template/devfile-dotnet.yaml");
+        assertThat(StackProfileResolver.resolveDevfileTemplate(StackId.NODE_NEST)).isEqualTo("repo-root-template/devfile-node.yaml");
+        assertThat(StackProfileResolver.resolveDevfileTemplate(StackId.RUST)).isEqualTo("repo-root-template/devfile-rust.yaml");
+        assertThat(StackProfileResolver.resolveDevfileTemplate(StackId.GO)).isEqualTo("repo-root-template/devfile-go.yaml");
+        assertThat(StackProfileResolver.resolveDevfileTemplate(StackId.PYTHON)).isEqualTo("repo-root-template/devfile-node.yaml");
+    }
 }

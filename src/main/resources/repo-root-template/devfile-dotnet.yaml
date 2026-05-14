@@ -1,0 +1,71 @@
+schemaVersion: 2.3.0
+metadata:
+  name: __REPO_NAME__
+  version: 2.41.0
+  description: 'JHipster .NET Core stack on Red Hat OpenShift Dev Spaces.'
+  displayName: __REPO_NAME__
+  icon: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/jhipster-icon.png
+  website: https://www.jhipster.tech
+  tags:
+    - DotNet
+    - JHipster
+  language: C#
+  projectType: dotnet
+projects:
+  - name: __REPO_NAME__
+    git:
+      remotes:
+        origin: '__GIT_REPO_URL__'
+      checkoutFrom:
+        revision: main
+components:
+  - name: tools
+    container:
+      image: '__DEVFILE_IMAGE__'
+      mountSources: true
+      cpuLimit: '4'
+      cpuRequest: '1'
+      memoryLimit: '8G'
+      memoryRequest: '4G'
+      volumeMounts:
+        - name: nuget
+          path: /home/user/.nuget
+      endpoints:
+        - exposure: public
+          name: webapp
+          protocol: https
+          targetPort: 5000
+      env:
+        - name: DOTNET_CLI_TELEMETRY_OPTOUT
+          value: '1'
+  - name: nuget
+    volume:
+      size: 512Mi
+commands:
+  - id: dotnet-restore
+    exec:
+      label: 'Restore NuGet packages'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'dotnet restore'
+      group:
+        kind: build
+        isDefault: true
+  - id: dotnet-build
+    exec:
+      label: 'Build application'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'dotnet build --no-restore'
+      group:
+        kind: build
+        isDefault: false
+  - id: dotnet-run
+    exec:
+      label: 'Run application'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'dotnet run'
+      group:
+        kind: run
+        isDefault: true

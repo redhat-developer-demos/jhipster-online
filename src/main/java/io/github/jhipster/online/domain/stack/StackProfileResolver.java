@@ -167,4 +167,52 @@ public final class StackProfileResolver {
     public static boolean isExperimentalStack(String helmFrameworkToken) {
         return (TOKEN_GO.equals(helmFrameworkToken) || TOKEN_RUST.equals(helmFrameworkToken) || TOKEN_PYTHON.equals(helmFrameworkToken));
     }
+
+    /**
+     * Dev Spaces / devfile {@code tools} container image per stack.
+     * JVM stacks share the main workspace image; non-JVM stacks use the stack-specific builder.
+     */
+    public static String resolveDevfileImage(StackId stackId, String version) {
+        if (stackId == null) {
+            return "quay.io/devfile/jhipster-online:" + version;
+        }
+        switch (stackId) {
+            case DOTNET:
+                return "quay.io/maximilianopizarro/jhipster-builder-dotnet:" + version;
+            case NODE_NEST:
+                return "quay.io/maximilianopizarro/jhipster-builder-node:" + version;
+            case GO:
+                return "quay.io/maximilianopizarro/jhipster-builder-go:" + version;
+            case RUST:
+                return "quay.io/maximilianopizarro/jhipster-builder-rust:" + version;
+            case PYTHON:
+                return "quay.io/maximilianopizarro/jhipster-builder-node:" + version;
+            default:
+                return "quay.io/devfile/jhipster-online:" + version;
+        }
+    }
+
+    /**
+     * Devfile template classpath resource per stack.
+     * JVM stacks use the default devfile; non-JVM stacks use stack-specific variants.
+     */
+    public static String resolveDevfileTemplate(StackId stackId) {
+        if (stackId == null) {
+            return "repo-root-template/devfile.yaml";
+        }
+        switch (stackId) {
+            case DOTNET:
+                return "repo-root-template/devfile-dotnet.yaml";
+            case NODE_NEST:
+                return "repo-root-template/devfile-node.yaml";
+            case RUST:
+                return "repo-root-template/devfile-rust.yaml";
+            case PYTHON:
+                return "repo-root-template/devfile-node.yaml";
+            case GO:
+                return "repo-root-template/devfile-go.yaml";
+            default:
+                return "repo-root-template/devfile.yaml";
+        }
+    }
 }

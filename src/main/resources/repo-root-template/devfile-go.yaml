@@ -1,0 +1,59 @@
+schemaVersion: 2.3.0
+metadata:
+  name: __REPO_NAME__
+  version: 2.41.0
+  description: 'JHipster Go stack on Red Hat OpenShift Dev Spaces (experimental).'
+  displayName: __REPO_NAME__
+  icon: https://raw.githubusercontent.com/redhat-developer-demos/jhipster-online/main/jhipster-icon.png
+  website: https://www.jhipster.tech
+  tags:
+    - Go
+    - JHipster
+  language: Go
+  projectType: go
+projects:
+  - name: __REPO_NAME__
+    git:
+      remotes:
+        origin: '__GIT_REPO_URL__'
+      checkoutFrom:
+        revision: main
+components:
+  - name: tools
+    container:
+      image: '__DEVFILE_IMAGE__'
+      mountSources: true
+      cpuLimit: '4'
+      cpuRequest: '1'
+      memoryLimit: '8G'
+      memoryRequest: '4G'
+      volumeMounts:
+        - name: gopath
+          path: /home/user/go
+      endpoints:
+        - exposure: public
+          name: webapp
+          protocol: https
+          targetPort: 8080
+  - name: gopath
+    volume:
+      size: 512Mi
+commands:
+  - id: go-build
+    exec:
+      label: 'Build application'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'go build -o app .'
+      group:
+        kind: build
+        isDefault: true
+  - id: go-run
+    exec:
+      label: 'Run application'
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: 'go run .'
+      group:
+        kind: run
+        isDefault: true

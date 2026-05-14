@@ -242,10 +242,12 @@ public class GeneratorService {
     }
 
     private void generateRepoRootArtifacts(String applicationId, File workingDir, String applicationConfiguration) throws IOException {
-        Map<String, String> tokens = buildGenerationTokens(applicationConfiguration);
-        copyClasspathResource("repo-root-template/devfile.yaml", new File(workingDir, "devfile.yaml"));
+        StackId stackId = StackProfileResolver.resolveStackId(applicationConfiguration, applicationProperties.getJhipsterCmd().getCmd());
+        Map<String, String> tokens = buildGenerationTokens(applicationConfiguration, stackId);
+        String devfileTemplate = StackProfileResolver.resolveDevfileTemplate(stackId);
+        copyClasspathResource(devfileTemplate, new File(workingDir, "devfile.yaml"));
         replaceTokensInFile(new File(workingDir, "devfile.yaml"), tokens);
-        this.logsService.addLog(applicationId, "Created devfile.yaml from classpath template");
+        this.logsService.addLog(applicationId, "Created devfile.yaml from " + devfileTemplate + " (stack: " + stackId + ")");
 
         copyClasspathResource("repo-root-template/catalog-info.yaml", new File(workingDir, "catalog-info.yaml"));
         replaceTokensInFile(new File(workingDir, "catalog-info.yaml"), tokens);
@@ -295,10 +297,15 @@ public class GeneratorService {
         }
     }
 
+    private Map<String, String> buildGenerationTokens(String applicationConfiguration) {
+        StackId stackId = StackProfileResolver.resolveStackId(applicationConfiguration, applicationProperties.getJhipsterCmd().getCmd());
+        return buildGenerationTokens(applicationConfiguration, stackId);
+    }
+
     /**
      * Tokens shared by Helm chart, Backstage catalog, Devfile, and Tekton values.
      */
-    private Map<String, String> buildGenerationTokens(String applicationConfiguration) {
+    private Map<String, String> buildGenerationTokens(String applicationConfiguration, StackId stackId) {
         Object document = Configuration.defaultConfiguration().jsonProvider().parse(applicationConfiguration);
         String gitCompany = JsonPath.read(document, "$.git-company");
         String repositoryName = JsonPath.read(document, "$.repository-name");
@@ -323,7 +330,12 @@ public class GeneratorService {
             "__DEVWORKSPACES_EDITOR_LINK__",
             "https://workspaces.openshift.com/#" + gitRepo + "/tree/main?storageType=ephemeral"
         );
-        tokenReplacements.put("__DEVFILE_IMAGE__", "quay.io/devfile/jhipster-online:2.40.1");
+        String appVersion = getClass().getPackage().getImplementationVersion();
+        if (appVersion == null || appVersion.isEmpty()) {
+            appVersion = "2.41.0";
+        }
+        appVersion = appVersion.replace("-SNAPSHOT", "");
+        tokenReplacements.put("__DEVFILE_IMAGE__", StackProfileResolver.resolveDevfileImage(stackId, appVersion));
         tokenReplacements.put("__PROD_DATABASE_TYPE__", readProdDatabaseType(document));
         return tokenReplacements;
     }
