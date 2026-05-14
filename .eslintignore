@@ -9,3 +9,4 @@ target/
 build/
 node/
 postcss.config.js
+jhipster8-worker/
