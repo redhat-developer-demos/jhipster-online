@@ -8,6 +8,13 @@ import org.junit.jupiter.api.Test;
 class StackProfileResolverTest {
 
     @Test
+    void resolvesRustFromBackendFramework() {
+        String json = "{\"generator-jhipster\":{\"baseName\":\"demo\",\"backendFramework\":\"rust\"}}";
+        assertThat(StackProfileResolver.resolveStackId(json, "jhipster")).isEqualTo(StackId.RUST);
+        assertThat(StackProfileResolver.resolveHelmFrameworkToken(json, "jhipster")).isEqualTo("rust");
+    }
+
+    @Test
     void requiresJhipster8WorkerForDotnetNodeAzure() {
         assertThat(StackProfileResolver.requiresJhipster8Worker(StackId.DOTNET)).isTrue();
         assertThat(StackProfileResolver.requiresJhipster8Worker(StackId.NODE_NEST)).isTrue();

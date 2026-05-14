@@ -22,6 +22,7 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
 - [Compatibility Matrix](#compatibility-matrix)
 - [Available Generators](#available-generators)
 - [Quick Start Guide](#quick-start-guide)
+- [Full stack with Podman Compose](#full-stack-with-podman-compose)
 - [Deployment Methods](#deployment-methods)
   - [Red Hat OpenShift Dev Spaces](#red-hat-openshift-dev-spaces)
   - [Helm Chart](#helm-chart-on-developer-sandbox)
@@ -32,6 +33,7 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
   - [GitLab configuration](#gitlab-configuration)
   - [Gitea configuration](#gitea-configuration)
   - [JDL AI assistant (models, RAG, embeddings)](#jdl-ai-assistant-models-rag-embeddings)
+- [New Features in v2.41.0](#new-features-in-v2410)
 - [New Features in v2.40.1](#new-features-in-v2401)
 - [New Features in v2.40.0](#new-features-in-v2400)
 - [Help and Contribution](#help-and-contribution-to-the-project)
@@ -88,6 +90,26 @@ docker-compose -f src/main/docker/mysql.yml up -d
 
 ```
 ./mvnw
+```
+
+### Full stack with Podman Compose
+
+To run **MySQL, MailHog, JHipster 8 worker, PyHipster worker, and the Spring Boot app** in one shot (builds from this repo; no Quay push required):
+
+```bash
+podman compose -f podman-compose.yml up --build
+```
+
+- Application: [http://localhost:8080](http://localhost:8080) (Angular UI is bundled in the production WAR)
+- MailHog UI: [http://localhost:8025](http://localhost:8025)
+- Uses profile `prod,local` via [`application-local.yml`](src/main/resources/config/application-local.yml) and [`Dockerfile.local`](Dockerfile.local) (public `eclipse-temurin` base images).
+
+Stop and remove containers: `podman compose -f podman-compose.yml down`. Add `-v` to drop the MySQL volume.
+
+To pick up **only** worker image changes after editing `jhipster8-worker/` or `Dockerfile.jhipster8-worker`:
+
+```bash
+podman compose -f podman-compose.yml build jhipster8-worker && podman compose -f podman-compose.yml up -d jhipster8-worker
 ```
 
 ## Deployment Methods
@@ -155,8 +177,10 @@ helm repo add jhipster-online https://maximilianopizarro.github.io/jhipster-onli
 #### Install Chart with parameters
 
 ```bash
-helm install jhipster-online jhipster-online/jhipster-online --version 1.0.4
+helm install jhipster-online jhipster-online/jhipster-online --version 1.1.0
 ```
+
+Use `helm search repo jhipster-online/jhipster-online --versions` to confirm the latest published chart version for that Helm repository (the in-repo chart under [`charts/jhipster-online`](charts/jhipster-online) uses its own `Chart.yaml` version, typically `0.1.0`, for local `./charts/...` installs).
 
 For **Developer Sandbox** from a local clone of the chart repo, use the overlay (enables in-cluster deploy + `edit` RoleBinding for the pod ServiceAccount):
 
@@ -201,6 +225,11 @@ To generate a production build, like any normal JHipster application, please run
 #### Build container images (CI / Dockerfile)
 
 Use the Dockerfiles in the repository root (for example `Dockerfile.spring-boot`, `Dockerfile.quarkus`, `Dockerfile.builder`) and GitHub Actions, or your cluster's build strategy, instead of the removed in-repo `jh-online-builder.yaml` BuildConfig.
+
+## New Features in v2.41.0
+
+- **Local full stack**: [`podman-compose.yml`](podman-compose.yml) + [`Dockerfile.local`](Dockerfile.local) + [`application-local.yml`](src/main/resources/config/application-local.yml) — one command to build and run app, MySQL, MailHog, JHipster 8 worker, and PyHipster worker locally.
+- **Rust generator fixes**: SQLite supported in the generator UI; H2 dev DB hidden/coerced for Rust; `StackProfileResolver` recognizes `backendFramework: "rust"`; server-side `.yo-rc.json` shim maps H2 dev DB to SQLite or the chosen SQL prod engine before generation.
 
 ## New Features in v2.40.1
 

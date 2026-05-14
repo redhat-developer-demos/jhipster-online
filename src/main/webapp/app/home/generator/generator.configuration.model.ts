@@ -23,6 +23,7 @@ export const AllProdDatabaseTypes: ProdDatabaseType[] = [
   'mariadb',
   'oracle',
   'mssql',
+  'sqlite',
   'mongodb',
   'cassandra',
   'couchbase',
@@ -37,6 +38,7 @@ export type ProdDatabaseType =
   | 'mariadb'
   | 'oracle'
   | 'mssql'
+  | 'sqlite'
   | 'mongodb'
   | 'cassandra'
   | 'couchbase'

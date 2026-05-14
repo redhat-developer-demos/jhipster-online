@@ -1,0 +1,44 @@
+# ===================================================================
+# Local Podman Compose profile (use with: spring.profiles.active=prod,local)
+# ===================================================================
+
+spring:
+  datasource:
+    url: jdbc:mysql://mysql:3306/jhipster-online?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: root
+    password:
+  mail:
+    host: mailhog
+    port: 1025
+  liquibase:
+    contexts: dev
+
+jhipster:
+  # Same-origin UI is served from the WAR; allow browser tools / proxies.
+  cors:
+    allowed-origins: '*'
+    allowed-origin-patterns: '*'
+    allowed-methods: '*'
+    allowed-headers: '*'
+    allow-credentials: true
+  security:
+    authentication:
+      jwt:
+        # Dev-style secret so prod profile JWT validation works locally (override prod placeholder).
+        base64-secret: ZjA0MzBhNGRmZWY4NGJiMTdiMzY2YzFiNzQwOWY4MjZmMzZhM2I5NDYyODgzMGI1MzA0M2JkMDY1NDgzNmViOGVjZDQzYTRjMWY3NmEyOTc1ZDQxOTAwYzAwZDMxNTQ3NmI1ZTMwNDEyYTM5YjU0ZGYyZWNlN2VkODg1ODlmOWE=
+  mail:
+    base-url: http://localhost:8080
+
+application:
+  jhipster8-worker:
+    enabled: true
+    base-url: http://jhipster8-worker:8081
+    timeout-seconds: 600
+  pyhipster-worker:
+    enabled: true
+    base-url: http://pyhipster-worker:8082
+    timeout-seconds: 600
+
+openshift:
+  deployment:
+    enabled: false

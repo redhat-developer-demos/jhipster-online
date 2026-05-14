@@ -19,6 +19,9 @@
 
 package io.github.jhipster.online.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
@@ -62,6 +65,8 @@ public class GeneratorService {
     public static final String OS_TEMP_DIR = System.getProperty("java.io.tmpdir");
 
     public static final String FILE_SEPARATOR = System.getProperty("file.separator");
+
+    private static final ObjectMapper YO_RC_OBJECT_MAPPER = new ObjectMapper();
 
     private final Logger log = LoggerFactory.getLogger(GeneratorService.class);
 
@@ -141,11 +146,12 @@ public class GeneratorService {
         final String tempDir = StringUtils.isBlank(fromConfig) ? OS_TEMP_DIR : fromConfig;
         final File workingDir = new File(String.join(FILE_SEPARATOR, tempDir, JHIPSTER, APPLICATIONS, applicationId));
         FileUtils.forceMkdir(workingDir);
-        this.generateYoRc(applicationId, workingDir, applicationConfiguration);
+        String effectiveConfiguration = applyYoRcShims(applicationConfiguration);
+        this.generateYoRc(applicationId, workingDir, effectiveConfiguration);
         log.info(".yo-rc.json created");
         this.generateRepoRootArtifacts(applicationId, workingDir, applicationConfiguration);
         log.info("devfile.yaml, catalog-info.yaml, and optional MariaDB preset created from classpath templates");
-        StackId stackId = StackProfileResolver.resolveStackId(applicationConfiguration, applicationProperties.getJhipsterCmd().getCmd());
+        StackId stackId = StackProfileResolver.resolveStackId(effectiveConfiguration, applicationProperties.getJhipsterCmd().getCmd());
         if (StackProfileResolver.requiresPyhipsterWorker(stackId)) {
             if (!applicationProperties.getPyhipsterWorker().isEnabled()) {
                 throw new IOException(
@@ -153,7 +159,7 @@ public class GeneratorService {
                 );
             }
             this.logsService.addLog(applicationId, "Delegating code generation to PyHipster worker for stack " + stackId);
-            this.pyhipsterWorkerClient.generateIntoWorkingDir(applicationId, workingDir.toPath(), applicationConfiguration);
+            this.pyhipsterWorkerClient.generateIntoWorkingDir(applicationId, workingDir.toPath(), effectiveConfiguration);
         } else if (StackProfileResolver.requiresJhipster8Worker(stackId)) {
             if (!applicationProperties.getJhipster8Worker().isEnabled()) {
                 throw new IOException(
@@ -161,7 +167,7 @@ public class GeneratorService {
                 );
             }
             this.logsService.addLog(applicationId, "Delegating code generation to JHipster 8 worker for stack " + stackId);
-            this.jHipster8WorkerClient.generateIntoWorkingDir(applicationId, workingDir.toPath(), applicationConfiguration);
+            this.jHipster8WorkerClient.generateIntoWorkingDir(applicationId, workingDir.toPath(), effectiveConfiguration);
         } else {
             this.jHipsterService.generateApplication(applicationId, workingDir);
         }
@@ -171,6 +177,60 @@ public class GeneratorService {
         this.openInDevSpaces(applicationId, workingDir, applicationConfiguration);
         log.info("Application generated");
         return workingDir;
+    }
+
+    /**
+     * Align {@code .yo-rc.json} with generators that reject JHipster Online defaults (e.g. Rust + H2 dev DB).
+     */
+    private String applyYoRcShims(String applicationConfiguration) {
+        if (StringUtils.isBlank(applicationConfiguration)) {
+            return applicationConfiguration;
+        }
+        try {
+            JsonNode root = YO_RC_OBJECT_MAPPER.readTree(applicationConfiguration);
+            JsonNode genNode = root.get("generator-jhipster");
+            if (!(genNode instanceof ObjectNode)) {
+                return applicationConfiguration;
+            }
+            ObjectNode gen = (ObjectNode) genNode;
+            boolean rust =
+                applicationConfiguration.contains("generator-jhipster-rust") ||
+                (gen.hasNonNull("backendFramework") && "rust".equals(gen.get("backendFramework").asText()));
+            if (!rust) {
+                return applicationConfiguration;
+            }
+            String dbType = gen.hasNonNull("databaseType") ? gen.get("databaseType").asText("") : "";
+            if ("mongodb".equals(dbType)) {
+                gen.put("devDatabaseType", "mongodb");
+                gen.put("prodDatabaseType", "mongodb");
+                return YO_RC_OBJECT_MAPPER.writeValueAsString(root);
+            }
+            if (!"sql".equals(dbType)) {
+                return applicationConfiguration;
+            }
+            String devDb = gen.hasNonNull("devDatabaseType") ? gen.get("devDatabaseType").asText("") : "";
+            if (!"h2Disk".equals(devDb) && !"h2Memory".equals(devDb)) {
+                return applicationConfiguration;
+            }
+            String prodDb = gen.hasNonNull("prodDatabaseType") ? gen.get("prodDatabaseType").asText("") : "";
+            boolean okProd =
+                "mysql".equals(prodDb) ||
+                "mariadb".equals(prodDb) ||
+                "postgresql".equals(prodDb) ||
+                "mssql".equals(prodDb) ||
+                "oracle".equals(prodDb) ||
+                "sqlite".equals(prodDb);
+            String next = okProd ? prodDb : "sqlite";
+            if (!okProd) {
+                gen.put("prodDatabaseType", "sqlite");
+            }
+            gen.put("devDatabaseType", next);
+            log.info("Applied Rust yo-rc shim: devDatabaseType {} -> {}", devDb, next);
+            return YO_RC_OBJECT_MAPPER.writeValueAsString(root);
+        } catch (Exception e) {
+            log.warn("yo-rc shims skipped: {}", e.toString());
+            return applicationConfiguration;
+        }
     }
 
     private void generateYoRc(String applicationId, File workingDir, String applicationConfiguration) throws IOException {

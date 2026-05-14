@@ -170,6 +170,63 @@ from the main (upstream) repository:
   git pull --ff upstream main
   ```
 
+## <a name="setup"></a> Generator development setup
+
+### Prerequisites
+
+- **Java 21** (JDK)
+- **Node.js** ≥ 22.9 and **npm** ≥ 10 (see root `package.json` `engines`)
+- **Docker** or **Podman** (for MySQL / MailHog / optional full stack)
+- **Git**
+
+### Option A — Classic split (fast UI reload)
+
+1. Start MySQL (and optionally MailHog for email capture):
+
+   ```shell
+   docker compose -f src/main/docker/mysql.yml up -d
+   docker compose -f src/main/docker/mailserver.yml up -d
+   ```
+
+2. Point `src/main/resources/config/application-dev.yml` at **localhost** MySQL if you are not in Dev Spaces (uncomment the `jdbc:mysql://localhost:3306/jhipster-online` block and comment the `mariadb` URL), or keep the `mariadb` host when using a compose network named `mariadb`.
+
+3. Backend:
+
+   ```shell
+   ./mvnw
+   ```
+
+   Default dev server: [http://localhost:8080](http://localhost:8080).
+
+4. Frontend (Webpack + BrowserSync):
+
+   ```shell
+   npm install
+   npm start
+   ```
+
+   UI proxied at [http://localhost:9000](http://localhost:9000) (API calls go to `:8080`).
+
+### Option B — Full stack in containers (single command)
+
+From the repository root:
+
+```shell
+podman compose -f podman-compose.yml up --build
+```
+
+See [README.md — Full stack with Podman Compose](README.md#full-stack-with-podman-compose). No Quay login required; images are built locally.
+
+### Optional environment variables
+
+| Variable                                                                       | Purpose                                                                |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `APPLICATION_JHIPSTER8WORKER_ENABLED` / `APPLICATION_JHIPSTER8WORKER_BASE_URL` | Delegate .NET / NestJS / Azure ACA generation to the JHipster 8 worker |
+| `APPLICATION_PYHIPSTERWORKER_ENABLED` / `APPLICATION_PYHIPSTERWORKER_BASE_URL` | Delegate Python/Flask to the PyHipster worker                          |
+| `APPLICATION_JDL_AI_*`                                                         | JDL AI assistant (see root README)                                     |
+
+Prefer `application-dev.yml` or your shell profile for local secrets; do not commit tokens.
+
 ## <a name="rules"></a> Coding Rules
 
 To ensure consistency throughout the source code, keep these rules in mind as you are working:

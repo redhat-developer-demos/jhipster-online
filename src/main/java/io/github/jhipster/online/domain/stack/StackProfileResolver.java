@@ -53,7 +53,7 @@ public final class StackProfileResolver {
         if (containsBlueprint(cfg, "generator-jhipster-go")) {
             return StackId.GO;
         }
-        if (containsBlueprint(cfg, "generator-jhipster-rust")) {
+        if (containsBlueprint(cfg, "generator-jhipster-rust") || containsBackendFramework(cfg, "rust")) {
             return StackId.RUST;
         }
         return defaultFromCmd(globalJhipsterCmd);

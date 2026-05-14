@@ -171,6 +171,11 @@ export class GeneratorComponent implements OnInit {
       this.model.blueprints = [{ name: 'generator-jhipster-micronaut' }];
     } else if (this.model.backendFramework === 'rust') {
       this.model.blueprints = [{ name: 'generator-jhipster-rust' }];
+      this.model.cacheProvider = 'no';
+      this.model.enableHibernateCache = false;
+      this.model.websocket = false;
+      this.model.enableSwaggerCodegen = false;
+      this.coerceRustDevDatabase();
     } else if (this.model.backendFramework === 'dotnet') {
       this.model.blueprints = [{ name: 'generator-jhipster-dotnetcore' }];
     } else if (this.model.backendFramework === 'azure-aca') {
@@ -208,6 +213,7 @@ export class GeneratorComponent implements OnInit {
       this.model.languages.push(this.model.nativeLanguage);
     }
     this.model.jhiPrefix = 'jhi';
+    this.coerceRustDevDatabase();
   }
 
   onSubmit(): void {
@@ -332,6 +338,14 @@ export class GeneratorComponent implements OnInit {
       this.model.blueprints = bp('generator-jhipster-micronaut');
     } else if (this.model.backendFramework === 'rust') {
       this.model.blueprints = bp('generator-jhipster-rust');
+      this.model.cacheProvider = 'no';
+      this.model.enableHibernateCache = false;
+      this.model.websocket = false;
+      this.model.enableSwaggerCodegen = false;
+      if (this.model.databaseType === 'sql') {
+        this.model.prodDatabaseType = 'sqlite';
+        this.model.devDatabaseType = 'sqlite';
+      }
     } else if (this.model.backendFramework === 'dotnet') {
       this.model.clientFramework = 'angularX';
       this.model.blueprints = bp('generator-jhipster-dotnetcore');
@@ -372,6 +386,7 @@ export class GeneratorComponent implements OnInit {
       this.model.cacheProvider = 'ehcache';
       this.model.enableHibernateCache = true;
       this.coerceNodeDevDatabaseForTypeorm();
+      this.coerceRustDevDatabase();
     } else if (this.model.databaseType === 'mongodb') {
       this.model.prodDatabaseType = 'mongodb';
       this.model.devDatabaseType = 'mongodb';
@@ -407,6 +422,7 @@ export class GeneratorComponent implements OnInit {
       // Find first allowed dev database type
       this.model.devDatabaseType = AllDevDatabaseTypes.find(type => !this.isDevDatabaseOptionHidden('sql', type)) ?? 'h2Disk';
       this.coerceNodeDevDatabaseForTypeorm();
+      this.coerceRustDevDatabase();
     } else if (this.model.prodDatabaseType === 'mongodb') {
       this.model.devDatabaseType = 'mongodb';
       this.model.cacheProvider = 'no';
@@ -427,6 +443,15 @@ export class GeneratorComponent implements OnInit {
   }
 
   isProdDatabaseOptionHidden(validDatabaseType: string, databaseName: ProdDatabaseType): boolean {
+    if (databaseName === 'sqlite' && this.model.backendFramework !== 'rust') {
+      return true;
+    }
+    if (this.model.backendFramework === 'rust' && validDatabaseType === 'sql') {
+      const unsupportedRustSql: ProdDatabaseType[] = ['cassandra', 'couchbase', 'neo4j', 'no'];
+      if (unsupportedRustSql.includes(databaseName)) {
+        return true;
+      }
+    }
     return this.model.databaseType !== validDatabaseType || Boolean(this.config?.hideProdDatabaseTypeOptions?.includes(databaseName));
   }
 
@@ -435,6 +460,12 @@ export class GeneratorComponent implements OnInit {
   }
 
   isDevDatabaseOptionHidden(validDatabaseType: string, databaseName: DevDatabaseType): boolean {
+    if (databaseName === 'sqlite' && this.model.backendFramework !== 'rust') {
+      return true;
+    }
+    if (this.model.backendFramework === 'rust' && (databaseName === 'h2Disk' || databaseName === 'h2Memory')) {
+      return true;
+    }
     if (this.model.backendFramework === 'node' && (databaseName === 'h2Disk' || databaseName === 'h2Memory')) {
       return true;
     }
@@ -461,5 +492,31 @@ export class GeneratorComponent implements OnInit {
       return p;
     }
     return 'mysql';
+  }
+
+  /**
+   * generator-jhipster-rust does not handle Java H2 dev DB; map to SQLite or a concrete SQL prod engine.
+   */
+  private coerceRustDevDatabase(): void {
+    if (this.model.backendFramework !== 'rust') {
+      return;
+    }
+    if (this.model.databaseType === 'mongodb') {
+      this.model.devDatabaseType = 'mongodb';
+      this.model.prodDatabaseType = 'mongodb';
+      return;
+    }
+    if (this.model.databaseType !== 'sql') {
+      return;
+    }
+    if (this.model.devDatabaseType === 'h2Disk' || this.model.devDatabaseType === 'h2Memory') {
+      const p = this.model.prodDatabaseType;
+      if (p === 'mysql' || p === 'mariadb' || p === 'postgresql' || p === 'oracle' || p === 'mssql' || p === 'sqlite') {
+        this.model.devDatabaseType = p;
+      } else {
+        this.model.devDatabaseType = 'sqlite';
+        this.model.prodDatabaseType = 'sqlite';
+      }
+    }
   }
 }

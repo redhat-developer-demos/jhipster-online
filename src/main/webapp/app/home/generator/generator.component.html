@@ -106,7 +106,8 @@
         Quarkus requires Vue; Hibernate 2nd level cache, Spring WebSocket, and OpenAPI-generator options are turned off for compatibility.
       </div>
       <div *ngIf="model.backendFramework === 'rust'" class="form-text text-muted small">
-        Rust is experimental — verify generator packages exist on the server image; OpenShift defaults may still use JVM-oriented Tekton until customized.
+        Rust is experimental — use SQLite, PostgreSQL, MySQL/MariaDB, MSSQL, Oracle, or MongoDB. Java H2 is not supported; dev DB is coerced
+        automatically.
       </div>
       <div *ngIf="model.backendFramework === 'node'" class="form-text text-muted small">
         NestJS uses TypeORM: development database must be a real SQL driver (same family as production). H2 is not available for this stack.
@@ -268,6 +269,9 @@
             <option value="mariadb" *ngIf="!isProdDatabaseOptionHidden('sql', 'mariadb')">MariaDB</option>
             <option value="oracle" *ngIf="!isProdDatabaseOptionHidden('sql', 'oracle')">Oracle*</option>
             <option value="mssql" *ngIf="!isProdDatabaseOptionHidden('sql', 'mssql')">Microsoft SQL Server</option>
+            <option value="sqlite" *ngIf="model.backendFramework === 'rust' && !isProdDatabaseOptionHidden('sql', 'sqlite')"
+              >SQLite (Rust)</option
+            >
             <option value="mongodb" *ngIf="!isProdDatabaseOptionHidden('mongodb', 'mongodb')">MongoDB</option>
             <option value="cassandra" *ngIf="!isProdDatabaseOptionHidden('cassandra', 'cassandra')">Cassandra</option>
             <option value="couchbase" *ngIf="!isProdDatabaseOptionHidden('couchbase', 'couchbase')">Couchbase</option>
@@ -310,6 +314,9 @@
             <option value="postgresql" *ngIf="!isDevDatabaseOptionHidden('sql', 'postgresql')">PostgreSQL</option>
             <option value="oracle" *ngIf="!isDevDatabaseOptionHidden('sql', 'oracle')">Oracle*</option>
             <option value="mssql" *ngIf="!isDevDatabaseOptionHidden('sql', 'mssql')">Microsoft SQL Server</option>
+            <option value="sqlite" *ngIf="model.backendFramework === 'rust' && !isDevDatabaseOptionHidden('sql', 'sqlite')"
+              >SQLite (Rust)</option
+            >
             <option value="mongodb" *ngIf="!isDevDatabaseOptionHidden('mongodb', 'mongodb')">MongoDB</option>
             <option value="cassandra" *ngIf="!isDevDatabaseOptionHidden('cassandra', 'cassandra')">Cassandra</option>
             <option value="couchbase" *ngIf="!isDevDatabaseOptionHidden('couchbase', 'couchbase')">Couchbase</option>
