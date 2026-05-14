@@ -84,8 +84,7 @@ export const computeAngularKey = (lowercaseKey: string) => {
 @Injectable({ providedIn: 'root' })
 export class StatisticsUtils {
   public static getDisplayName(name: string, upperFirst = true): string {
-    const labels = displayNames as Record<string, string>;
-    return upperFirst ? StatisticsUtils.upperFirst(labels[name] || name) : labels[name] || name;
+    return upperFirst ? StatisticsUtils.upperFirst(displayNames[name] || name) : displayNames[name] || name;
   }
 
   public static upperFirst(text: string): string {
