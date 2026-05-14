@@ -40,28 +40,56 @@ Taking a look at the [Video Demo](https://www.youtube.com/watch?v=b7xbcTAGNIQ)
 
 ## Compatibility Matrix
 
+### Platform support
+
 | Platform                     | Version                                                                        | Status                                  |
 | ---------------------------- | ------------------------------------------------------------------------------ | --------------------------------------- |
 | Red Hat OpenShift Dev Spaces | 3.27+                                                                          | Supported (devfile v2.2.2)              |
 | OpenShift Helm Chart         | [v0.1.0](https://artifacthub.io/packages/helm/jhipster-online/jhipster-online) | Supported                               |
 | OpenShift Operator           | [v0.1.0](https://github.com/maximilianoPizarro/jhipster-online-operator)       | Supported                               |
 | Kubernetes (vanilla)         | 1.25+                                                                          | Partial (no OpenShift Routes/Templates) |
-| Docker Compose               | -                                                                              | Supported (local dev)                   |
+| Podman Compose               | -                                                                              | Supported (local dev)                   |
+
+### Stack generation matrix
+
+| Stack                | Generator / Blueprint                           | JHipster | Runs on                            | Status                    |
+| -------------------- | ----------------------------------------------- | -------- | ---------------------------------- | ------------------------- |
+| Spring Boot          | `generator-jhipster@9.0.0`                      | 9.x      | Main app (JHipster CLI)            | Supported                 |
+| Quarkus              | `generator-jhipster-quarkus@4.0.0`              | 9.x      | Main app (JHipster CLI)            | Supported                 |
+| Micronaut            | `generator-jhipster-micronaut@4.0.0`            | 9.x      | Main app (JHipster CLI)            | Supported                 |
+| Rust                 | `generator-jhipster-rust@1.0.0`                 | 9.x      | Main app (JHipster CLI)            | Experimental              |
+| .NET Core            | `generator-jhipster-dotnetcore@4.5.0`           | 8.x      | `jhipster8-worker` sidecar (:8081) | Supported (via worker)    |
+| Node.js / NestJS     | `generator-jhipster-nodejs@3.2.0`               | 8.x      | `jhipster8-worker` sidecar (:8081) | Supported (via worker)    |
+| Azure Container Apps | `generator-jhipster-azure-container-apps@1.0.9` | 8.x      | `jhipster8-worker` sidecar (:8081) | Supported (via worker)    |
+| Python / Flask       | `generator-pyhipster@0.0.9`                     | -        | `pyhipster-worker` sidecar (:8082) | Experimental              |
+| Go                   | `generator-jhipster-go@1.0.0`                   | -        | -                                  | Not supported (empty pkg) |
+
+### Container images (Quay.io / GHCR)
+
+| Image                                                         | Tag pattern                  | Contents                                  |
+| ------------------------------------------------------------- | ---------------------------- | ----------------------------------------- |
+| `quay.io/maximilianopizarro/jhipster-online`                  | `{version}-spring-boot`      | Spring Boot WAR + Angular 19 frontend     |
+| `quay.io/maximilianopizarro/jhipster-online`                  | `{version}-quarkus`          | Quarkus WAR + Angular 19 frontend         |
+| `quay.io/maximilianopizarro/jhipster-online-jhipster8-worker` | `{version}-jhipster8-worker` | JH8 worker (.NET, NestJS, ACA generators) |
+| `quay.io/maximilianopizarro/jhipster-online-pyhipster-worker` | `{version}-pyhipster-worker` | PyHipster worker (Python/Flask)           |
+| `quay.io/devfile/jhipster-online`                             | `{version}`                  | Dev Spaces workspace (all generators)     |
+| `ghcr.io/redhat-developer-demos/jhipster-online`              | `main`, `v*`                 | Spring Boot image (Docker workflow)       |
 
 ## Available Generators
 
-The Dev Spaces workspace image includes the following pre-installed generators:
+Generators run either on the **main app** (JHipster 9 CLI) or on dedicated **worker sidecars** (JHipster 8 / PyHipster):
 
-| Generator                                 | Version | Description                                             |
-| ----------------------------------------- | ------- | ------------------------------------------------------- |
-| `generator-jhipster`                      | 9.0.0   | Core JHipster generator (generates JHipster 9 projects) |
-| `generator-jhipster-quarkus`              | 3.6.0   | Quarkus blueprint                                       |
-| `generator-jhipster-micronaut`            | 3.9.0   | Micronaut blueprint                                     |
-| `generator-jhipster-dotnetcore`           | 4.5.0   | .NET Core blueprint                                     |
-| `generator-jhipster-azure-container-apps` | latest  | Azure Container Apps blueprint                          |
-| `generator-jhipster-nodejs`               | 3.2.0   | Node.js / NestJS blueprint                              |
-| `generator-jhipster-go`                   | 1.0.0   | Go blueprint (experimental)                             |
-| `generator-jhipster-rust`                 | 1.0.0   | Rust blueprint (experimental)                           |
+| Generator                                 | Version | Runs on          | Description                                             |
+| ----------------------------------------- | ------- | ---------------- | ------------------------------------------------------- |
+| `generator-jhipster`                      | 9.0.0   | Main app         | Core JHipster generator (generates JHipster 9 projects) |
+| `generator-jhipster-quarkus`              | 4.0.0   | Main app         | Quarkus blueprint                                       |
+| `generator-jhipster-micronaut`            | 4.0.0   | Main app         | Micronaut blueprint                                     |
+| `generator-jhipster-rust`                 | 1.0.0   | Main app         | Rust blueprint (experimental)                           |
+| `generator-jhipster-dotnetcore`           | 4.5.0   | jhipster8-worker | .NET Core blueprint (JH8)                               |
+| `generator-jhipster-nodejs`               | 3.2.0   | jhipster8-worker | Node.js / NestJS blueprint (JH8)                        |
+| `generator-jhipster-azure-container-apps` | 1.0.9   | jhipster8-worker | Azure Container Apps blueprint (JH8)                    |
+| `generator-pyhipster`                     | 0.0.9   | pyhipster-worker | Python / Flask (Yeoman 5)                               |
+| `generator-jhipster-go`                   | 1.0.0   | -                | Go blueprint (empty pkg, not supported)                 |
 
 ## Podman, Quay, and multi-stack
 
@@ -228,6 +256,7 @@ Use the Dockerfiles in the repository root (for example `Dockerfile.spring-boot`
 
 ## New Features in v2.41.0
 
+- **Angular 19 upgrade**: Frontend migrated from Angular 14 to Angular 19 (TypeScript 5.6, RxJS 7, zone.js 0.15). `ng-jhipster` removed and replaced with local implementations. All third-party libraries updated to Angular 19–compatible versions.
 - **Local full stack**: [`podman-compose.yml`](podman-compose.yml) + [`Dockerfile.local`](Dockerfile.local) + [`application-local.yml`](src/main/resources/config/application-local.yml) — one command to build and run app, MySQL, MailHog, JHipster 8 worker, and PyHipster worker locally.
 - **Rust generator fixes**: SQLite supported in the generator UI; H2 dev DB hidden/coerced for Rust; `StackProfileResolver` recognizes `backendFramework: "rust"`; server-side `.yo-rc.json` shim maps H2 dev DB to SQLite or the chosen SQL prod engine before generation.
 
