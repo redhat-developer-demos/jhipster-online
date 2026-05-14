@@ -45,6 +45,9 @@ public class JHipster8WorkerClient {
             throw new IOException("JHipster 8 worker is disabled (application.jhipster8-worker.enabled=false).");
         }
         String base = trimTrailingSlash(cfg.getBaseUrl());
+        if (base.isBlank()) {
+            throw new IOException("JHipster 8 worker base URL is not configured (application.jhipster8-worker.base-url).");
+        }
         URI uri = URI.create(base + "/generate");
         int timeoutSec = Math.max(60, cfg.getTimeoutSeconds());
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
