@@ -137,8 +137,7 @@ export class AlertService {
   }
 
   private factory(alertOptions: JhiAlert): JhiAlert {
-    const sanitized =
-      this.sanitizer.sanitize(SecurityContext.HTML, alertOptions.msg) ?? '';
+    const sanitized = this.sanitizer.sanitize(SecurityContext.HTML, alertOptions.msg) ?? '';
     const alert: JhiAlert = {
       type: alertOptions.type,
       msg: sanitized,

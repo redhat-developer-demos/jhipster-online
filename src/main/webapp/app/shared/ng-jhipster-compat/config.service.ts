@@ -21,19 +21,19 @@ import { Injectable, Inject, Optional } from '@angular/core';
 import { JhiModuleConfig } from './config';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class JhiConfigService {
-    CONFIG_OPTIONS: JhiModuleConfig;
+  CONFIG_OPTIONS: JhiModuleConfig;
 
-    constructor(@Optional() @Inject(JhiModuleConfig) moduleConfig?: JhiModuleConfig) {
-        this.CONFIG_OPTIONS = {
-            ...new JhiModuleConfig(),
-            ...moduleConfig
-        };
-    }
+  constructor(@Optional() @Inject(JhiModuleConfig) moduleConfig?: JhiModuleConfig) {
+    this.CONFIG_OPTIONS = {
+      ...new JhiModuleConfig(),
+      ...moduleConfig
+    };
+  }
 
-    getConfig(): JhiModuleConfig {
-        return this.CONFIG_OPTIONS;
-    }
+  getConfig(): JhiModuleConfig {
+    return this.CONFIG_OPTIONS;
+  }
 }

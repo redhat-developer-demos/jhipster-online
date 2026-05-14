@@ -27,14 +27,6 @@ import { NgJhipsterCompatModule } from './ng-jhipster-compat/ng-jhipster-compat.
 
 @NgModule({
   imports: [NgJhipsterCompatModule],
-  exports: [
-    FormsModule,
-    CommonModule,
-    NgbModule,
-    NgJhipsterCompatModule,
-    InfiniteScrollModule,
-    FontAwesomeModule,
-    ReactiveFormsModule
-  ]
+  exports: [FormsModule, CommonModule, NgbModule, NgJhipsterCompatModule, InfiniteScrollModule, FontAwesomeModule, ReactiveFormsModule]
 })
 export class JhonlineSharedLibsModule {}

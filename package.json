@@ -2,15 +2,36 @@
   "name": "jhonline",
   "version": "2.41.0",
   "description": "JHipster Online is the best place to generate JHipster applications, with no installation required!",
-  "license": "Apache-2.0",
   "keywords": [
     "jhipster"
   ],
   "homepage": "https://www.jhipster.tech/",
   "bugs": "https://github.com/jhipster/jhipster-online/issues",
-  "cacheDirectories": [
-    "node_modules"
-  ],
+  "license": "Apache-2.0",
+  "scripts": {
+    "prettier:format": "prettier --write \"{,src/**/}*.{md,json,yaml,yml,java,ts,js,css,scss}\"",
+    "prettier:check": "prettier --check \"{,src/**/}*.{md,json,yaml,yml,java,ts,js,css,scss}\"",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "npm run lint -- --fix",
+    "cleanup": "rimraf target/classes/static/{index.html,favicon.ico,manifest.webapp,robots.txt,app/,content/,swagger-ui/} target/classes/aot",
+    "clean-www": "rimraf target/classes/static/app/{src,target/}",
+    "start": "ng serve --hmr",
+    "start-tls": "npm run webapp:dev-ssl",
+    "serve": "npm run start",
+    "build": "npm run webapp:prod",
+    "pretest": "npm run lint",
+    "test": "ng test --coverage --log-heap-usage -w=2",
+    "test:watch": "npm run test -- --watch",
+    "webapp:build": "npm run clean-www && npm run webapp:build:dev",
+    "webapp:build:dev": "ng build --configuration development",
+    "webapp:build:prod": "ng build --configuration production --delete-output-path false",
+    "webapp:dev": "ng serve",
+    "webapp:dev-ssl": "ng serve --ssl",
+    "webapp:dev-verbose": "ng serve --verbose",
+    "webapp:prod": "npm run clean-www && npm run webapp:build:prod",
+    "webapp:test": "npm run test",
+    "update-jdl-studio": "cd src/main/resources/static/jdl-studio && git pull origin gh-pages --rebase && cd .. && git add jdl-studio && git commit -m 'jdl-studio submodule updated'"
+  },
   "dependencies": {
     "@angular/common": "^19.0.0",
     "@angular/compiler": "^19.0.0",
@@ -90,30 +111,9 @@
     "node": ">=22.9.0",
     "npm": ">=10.0.0"
   },
-  "scripts": {
-    "prettier:format": "prettier --write \"{,src/**/}*.{md,json,yaml,yml,java,ts,js,css,scss}\"",
-    "prettier:check": "prettier --check \"{,src/**/}*.{md,json,yaml,yml,java,ts,js,css,scss}\"",
-    "lint": "eslint . --ext .js,.ts",
-    "lint:fix": "npm run lint -- --fix",
-    "cleanup": "rimraf target/classes/static/{index.html,favicon.ico,manifest.webapp,robots.txt,app/,content/,swagger-ui/} target/classes/aot",
-    "clean-www": "rimraf target/classes/static/app/{src,target/}",
-    "start": "ng serve --hmr",
-    "start-tls": "npm run webapp:dev-ssl",
-    "serve": "npm run start",
-    "build": "npm run webapp:prod",
-    "pretest": "npm run lint",
-    "test": "ng test --coverage --log-heap-usage -w=2",
-    "test:watch": "npm run test -- --watch",
-    "webapp:build": "npm run clean-www && npm run webapp:build:dev",
-    "webapp:build:dev": "ng build --configuration development",
-    "webapp:build:prod": "ng build --configuration production --delete-output-path false",
-    "webapp:dev": "ng serve",
-    "webapp:dev-ssl": "ng serve --ssl",
-    "webapp:dev-verbose": "ng serve --verbose",
-    "webapp:prod": "npm run clean-www && npm run webapp:build:prod",
-    "webapp:test": "npm run test",
-    "update-jdl-studio": "cd src/main/resources/static/jdl-studio && git pull origin gh-pages --rebase && cd .. && git add jdl-studio && git commit -m 'jdl-studio submodule updated'"
-  },
+  "cacheDirectories": [
+    "node_modules"
+  ],
   "jestSonar": {
     "reportPath": "target/test-results/jest",
     "reportFile": "TESTS-results-sonar.xml"

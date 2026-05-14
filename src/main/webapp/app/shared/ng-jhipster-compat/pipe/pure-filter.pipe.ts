@@ -21,9 +21,11 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { JhiFilterPipe } from './filter.pipe';
 
 @Pipe({
-  standalone: false, name: 'pureFilter' })
+  standalone: false,
+  name: 'pureFilter'
+})
 export class JhiPureFilterPipe extends JhiFilterPipe implements PipeTransform {
-    transform(input: any[], filter: any, field?: string): any {
-        return super.transform(input, filter, field);
-    }
+  transform(input: any[], filter: any, field?: string): any {
+    return super.transform(input, filter, field);
+  }
 }

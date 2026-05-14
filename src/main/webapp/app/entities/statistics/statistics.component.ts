@@ -210,8 +210,7 @@ export class StatisticsComponent implements AfterViewInit {
 
   private refineData(data: any): any {
     return data.reduce((acc: any, current: any) => {
-      const refinedValues = Object.keys(current.values).reduce(
-        (prev: Record<string, number>, currentProperty: string) => {
+      const refinedValues = Object.keys(current.values).reduce((prev: Record<string, number>, currentProperty: string) => {
         const lowerCaseKey = currentProperty.toLowerCase();
 
         this.prettifyClientFrameworkData(lowerCaseKey, prev, currentProperty, current);
@@ -227,9 +226,7 @@ export class StatisticsComponent implements AfterViewInit {
         }
 
         return prev;
-        },
-        {} as Record<string, number>
-      );
+      }, {} as Record<string, number>);
 
       acc.push({ date: current.date, values: refinedValues });
 

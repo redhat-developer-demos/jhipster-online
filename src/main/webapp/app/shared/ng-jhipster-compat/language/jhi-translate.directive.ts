@@ -29,52 +29,52 @@ import { JhiConfigService } from '../config.service';
  */
 @Directive({
   standalone: false,
-    selector: '[jhiTranslate]'
+  selector: '[jhiTranslate]'
 })
 export class JhiTranslateDirective implements OnChanges, OnInit, OnDestroy {
-    @Input() jhiTranslate: string;
-    @Input() translateValues: any;
+  @Input() jhiTranslate: string;
+  @Input() translateValues: any;
 
-    private readonly directiveDestroyed = new Subject<void>();
+  private readonly directiveDestroyed = new Subject<void>();
 
-    constructor(private configService: JhiConfigService, private el: ElementRef, @Optional() private translateService?: TranslateService) {}
+  constructor(private configService: JhiConfigService, private el: ElementRef, @Optional() private translateService?: TranslateService) {}
 
-    ngOnInit(): void {
-        const enabled = this.configService.getConfig().i18nEnabled;
-        if (enabled && this.translateService) {
-            this.translateService.onLangChange.pipe(takeUntil(this.directiveDestroyed)).subscribe(() => {
-                this.getTranslation();
-            });
+  ngOnInit(): void {
+    const enabled = this.configService.getConfig().i18nEnabled;
+    if (enabled && this.translateService) {
+      this.translateService.onLangChange.pipe(takeUntil(this.directiveDestroyed)).subscribe(() => {
+        this.getTranslation();
+      });
+    }
+  }
+
+  ngOnChanges(): void {
+    const enabled = this.configService.getConfig().i18nEnabled;
+
+    if (enabled && this.translateService) {
+      this.getTranslation();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.directiveDestroyed.next();
+    this.directiveDestroyed.complete();
+  }
+
+  private getTranslation(): void {
+    if (!this.translateService) {
+      return;
+    }
+    this.translateService
+      .get(this.jhiTranslate, this.translateValues)
+      .pipe(takeUntil(this.directiveDestroyed))
+      .subscribe(
+        value => {
+          this.el.nativeElement.innerHTML = value;
+        },
+        () => {
+          return `${this.configService.getConfig().noi18nMessage}[${this.jhiTranslate}]`;
         }
-    }
-
-    ngOnChanges(): void {
-        const enabled = this.configService.getConfig().i18nEnabled;
-
-        if (enabled && this.translateService) {
-            this.getTranslation();
-        }
-    }
-
-    ngOnDestroy(): void {
-        this.directiveDestroyed.next();
-        this.directiveDestroyed.complete();
-    }
-
-    private getTranslation(): void {
-        if (!this.translateService) {
-            return;
-        }
-        this.translateService
-            .get(this.jhiTranslate, this.translateValues)
-            .pipe(takeUntil(this.directiveDestroyed))
-            .subscribe(
-                value => {
-                    this.el.nativeElement.innerHTML = value;
-                },
-                () => {
-                    return `${this.configService.getConfig().noi18nMessage}[${this.jhiTranslate}]`;
-                }
-            );
-    }
+      );
+  }
 }

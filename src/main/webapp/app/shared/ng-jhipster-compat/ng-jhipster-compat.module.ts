@@ -54,14 +54,6 @@ const METRICS_AND_BOOLEAN = [
 @NgModule({
   imports: [CommonModule, FormsModule, NgbModule, JhSortModule],
   declarations: [...PIPES, ...METRICS_AND_BOOLEAN, JhiTranslateDirective],
-  exports: [
-    CommonModule,
-    FormsModule,
-    NgbModule,
-    JhSortModule,
-    ...PIPES,
-    ...METRICS_AND_BOOLEAN,
-    JhiTranslateDirective
-  ]
+  exports: [CommonModule, FormsModule, NgbModule, JhSortModule, ...PIPES, ...METRICS_AND_BOOLEAN, JhiTranslateDirective]
 })
 export class NgJhipsterCompatModule {}
