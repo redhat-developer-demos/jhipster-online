@@ -4,6 +4,7 @@ import { JhiAlert, JhiAlertService } from 'app/shared/alert/alert.service';
 import { EditorAiModelOption, EditorAiService } from './editor-ai.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-ai-assist-panel',
   templateUrl: './ai-assist-panel.component.html'
 })

@@ -27,6 +27,7 @@ import { GitConfigurationService } from 'app/core/git/git-configuration.service'
 import { ProfileService } from 'app/layouts/profiles/profile.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['navbar.scss']

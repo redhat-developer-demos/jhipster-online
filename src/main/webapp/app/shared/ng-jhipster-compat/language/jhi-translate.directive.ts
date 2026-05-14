@@ -28,6 +28,7 @@ import { JhiConfigService } from '../config.service';
  * A wrapper directive on top of the translate pipe as the inbuilt translate directive from ngx-translate is too verbose and buggy
  */
 @Directive({
+  standalone: false,
     selector: '[jhiTranslate]'
 })
 export class JhiTranslateDirective implements OnChanges, OnInit, OnDestroy {

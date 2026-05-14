@@ -7,6 +7,7 @@ import { JdlMetadataService } from './jdl-metadata.service';
 import { JdlAiModelOption, JdlAiService } from './jdl-ai.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-jdl-ai-assistant',
   templateUrl: './jdl-ai-assistant.component.html'
 })

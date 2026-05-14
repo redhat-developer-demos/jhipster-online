@@ -5,6 +5,7 @@ import { AiAssistPanelComponent } from 'app/shared/editor-ai/ai-assist-panel.com
 import { YamlEditorComponent } from './yaml-editor.component';
 
 @Component({
+  standalone: false,
   selector: 'jhi-helm-template-editor',
   templateUrl: './helm-template-editor.component.html'
 })

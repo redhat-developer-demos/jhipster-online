@@ -19,6 +19,7 @@
 import { Component, ElementRef, Input, Renderer2 } from '@angular/core';
 
 @Component({
+  standalone: false,
   selector: 'jhi-password-strength-bar',
   template: `
     <div id="strength">

@@ -26,6 +26,7 @@ import { AccountService } from 'app/core/auth/account.service';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'jhi-jdl-metadata',
   templateUrl: './jdl-metadata.component.html'
 })

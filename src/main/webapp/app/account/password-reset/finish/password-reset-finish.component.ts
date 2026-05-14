@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { UntypedFormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -24,6 +24,7 @@ import { LoginModalService } from 'app/core/login/login-modal.service';
 import { PasswordResetFinishService } from './password-reset-finish.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-password-reset-finish',
   templateUrl: './password-reset-finish.component.html'
 })
@@ -37,6 +38,7 @@ export class PasswordResetFinishComponent implements OnInit, AfterViewInit {
   success = false;
   key = '';
 
+  private fb = inject(UntypedFormBuilder);
   passwordForm = this.fb.group({
     newPassword: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
     confirmPassword: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]]
@@ -45,8 +47,7 @@ export class PasswordResetFinishComponent implements OnInit, AfterViewInit {
   constructor(
     private passwordResetFinishService: PasswordResetFinishService,
     private loginModalService: LoginModalService,
-    private route: ActivatedRoute,
-    private fb: UntypedFormBuilder
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {

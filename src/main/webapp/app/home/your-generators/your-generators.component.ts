@@ -31,6 +31,7 @@ import { DataDeletionDialogComponent } from 'app/home/your-generators/data-delet
 import { AccountService } from 'app/core/auth/account.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-your-generators',
   templateUrl: './your-generators.component.html'
 })

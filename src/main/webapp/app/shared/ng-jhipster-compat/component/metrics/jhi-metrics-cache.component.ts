@@ -20,6 +20,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
+  standalone: false,
     selector: 'jhi-metrics-cache',
     template: `
         <h3 jhiTranslate="metrics.cache.title">Cache statistics</h3>

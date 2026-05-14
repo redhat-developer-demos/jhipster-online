@@ -20,6 +20,7 @@ export interface YamlEditorAiShortcutPayload {
 }
 
 @Component({
+  standalone: false,
   selector: 'jhi-yaml-editor',
   template: '<textarea #ta class="jhi-yaml-editor-ta"></textarea>',
   styles: [

@@ -22,6 +22,7 @@ import { GeneratorConfigurationModel } from '../generator/generator.configuratio
 import { JHipsterConfigurationModel } from '../generator/jhipster.configuration.model';
 
 @Component({
+  standalone: false,
   selector: 'jhi-azure-generator',
   templateUrl: './azure-generator.component.html'
 })

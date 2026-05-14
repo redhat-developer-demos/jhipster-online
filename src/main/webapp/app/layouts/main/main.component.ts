@@ -23,6 +23,7 @@ import { Router, ActivatedRouteSnapshot, NavigationEnd, NavigationError } from '
 import { AccountService } from 'app/core/auth/account.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-main',
   templateUrl: './main.component.html'
 })

@@ -24,6 +24,7 @@ import { EventManager, EventWithContent } from 'app/core/event-manager.service';
 import { GeneratorIdentityService } from './generator-identity.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-remove-generator-dialog',
   templateUrl: './remove-generator-dialog.component.html'
 })

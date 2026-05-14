@@ -26,6 +26,7 @@ import { Audit } from './audit.model';
 import { AuditsService } from './audits.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-audit',
   templateUrl: './audits.component.html'
 })

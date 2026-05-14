@@ -24,6 +24,7 @@ import { LoginModalService } from 'app/core/login/login-modal.service';
 import { AccountService } from 'app/core/auth/account.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-welcome',
   templateUrl: './welcome.component.html',
   styleUrls: ['welcome.scss']

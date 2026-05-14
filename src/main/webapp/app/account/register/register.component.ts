@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { UntypedFormBuilder, Validators } from '@angular/forms';
 
@@ -26,6 +26,7 @@ import { PasswordResetService } from 'app/core/auth/password-reset.service';
 import { RegisterService } from './register.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-register',
   templateUrl: './register.component.html'
 })
@@ -39,6 +40,7 @@ export class RegisterComponent implements AfterViewInit {
   errorUserExists = false;
   success = false;
 
+  private fb = inject(UntypedFormBuilder);
   registerForm = this.fb.group({
     login: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50), Validators.pattern('^[_.@A-Za-z0-9-]*$')]],
     email: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(254), Validators.email]],
@@ -49,7 +51,6 @@ export class RegisterComponent implements AfterViewInit {
   constructor(
     private loginModalService: LoginModalService,
     private registerService: RegisterService,
-    private fb: UntypedFormBuilder,
     private passwordResetService: PasswordResetService
   ) {}
 

@@ -20,6 +20,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
+  standalone: false,
     selector: 'jhi-metrics-garbagecollector',
     template: `
         <div class="row">

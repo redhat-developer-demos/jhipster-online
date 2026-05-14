@@ -22,6 +22,7 @@ import { combineLatest } from 'rxjs';
 import { MetricsService, Metrics, MetricsKey, Thread } from './metrics.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-metrics',
   templateUrl: './metrics.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush

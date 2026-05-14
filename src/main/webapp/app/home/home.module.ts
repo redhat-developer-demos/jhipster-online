@@ -41,7 +41,7 @@ import { OpenshiftGeneratorComponent } from './openshift-generator/openshift-gen
 import { DeployedAppsComponent } from './deployed-apps/deployed-apps.component';
 
 @NgModule({
-  imports: [JhonlineSharedModule, RouterModule.forRoot([HOME_ROUTE], { relativeLinkResolution: 'legacy' })],
+  imports: [JhonlineSharedModule, RouterModule.forRoot([HOME_ROUTE])],
   declarations: [
     HomeComponent,
     GeneratorComponent,

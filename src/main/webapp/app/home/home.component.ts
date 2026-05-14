@@ -25,6 +25,7 @@ import { GitConfigurationService } from 'app/core/git/git-configuration.service'
 import { GitConfigurationModel } from 'app/core/git/git-configuration.model';
 
 @Component({
+  standalone: false,
   selector: 'jhi-home',
   templateUrl: './home.component.html',
   styleUrls: ['home.scss']

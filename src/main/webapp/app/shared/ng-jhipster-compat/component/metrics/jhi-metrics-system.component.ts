@@ -20,6 +20,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
+  standalone: false,
     selector: 'jhi-metrics-system',
     template: `
         <h4>System</h4>

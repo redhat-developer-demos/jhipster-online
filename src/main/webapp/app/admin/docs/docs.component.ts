@@ -19,6 +19,7 @@
 import { Component } from '@angular/core';
 
 @Component({
+  standalone: false,
   selector: 'jhi-docs',
   templateUrl: './docs.component.html',
   styleUrls: ['docs.scss']

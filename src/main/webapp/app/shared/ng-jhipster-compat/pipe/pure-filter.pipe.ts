@@ -20,7 +20,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { JhiFilterPipe } from './filter.pipe';
 
-@Pipe({ name: 'pureFilter' })
+@Pipe({
+  standalone: false, name: 'pureFilter' })
 export class JhiPureFilterPipe extends JhiFilterPipe implements PipeTransform {
     transform(input: any[], filter: any, field?: string): any {
         return super.transform(input, filter, field);

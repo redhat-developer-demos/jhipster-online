@@ -6,17 +6,24 @@ const {
 const environment = require('./webpack/environment');
 
 module.exports = {
+  testEnvironment: 'jsdom',
+  moduleFileExtensions: ['ts', 'html', 'js', 'json', 'mjs'],
+  setupFilesAfterEnv: ['<rootDir>/jest-angular-setup.cjs'],
+  transform: {
+    '^.+\\.(ts|js|html)$': [
+      'jest-preset-angular',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        stringifyContentPathRegex: '\\.html$'
+      }
+    ]
+  },
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|dayjs/esm)'],
-  testRunner: 'jest-jasmine2',
   setupFiles: ['jest-date-mock'],
   cacheDirectory: '<rootDir>/target/jest-cache',
   coverageDirectory: '<rootDir>/target/test-results/',
   globals: {
-    ...environment,
-    'ts-jest': {
-      stringifyContentPathRegex: '\\.html$',
-      tsconfig: '<rootDir>/tsconfig.spec.json'
-    }
+    ...environment
   },
   coveragePathIgnorePatterns: ['<rootDir>/src/test/javascript'],
   moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: `<rootDir>/${baseUrl}/` }),

@@ -22,6 +22,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HealthKey, HealthDetails } from './health.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-health-modal',
   templateUrl: './health-modal.component.html'
 })

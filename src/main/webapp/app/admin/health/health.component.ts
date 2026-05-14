@@ -24,6 +24,7 @@ import { HealthService, HealthStatus, Health, HealthKey, HealthDetails } from '.
 import { HealthModalComponent } from './health-modal.component';
 
 @Component({
+  standalone: false,
   selector: 'jhi-health',
   templateUrl: './health.component.html'
 })

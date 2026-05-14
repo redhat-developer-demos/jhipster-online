@@ -21,6 +21,7 @@ import { Component, OnInit } from '@angular/core';
 import { ConfigurationService, Bean, PropertySource } from './configuration.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-configuration',
   templateUrl: './configuration.component.html'
 })

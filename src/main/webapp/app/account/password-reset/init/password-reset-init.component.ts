@@ -16,12 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { UntypedFormBuilder, Validators } from '@angular/forms';
 
 import { PasswordResetInitService } from './password-reset-init.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-password-reset-init',
   templateUrl: './password-reset-init.component.html'
 })
@@ -30,11 +31,12 @@ export class PasswordResetInitComponent implements AfterViewInit {
   email?: ElementRef;
 
   success = false;
+  private fb = inject(UntypedFormBuilder);
   resetRequestForm = this.fb.group({
     email: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(254), Validators.email]]
   });
 
-  constructor(private passwordResetInitService: PasswordResetInitService, private fb: UntypedFormBuilder) {}
+  constructor(private passwordResetInitService: PasswordResetInitService) {}
 
   ngAfterViewInit(): void {
     if (this.email) {

@@ -22,6 +22,7 @@ import { Log, LoggersResponse, Logger, Level } from './log.model';
 import { LogsService } from './logs.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-logs',
   templateUrl: './logs.component.html'
 })

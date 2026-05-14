@@ -20,6 +20,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
+  standalone: false,
     selector: 'jhi-metrics-endpoints-requests',
     template: `
         <h3>Endpoints requests (time in millisecond)</h3>

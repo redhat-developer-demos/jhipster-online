@@ -30,6 +30,7 @@ import { JdlService } from './jdl.service';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'jhi-jdl-studio-delete',
   templateUrl: './jdl-studio-delete.component.html'
 })
@@ -72,6 +73,7 @@ export class DeleteJdlStudioComponent implements OnInit, OnDestroy {
 }
 
 @Component({
+  standalone: false,
   selector: 'jhi-jdl-studio-apply',
   templateUrl: './jdl-studio-apply.component.html'
 })

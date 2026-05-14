@@ -22,6 +22,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { GeneratorService } from './generator.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-generator-output-dialog',
   templateUrl: './generator.output.component.html'
 })

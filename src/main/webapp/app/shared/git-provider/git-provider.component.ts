@@ -24,6 +24,7 @@ import { GitConfigurationService } from 'app/core/git/git-configuration.service'
 import { GitProviderModel } from 'app/core/git/git-provider.model';
 
 @Component({
+  standalone: false,
   selector: 'jhi-git-provider-alert',
   templateUrl: './git-provider-alert.component.html'
 })
@@ -115,6 +116,7 @@ export class JhiGitProviderAlertComponent implements OnInit {
 }
 
 @Component({
+  standalone: false,
   selector: 'jhi-git-provider',
   templateUrl: './git-provider.component.html'
 })

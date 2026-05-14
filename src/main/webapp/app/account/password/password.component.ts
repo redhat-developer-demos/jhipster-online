@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { UntypedFormBuilder, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
@@ -25,6 +25,7 @@ import { Account } from 'app/core/user/account.model';
 import { PasswordService } from './password.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-password',
   templateUrl: './password.component.html'
 })
@@ -33,13 +34,14 @@ export class PasswordComponent implements OnInit {
   error = false;
   success = false;
   account$?: Observable<Account | null>;
+  private fb = inject(UntypedFormBuilder);
   passwordForm = this.fb.group({
     currentPassword: ['', [Validators.required]],
     newPassword: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
     confirmPassword: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]]
   });
 
-  constructor(private passwordService: PasswordService, private accountService: AccountService, private fb: UntypedFormBuilder) {}
+  constructor(private passwordService: PasswordService, private accountService: AccountService) {}
 
   ngOnInit(): void {
     this.account$ = this.accountService.identity();

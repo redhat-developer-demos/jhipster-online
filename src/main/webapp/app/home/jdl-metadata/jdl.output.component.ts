@@ -22,6 +22,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { JdlService } from './jdl.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-jdl-output-dialog',
   templateUrl: './jdl.output.component.html'
 })

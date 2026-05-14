@@ -23,6 +23,7 @@ import { IconDefinition, faSort, faSortDown, faSortUp } from '@fortawesome/free-
 import { SortDirective } from './sort.directive';
 
 @Directive({
+  standalone: false,
   selector: '[jhiSortBy]'
 })
 export class SortByDirective implements AfterContentInit {

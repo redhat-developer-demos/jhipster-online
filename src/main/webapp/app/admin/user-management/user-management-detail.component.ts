@@ -22,6 +22,7 @@ import { ActivatedRoute } from '@angular/router';
 import { User } from 'app/core/user/user.model';
 
 @Component({
+  standalone: false,
   selector: 'jhi-user-mgmt-detail',
   templateUrl: './user-management-detail.component.html'
 })

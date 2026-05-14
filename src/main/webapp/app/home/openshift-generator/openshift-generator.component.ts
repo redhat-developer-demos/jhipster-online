@@ -34,6 +34,7 @@ export interface OpenshiftScaffoldRow {
 }
 
 @Component({
+  standalone: false,
   selector: 'jhi-openshift-generator',
   templateUrl: './openshift-generator.component.html'
 })

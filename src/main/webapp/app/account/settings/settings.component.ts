@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { UntypedFormBuilder, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AccountService } from 'app/core/auth/account.service';
@@ -24,19 +24,21 @@ import { Account } from 'app/core/user/account.model';
 import { DeleteAccountDialogComponent } from 'app/account/settings/delete-account-dialog.component';
 
 @Component({
+  standalone: false,
   selector: 'jhi-settings',
   templateUrl: './settings.component.html'
 })
 export class SettingsComponent implements OnInit {
   account!: Account;
   success = false;
+  private fb = inject(UntypedFormBuilder);
   settingsForm = this.fb.group({
     firstName: [undefined, [Validators.required, Validators.minLength(1), Validators.maxLength(50)]],
     lastName: [undefined, [Validators.required, Validators.minLength(1), Validators.maxLength(50)]],
     email: [undefined, [Validators.required, Validators.minLength(5), Validators.maxLength(254), Validators.email]]
   });
 
-  constructor(private accountService: AccountService, private fb: UntypedFormBuilder, private modalService: NgbModal) {}
+  constructor(private accountService: AccountService, private modalService: NgbModal) {}
 
   ngOnInit(): void {
     this.accountService.identity().subscribe(account => {

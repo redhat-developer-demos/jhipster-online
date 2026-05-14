@@ -25,6 +25,7 @@ import { Subscription } from 'rxjs';
 import { AlertError } from './alert-error.model';
 
 @Component({
+  standalone: false,
   selector: 'jhi-alert-error',
   template: `
     <div class="alerts" role="alert">

@@ -20,6 +20,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
+  standalone: false,
   selector: 'jhi-error',
   templateUrl: './error.component.html'
 })

@@ -22,8 +22,10 @@ import { JhonlineAppModule } from './app.module';
 
 ProdConfig();
 
-if (module['hot']) {
-  module['hot'].accept();
+declare const module: { hot?: { accept: () => void } };
+
+if (module.hot) {
+  module.hot.accept();
 }
 
 platformBrowserDynamic()

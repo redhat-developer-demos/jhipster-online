@@ -19,7 +19,8 @@
  */
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'keys' })
+@Pipe({
+  standalone: false, name: 'keys' })
 export class JhiKeysPipe implements PipeTransform {
     transform(value: any): any {
         const keys = [];

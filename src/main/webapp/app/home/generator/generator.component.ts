@@ -36,6 +36,7 @@ import {
 } from './generator.configuration.model';
 
 @Component({
+  standalone: false,
   selector: 'jhi-generator',
   templateUrl: './generator.component.html'
 })

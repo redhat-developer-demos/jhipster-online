@@ -80,6 +80,7 @@ import { JhiConfigService } from '../config.service';
  * - Display a blue badge and write 'deactivated' when inputBooleanVariable is false
  */
 @Component({
+  standalone: false,
     selector: 'jhi-boolean',
     template: `
         <span [ngClass]="value ? classTrue : classFalse" [innerHtml]="value ? textTrue : textFalse"> </span>

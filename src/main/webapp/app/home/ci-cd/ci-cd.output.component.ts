@@ -22,6 +22,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CiCdService } from './ci-cd.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-ci-cd-output-dialog',
   templateUrl: './ci-cd.output.component.html'
 })

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
+  standalone: false,
   selector: 'jhi-deployed-apps',
   templateUrl: './deployed-apps.component.html'
 })

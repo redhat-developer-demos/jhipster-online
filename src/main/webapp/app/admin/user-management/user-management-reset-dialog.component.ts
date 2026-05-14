@@ -23,6 +23,7 @@ import { User } from 'app/core/user/user.model';
 import { PasswordResetService } from 'app/core/auth/password-reset.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-user-mgmt-reset-dialog',
   templateUrl: './user-management-reset-dialog.component.html'
 })

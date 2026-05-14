@@ -33,6 +33,7 @@ import { UserManagementDeleteDialogComponent } from './user-management-delete-di
 import { UserMgmtResetDialogComponent } from 'app/admin/user-management/user-management-reset-dialog.component';
 
 @Component({
+  standalone: false,
   selector: 'jhi-user-mgmt',
   templateUrl: './user-management.component.html'
 })

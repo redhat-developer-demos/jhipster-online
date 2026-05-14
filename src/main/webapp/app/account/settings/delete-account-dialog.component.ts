@@ -24,6 +24,7 @@ import { AccountService } from 'app/core/auth/account.service';
 import { timer } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'jhi-account-delete-dialog',
   templateUrl: './delete-account-dialog.component.html'
 })

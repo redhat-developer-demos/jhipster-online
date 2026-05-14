@@ -24,6 +24,7 @@ import { LoginModalService } from 'app/core/login/login-modal.service';
 import { ActivateService } from './activate.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-activate',
   templateUrl: './activate.component.html'
 })

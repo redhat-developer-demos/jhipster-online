@@ -49,10 +49,11 @@ export class SpyObject {
   }
 
   spy(name: string): GuinessCompatibleSpy {
-    if (!this[name]) {
-      this[name] = this.createGuinnessCompatibleSpy(name);
+    const bag = this as unknown as Record<string, GuinessCompatibleSpy | undefined>;
+    if (!bag[name]) {
+      bag[name] = this.createGuinnessCompatibleSpy(name);
     }
-    return this[name];
+    return bag[name] as GuinessCompatibleSpy;
   }
 
   private createGuinnessCompatibleSpy(name: string): GuinessCompatibleSpy {

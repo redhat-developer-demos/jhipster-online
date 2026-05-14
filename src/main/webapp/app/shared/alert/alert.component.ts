@@ -20,6 +20,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { JhiAlertService, JhiAlert } from './alert.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-alert',
   template: `
     <div class="alerts" role="alert">

@@ -19,6 +19,7 @@
 import { Component } from '@angular/core';
 
 @Component({
+  standalone: false,
   selector: 'jhi-footer',
   templateUrl: './footer.component.html',
   styleUrls: ['footer.scss']

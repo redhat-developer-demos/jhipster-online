@@ -38,7 +38,7 @@
     </div>
     <div class="col-md-4 col-xl-2 d-flex align-items-end" *ngIf="simpleMode">
       <button class="btn btn-secondary btn-form w-100" (click)="refreshGitCompanyListByGitProvider(data?.selectedGitProvider)">
-        <fa-icon [icon]="'sync'" [spin]="data.gitCompanyListRefresh"></fa-icon>
+        <fa-icon [icon]="'sync'" [animation]="data.gitCompanyListRefresh ? 'spin' : undefined"></fa-icon>
         <span>
           Refresh
         </span>
@@ -64,7 +64,7 @@
       </div>
       <div class="col-md-4 col-xl-2 d-flex align-items-end">
         <button class="btn btn-secondary btn-form w-100" (click)="refreshGitProjectList()">
-          <fa-icon [icon]="'sync'" [spin]="data.gitProjectListRefresh"></fa-icon>
+          <fa-icon [icon]="'sync'" [animation]="data.gitProjectListRefresh ? 'spin' : undefined"></fa-icon>
           <span>
             Refresh
           </span>

@@ -24,6 +24,7 @@ import { barChartOptions, comparingLineChartOptions, pieChartOptions } from './s
 import { computeAngularKey, displayNames } from 'app/entities/statistics/statistics.utils';
 
 @Component({
+  standalone: false,
   selector: 'jhi-statistics',
   templateUrl: './statistics.component.html',
   styleUrls: ['statistics.scss']
@@ -209,7 +210,8 @@ export class StatisticsComponent implements AfterViewInit {
 
   private refineData(data: any): any {
     return data.reduce((acc: any, current: any) => {
-      const refinedValues = Object.keys(current.values).reduce((prev, currentProperty: string) => {
+      const refinedValues = Object.keys(current.values).reduce(
+        (prev: Record<string, number>, currentProperty: string) => {
         const lowerCaseKey = currentProperty.toLowerCase();
 
         this.prettifyClientFrameworkData(lowerCaseKey, prev, currentProperty, current);
@@ -225,7 +227,9 @@ export class StatisticsComponent implements AfterViewInit {
         }
 
         return prev;
-      }, {});
+        },
+        {} as Record<string, number>
+      );
 
       acc.push({ date: current.date, values: refinedValues });
 
@@ -233,7 +237,7 @@ export class StatisticsComponent implements AfterViewInit {
     }, []);
   }
 
-  private prettifyClientFrameworkData(lowerCaseKey: string, prev: any, currentProperty: string, current: any): void {
+  private prettifyClientFrameworkData(lowerCaseKey: string, prev: Record<string, number>, currentProperty: string, current: any): void {
     if (!['react', 'vue', 'angular', 'none'].some(k => lowerCaseKey.includes(k))) {
       return;
     }
@@ -252,7 +256,7 @@ export class StatisticsComponent implements AfterViewInit {
     prev[key] = (prev[key] || 0) + current.values[currentProperty];
   }
 
-  private prettifyBuildToolData(lowerCaseKey: string, prev: any, currentProperty: string, current: any): void {
+  private prettifyBuildToolData(lowerCaseKey: string, prev: Record<string, number>, currentProperty: string, current: any): void {
     if (!['maven', 'gradle'].includes(lowerCaseKey)) {
       return;
     }
@@ -294,7 +298,7 @@ export class StatisticsComponent implements AfterViewInit {
     prev[key] = (prev[key] || 0) + current.values[currentProperty];
   }
 
-  private prettifyCacheProvider(lowerCaseKey: string, prev: any, currentProperty: string, current: any): void {
+  private prettifyCacheProvider(lowerCaseKey: string, prev: Record<string, number>, currentProperty: string, current: any): void {
     if (!['ehcache', 'hazelcast', 'infinispan', 'none'].some(k => lowerCaseKey.includes(k))) {
       return;
     }
@@ -313,7 +317,7 @@ export class StatisticsComponent implements AfterViewInit {
     prev[key] = (prev[key] || 0) + current.values[currentProperty];
   }
 
-  private prettifyCloudDeployment(lowerCaseKey: string, prev: any, currentProperty: string, current: any): void {
+  private prettifyCloudDeployment(lowerCaseKey: string, prev: Record<string, number>, currentProperty: string, current: any): void {
     if (!['kubernetes', 'openshift', 'heroku', 'cloud', 'aws', 'none'].some(k => lowerCaseKey.includes(k))) {
       return;
     }
@@ -336,7 +340,7 @@ export class StatisticsComponent implements AfterViewInit {
     prev[key] = (prev[key] || 0) + current.values[currentProperty];
   }
 
-  private prettifyApplicationTypeData(lowerCaseKey: string, prev: any, currentProperty: string, current: any): void {
+  private prettifyApplicationTypeData(lowerCaseKey: string, prev: Record<string, number>, currentProperty: string, current: any): void {
     if (!['gateway', 'microservice', 'monolith', 'none'].some(k => lowerCaseKey.includes(k))) {
       return;
     }

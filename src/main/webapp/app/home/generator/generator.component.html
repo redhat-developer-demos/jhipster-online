@@ -595,7 +595,7 @@
           </div>
 
           <div *ngSwitchCase="false">
-            <fa-icon [icon]="'sync'" [spin]="true"></fa-icon>
+            <fa-icon [icon]="'sync'" animation="spin"></fa-icon>
             <button type="submit" class="btn btn-success" [disabled]="true" *ngIf="selectedGitProvider">
               Generate on {{ selectedGitProvider }}
             </button>

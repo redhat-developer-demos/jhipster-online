@@ -11,24 +11,23 @@
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
+    "useDefineForClassFields": true,
     "moduleResolution": "node",
     "importHelpers": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,
     "removeComments": false,
-    "suppressImplicitAnyIndexErrors": true,
     "skipLibCheck": true,
-    "target": "es2020",
-    "module": "es2020",
-    "lib": ["es2018", "dom"],
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2022", "dom"],
     "paths": {
       "app/*": ["app/*"]
     }
   },
   "angularCompilerOptions": {
-    "genDir": "target/classes/aot",
-    "fullTemplateTypeCheck": true,
+    "strictTemplates": false,
     "preserveWhitespaces": true
   }
 }

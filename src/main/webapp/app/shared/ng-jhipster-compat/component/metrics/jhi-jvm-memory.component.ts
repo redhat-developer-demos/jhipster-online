@@ -20,6 +20,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
+  standalone: false,
     selector: 'jhi-jvm-memory',
     template: `
         <h4 jhiTranslate="metrics.jvm.memory.title">Memory</h4>

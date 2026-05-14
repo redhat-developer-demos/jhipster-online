@@ -35,6 +35,7 @@ interface GitRuntimeConfigView {
 }
 
 @Component({
+  standalone: false,
   selector: 'jhi-git-runtime-config',
   templateUrl: './git-runtime-config.component.html'
 })

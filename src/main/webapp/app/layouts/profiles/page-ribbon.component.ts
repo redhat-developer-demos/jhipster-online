@@ -22,6 +22,7 @@ import { map } from 'rxjs/operators';
 import { ProfileService } from './profile.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-page-ribbon',
   template: `
     <div class="ribbon" *ngIf="ribbonEnv$ | async as ribbonEnv">

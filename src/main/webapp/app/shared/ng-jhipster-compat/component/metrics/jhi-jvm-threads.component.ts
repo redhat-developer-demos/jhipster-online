@@ -24,6 +24,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { JhiThreadModalComponent } from './jhi-metrics-modal-threads.component';
 
 @Component({
+  standalone: false,
     selector: 'jhi-jvm-threads',
     template: `
         <h4 jhiTranslate="metrics.jvm.threads.title">Threads</h4>

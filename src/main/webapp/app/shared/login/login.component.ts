@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { UntypedFormBuilder } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
@@ -25,6 +25,7 @@ import { LoginService } from 'app/core/login/login.service';
 import { GitConfigurationService } from 'app/core/git/git-configuration.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-login-modal',
   templateUrl: './login.component.html'
 })
@@ -34,6 +35,7 @@ export class LoginModalComponent implements AfterViewInit {
 
   authenticationError = false;
 
+  private fb = inject(UntypedFormBuilder);
   loginForm = this.fb.group({
     username: [''],
     password: [''],
@@ -44,7 +46,6 @@ export class LoginModalComponent implements AfterViewInit {
     private loginService: LoginService,
     private router: Router,
     public activeModal: NgbActiveModal,
-    private fb: UntypedFormBuilder,
     private gitConfigurationService: GitConfigurationService
   ) {}
 

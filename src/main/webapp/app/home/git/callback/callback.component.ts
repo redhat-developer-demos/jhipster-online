@@ -24,6 +24,7 @@ import { GitConfigurationService } from 'app/core/git/git-configuration.service'
 import { GithubCallbackService } from './callback.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-github-callback',
   templateUrl: './callback.component.html'
 })

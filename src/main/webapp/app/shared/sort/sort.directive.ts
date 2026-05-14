@@ -20,6 +20,7 @@ import { Directive, EventEmitter, Input, Output } from '@angular/core';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Directive({
+  standalone: false,
   selector: '[jhiSort]'
 })
 export class SortDirective {

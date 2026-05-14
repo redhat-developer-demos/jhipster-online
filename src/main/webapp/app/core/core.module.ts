@@ -21,8 +21,7 @@ import { DatePipe, registerLocaleData } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { CookieModule } from 'ngx-cookie';
-import { NgxWebstorageModule } from 'ngx-webstorage';
+import { provideNgxWebstorage, withLocalStorage, withNgxWebstorageConfig, withSessionStorage } from 'ngx-webstorage';
 import locale from '@angular/common/locales/en';
 
 import dayjs from 'dayjs/esm';
@@ -37,12 +36,9 @@ import { NotificationInterceptor } from 'app/blocks/interceptor/notification.int
 import { fontAwesomeIcons } from './icons/font-awesome-icons';
 
 @NgModule({
-  imports: [
-    HttpClientModule,
-    CookieModule.withOptions(),
-    NgxWebstorageModule.forRoot({ prefix: 'jhi', separator: '-' })
-  ],
+  imports: [HttpClientModule],
   providers: [
+    provideNgxWebstorage(withNgxWebstorageConfig({ prefix: 'jhi', separator: '-' }), withLocalStorage(), withSessionStorage()),
     Title,
     {
       provide: LOCALE_ID,

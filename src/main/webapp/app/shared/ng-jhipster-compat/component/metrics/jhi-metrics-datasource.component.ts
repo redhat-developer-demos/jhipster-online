@@ -20,6 +20,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
+  standalone: false,
     selector: 'jhi-metrics-datasource',
     template: `
         <h3 jhiTranslate="metrics.datasource.title">DataSource statistics (time in millisecond)</h3>

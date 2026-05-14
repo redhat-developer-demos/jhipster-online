@@ -26,6 +26,7 @@ import { CiCdOutputDialogComponent } from './ci-cd.output.component';
 import { CiCdService } from './ci-cd.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-cicd',
   templateUrl: './ci-cd.component.html'
 })

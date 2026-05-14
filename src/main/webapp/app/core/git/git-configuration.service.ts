@@ -18,6 +18,8 @@
  */
 import { EventEmitter, Injectable } from '@angular/core';
 
+import { firstValueFrom } from 'rxjs';
+
 import { GitConfigurationModel } from 'app/core/git/git-configuration.model';
 import { GitProviderService } from 'app/core/git/git-provider.service';
 
@@ -49,9 +51,7 @@ export class GitConfigurationService {
   }
 
   setupGitConfiguration(): Promise<any> {
-    return this.gitProviderService
-      .getGitConfig()
-      .toPromise()
+    return firstValueFrom(this.gitProviderService.getGitConfig())
       .then((config: any) => {
         this.gitConfig = { ...this.gitConfig, ...config };
         this.sharedData.emit(this.gitConfig);

@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { UntypedFormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -24,6 +24,7 @@ import { User } from 'app/core/user/user.model';
 import { UserService } from 'app/core/user/user.service';
 
 @Component({
+  standalone: false,
   selector: 'jhi-user-mgmt-update',
   templateUrl: './user-management-update.component.html'
 })
@@ -32,6 +33,7 @@ export class UserManagementUpdateComponent implements OnInit {
   authorities: string[] = [];
   isSaving = false;
 
+  private fb = inject(UntypedFormBuilder);
   editForm = this.fb.group({
     id: [],
     login: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50), Validators.pattern('^[_.@A-Za-z0-9-]*')]],
@@ -43,7 +45,7 @@ export class UserManagementUpdateComponent implements OnInit {
     authorities: []
   });
 
-  constructor(private userService: UserService, private route: ActivatedRoute, private fb: UntypedFormBuilder) {}
+  constructor(private userService: UserService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.route.data.subscribe(({ user }) => {

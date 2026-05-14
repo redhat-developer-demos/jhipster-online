@@ -33,6 +33,7 @@ import { AccountService } from 'app/core/auth/account.service';
  * ```
  */
 @Directive({
+  standalone: false,
   selector: '[jhiHasAnyAuthority]'
 })
 export class HasAnyAuthorityDirective implements OnDestroy {
